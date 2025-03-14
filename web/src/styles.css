@@ -89,7 +89,7 @@
     font-weight: var(--font-weight-caption);
   }
 
-  .text-caption-sm {
+  .text-overline {
     font-size: var(--font-size-overline);
     line-height: var(--line-height-overline);
     font-weight: var(--font-weight-overline);
