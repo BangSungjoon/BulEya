@@ -1,47 +1,53 @@
 package com.ssafy.jangan_backend.beacon.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-
-import java.sql.Timestamp;
+import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Beacon {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
 
     @Column(nullable = false)
-    private int mapId;
+    private Integer mapId;
 
     @Column(nullable = false)
-    private int beaconCode;
+    private Integer beaconCode;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 255)
     private String name;
 
     @Column(nullable = false)
-    private int coordX;
+    private Integer coordX;
 
     @Column(nullable = false)
-    private int coordY;
+    private Integer coordY;
 
-    @Column
     private Boolean isExit;
 
-    @Column
     private Boolean isCctv;
 
-    @Column
     private String cctvIp;
 
-    @Column(updatable = false)
     private LocalDateTime createdAt;
 
-    @Column
     private LocalDateTime updatedAt;
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
 }
