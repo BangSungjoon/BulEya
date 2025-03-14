@@ -1,29 +1,34 @@
 package com.ssafy.jangan_backend.edge.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-
-import java.sql.Timestamp;
+import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Edge {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
 
     @Column(nullable = false)
-    private int beaconAId;
+    private Integer beaconAId;
 
     @Column(nullable = false)
-    private int beaconBId;
+    private Integer beaconBId;
 
     @Column(nullable = false)
-    private int distance;
+    private Integer distance;
 
-    @Column(updatable = false)
     private LocalDateTime createdAt;
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
 }
