@@ -27,7 +27,7 @@ public class Map {
     private Integer id;
 
     @ManyToOne
-    @JoinColumn(name = "station_id", nullable = false)
+    @JoinColumn(name = "station_id", nullable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     private Station station;
 
     @Column(nullable = false)
