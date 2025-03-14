@@ -1,10 +1,10 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from "react";
+import reactLogo from "./assets/react.svg";
+import viteLogo from "/vite.svg";
+import "./App.css";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [count, setCount] = useState(0);
 
   return (
     <>
@@ -25,11 +25,19 @@ function App() {
           Edit <code>src/App.jsx</code> and save to test HMR
         </p>
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <p className="bg-primary">bg-primary 장안의 화재 메인 컬러</p>
+      <p className="bg-system-red">system-red</p>
+      <p className="bg-system-yellow">system-yellow</p>
+      <p className="bg-system-green">system-green</p>
+      <p className="bg-system-blue">system-blue</p>
+      <p className="bg-gray-600">gray600</p>
+      <p className="bg-gray-500">gray500</p>
+      <p className="bg-gray-400">gray400</p>
+      <p className="bg-gray-300">gray300</p>
+      <p className="bg-gray-200">gray200</p>
+      <p className="bg-gray-100">gray100</p>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
