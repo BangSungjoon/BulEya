@@ -1,5 +1,6 @@
 package com.ssafy.jangan_backend.beacon.entity;
 
+import com.ssafy.jangan_backend.map.entity.Map;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -16,8 +17,9 @@ public class Beacon {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(nullable = false)
-    private Integer mapId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "mapId", insertable = false, updatable = false, foreignKey = @ForeignKey(ConstraintMode.CONSTRAINT))
+    private Map map;
 
     @Column(nullable = false)
     private Integer beaconCode;
@@ -37,6 +39,7 @@ public class Beacon {
 
     private String cctvIp;
 
+    @Column(updatable = false)
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
@@ -44,6 +47,7 @@ public class Beacon {
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
+        this.updatedAt = null;
     }
 
     @PreUpdate
