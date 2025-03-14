@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -30,17 +31,17 @@ public class Beacon {
     private int coordY;
 
     @Column
-    private byte isExit;
+    private Boolean isExit;
 
     @Column
-    private byte isCctv;
+    private Boolean isCctv;
 
     @Column
     private String cctvIp;
 
     @Column(updatable = false)
-    private Timestamp createdAt;
+    private LocalDateTime createdAt;
 
     @Column
-    private Timestamp updatedAt;
+    private LocalDateTime updatedAt;
 }

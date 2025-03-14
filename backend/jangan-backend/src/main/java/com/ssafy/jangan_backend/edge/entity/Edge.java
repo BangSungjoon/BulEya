@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -24,5 +25,5 @@ public class Edge {
     private int distance;
 
     @Column(updatable = false)
-    private Timestamp createdAt;
+    private LocalDateTime createdAt;
 }

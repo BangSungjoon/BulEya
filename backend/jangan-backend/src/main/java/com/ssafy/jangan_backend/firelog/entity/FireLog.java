@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -21,8 +22,8 @@ public class FireLog {
     private String imageUrl;
 
     @Column(nullable = false)
-    private byte isActiveFire;
+    private Boolean isActiveFire;
 
     @Column(updatable = false)
-    private Timestamp createdAt;
+    private LocalDateTime createdAt;
 }
