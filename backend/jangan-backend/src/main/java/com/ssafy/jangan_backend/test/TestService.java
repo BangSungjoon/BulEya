@@ -24,7 +24,7 @@ public class TestService {
 
     // 파일 업로드
     public String uploadFile(MultipartFile image) throws Exception {
-        String imageName = UUID.randomUUID().toString() + "_" + image.getOriginalFilename();
+        String imageName = UUID.randomUUID() + "_" + image.getOriginalFilename();
         String imagePath = "map/"+imageName;
         try (InputStream inputStream = image.getInputStream()) {
             System.out.println("==============="+imagePath);
