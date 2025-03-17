@@ -38,3 +38,6 @@ out/
 
 # 모든 디렉터리의 .env 파일 무시
 **/env.yml
+
+# firebase adminsdk
+jangan204-firebase-adminsdk.json
