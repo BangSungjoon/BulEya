@@ -1,12 +1,14 @@
-FROM openjdk:17-jdk AS builder
+FROM openjdk:17-jdk-alpine AS builder
 
 WORKDIR /app
 
 COPY . .
 
+RUN chmod +x ./gradlew
+
 RUN ./gradlew clean build
 
-FROM openjdk:21-jdk
+FROM openjdk:17-jdk-alpine
 
 WORKDIR /app
 
