@@ -2,10 +2,7 @@ FROM openjdk:17-oracle AS builder
 
 WORKDIR /app
 
-COPY gradlew gradlew
-COPY gradle gradle
-COPY build.gradle settings.gradle ./
-COPY src src
+COPY . .
 
 RUN chmod +x ./gradlew
 
