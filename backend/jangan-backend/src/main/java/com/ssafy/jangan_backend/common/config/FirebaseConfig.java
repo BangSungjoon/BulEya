@@ -1,4 +1,4 @@
-package com.ssafy.jangan_backend.config;
+package com.ssafy.jangan_backend.common.config;
 
 import java.io.InputStream;
 
