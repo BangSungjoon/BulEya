@@ -26,6 +26,12 @@ public class TestController {
         System.out.println(imageName);
     }
 
+    @GetMapping("/image")
+    public BaseResponse getImage() {
+        TestGetImageDto dto = service.getImage();
+        return BaseResponse.ok(dto);
+    }
+
     @GetMapping("/error")
     public BaseResponse errorTest() {
         service.errorTest();
