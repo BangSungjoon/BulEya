@@ -45,6 +45,8 @@ public class TestService {
     }
 
     public TestGetImageDto getImage() {
+
+
         return new TestGetImageDto(getImageUrlOrElseThrow());
     }
 
@@ -53,7 +55,7 @@ public class TestService {
             String imageUrl = minioClient.getPresignedObjectUrl(
                     GetPresignedObjectUrlArgs.builder()
                             .bucket(bucketName)
-                            .object("map/451945c6-9e0a-4f21-9ffe-ba717c2ce8b2_게살버거.jpg")
+                            .object("map/67ac1169-dd5b-4026-abec-4b0748cfe332_장안의 화재.png")
                             .method(Method.GET) // GET 요청 가능
                             .expiry(60 * 60) // 1시간 유효
                             .build()
