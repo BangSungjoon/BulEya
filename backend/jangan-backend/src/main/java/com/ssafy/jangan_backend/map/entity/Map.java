@@ -33,8 +33,11 @@ public class Map {
     @Column(nullable = false)
     private Integer floor;
 
+    @Column(nullable = false, length = 50)
+    private String bucketName;
+
     @Column(nullable = false, length = 255)
-    private String imageUrl;
+    private String imageName;
 
     @Column(updatable = false)
     private LocalDateTime createdAt;

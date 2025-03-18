@@ -31,6 +31,6 @@ public class FireLog {
     }
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "beaconId", insertable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT))
+    @JoinColumn(name = "beaconId", insertable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))
     private Beacon beacon;
 }

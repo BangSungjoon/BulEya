@@ -10,9 +10,15 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @Slf4j
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(InternalSeverException.class)
-    public BaseResponse<BaseResponseStatus> internalServerExceptionHandler(InternalSeverException exception) {
+    @ExceptionHandler(InternalServerException.class)
+    public BaseResponse<BaseResponseStatus> internalServerExceptionHandler(InternalServerException exception) {
         log.error("InternalServerException has occurred. {} {} {}", exception.getMessage(), exception.getCause(), exception.getStackTrace()[0]);
         return BaseResponse.status(BaseResponseStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler
+    public BaseResponse<BaseResponseStatus> NotFoundExceptionHandler(NotFoundException exception) {
+        log.error("NotFoundException has occurred. {} {} {}", exception.getMessage(), exception.getCause(), exception.getStackTrace()[0]);
+        return BaseResponse.status(exception.getStatus());
     }
 }

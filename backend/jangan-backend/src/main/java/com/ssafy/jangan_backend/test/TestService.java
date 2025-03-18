@@ -1,12 +1,11 @@
 package com.ssafy.jangan_backend.test;
 
-import com.ssafy.jangan_backend.common.exception.InternalSeverException;
+import com.ssafy.jangan_backend.common.exception.InternalServerException;
 import com.ssafy.jangan_backend.common.response.BaseResponseStatus;
 import io.minio.GetPresignedObjectUrlArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import io.minio.http.Method;
-import kotlin.jvm.Throws;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -61,11 +60,11 @@ public class TestService {
             );
             return imageUrl;
         } catch(Exception e) {
-            throw new InternalSeverException(BaseResponseStatus.INTERNAL_SERVER_ERROR);
+            throw new InternalServerException(BaseResponseStatus.INTERNAL_SERVER_ERROR);
         }
     }
-    public void errorTest() throws InternalSeverException {
-        throw new InternalSeverException(BaseResponseStatus.INTERNAL_SERVER_ERROR);
+    public void errorTest() throws InternalServerException {
+        throw new InternalServerException(BaseResponseStatus.INTERNAL_SERVER_ERROR);
     }
 
 }
