@@ -3,7 +3,6 @@ package com.ssafy.jangan_backend.common.exception;
 import com.ssafy.jangan_backend.common.response.BaseResponse;
 import com.ssafy.jangan_backend.common.response.BaseResponseStatus;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 

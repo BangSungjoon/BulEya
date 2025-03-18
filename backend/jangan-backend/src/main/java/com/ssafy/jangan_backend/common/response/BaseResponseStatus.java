@@ -7,8 +7,8 @@ public enum BaseResponseStatus {
     SUCCESS(true, 200, "요청에 성공하였습니다."),
     INTERNAL_SERVER_ERROR(false, 5001, "서버 에러가 발생했습니다."),
 
-    /**
-     * 이후 자유롭게 에러 추가
+    /*
+        이후 자유롭게 에러 추가
      */
     ;
 
