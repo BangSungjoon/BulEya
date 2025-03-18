@@ -2,8 +2,10 @@ package com.ssafy.jangan_backend.test;
 
 import com.ssafy.jangan_backend.common.exception.InternalSeverException;
 import com.ssafy.jangan_backend.common.response.BaseResponseStatus;
+import io.minio.GetPresignedObjectUrlArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
+import io.minio.http.Method;
 import kotlin.jvm.Throws;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -43,7 +45,27 @@ public class TestService {
         return imageName;
     }
 
+    public TestGetImageDto getImage() {
+        return new TestGetImageDto(getImageUrlOrElseThrow());
+    }
+
+    public String getImageUrlOrElseThrow() {
+        try {
+            String imageUrl = minioClient.getPresignedObjectUrl(
+                    GetPresignedObjectUrlArgs.builder()
+                            .bucket(bucketName)
+                            .object("map/451945c6-9e0a-4f21-9ffe-ba717c2ce8b2_게살버거.jpg")
+                            .method(Method.GET) // GET 요청 가능
+                            .expiry(60 * 60) // 1시간 유효
+                            .build()
+            );
+            return imageUrl;
+        } catch(Exception e) {
+            throw new InternalSeverException(BaseResponseStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
     public void errorTest() throws InternalSeverException {
         throw new InternalSeverException(BaseResponseStatus.INTERNAL_SERVER_ERROR);
     }
+
 }
