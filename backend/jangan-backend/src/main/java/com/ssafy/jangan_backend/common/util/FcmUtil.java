@@ -1,4 +1,4 @@
-package com.ssafy.jangan_backend.util;
+package com.ssafy.jangan_backend.common.util;
 
 import java.util.concurrent.Executors;
 

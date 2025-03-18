@@ -1,7 +1,10 @@
 package com.ssafy.jangan_backend.test;
 
+import com.ssafy.jangan_backend.common.exception.InternalSeverException;
+import com.ssafy.jangan_backend.common.response.BaseResponseStatus;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
+import kotlin.jvm.Throws;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -39,17 +42,8 @@ public class TestService {
         }
         return imageName;
     }
-//    @PostConstruct
-//    public void init() {
-//        try {
-//            // 버킷이 존재하는지 확인하고, 없으면 생성
-//            boolean exists = minioClient.bucketExists(BucketExistsArgs.builder().bucket(bucketName).build());
-//            if (!exists) {
-//                minioClient.makeBucket(MakeBucketArgs.builder().bucket(bucketName).build());
-//            }
-//        } catch (Exception e) {
-//            throw new RuntimeException("MinIO 초기화 실패", e);
-//        }
-//    }
-//
+
+    public void errorTest() throws InternalSeverException {
+        throw new InternalSeverException(BaseResponseStatus.INTERNAL_SERVER_ERROR);
+    }
 }
