@@ -4,13 +4,9 @@ import com.ssafy.jangan_backend.common.response.BaseResponse;
 import com.ssafy.jangan_backend.edge.dto.EdgeDto;
 import com.ssafy.jangan_backend.edge.service.EdgeService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
-@Controller
+@RestController
 @RequestMapping("/api/edge")
 @RequiredArgsConstructor
 public class EdgeController {

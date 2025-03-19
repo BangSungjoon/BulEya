@@ -3,6 +3,8 @@ package com.ssafy.jangan_backend.beacon.service;
 import com.ssafy.jangan_backend.beacon.dto.BeaconDto;
 import com.ssafy.jangan_backend.beacon.entity.Beacon;
 import com.ssafy.jangan_backend.beacon.repository.BeaconRepository;
+import com.ssafy.jangan_backend.common.exception.CustomIllegalArgumentException;
+import com.ssafy.jangan_backend.common.response.BaseResponseStatus;
 import com.ssafy.jangan_backend.map.entity.Map;
 import com.ssafy.jangan_backend.map.repository.MapRepository;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +19,7 @@ public class BeaconService {
     public BeaconDto saveBeacon(BeaconDto beaconDto) {
         // staionId와 floor로 mapId 찾기
         Map map = mapRepository.findByStationIdAndFloor(beaconDto.getStationId(), beaconDto.getFloor())
-                .orElseThrow(() -> new IllegalArgumentException("map이 존재하지 않음"));
+                .orElseThrow(() -> new CustomIllegalArgumentException(BaseResponseStatus.MAP_NOT_FOUND_EXCEPTION));
 
         // Beacon 엔티티 생성, 저장
         Beacon beacon = beaconDto.toEntity(map);

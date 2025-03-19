@@ -3,6 +3,8 @@ spring:
     import: classpath:/env.yml
   application:
     name: jangan-backend
+  jackson:
+    property-naming-strategy: SNAKE_CASE # snake_case <-> camelCase 자동 변환
   data:
     redis:
       host: ${REDIS_HOST}

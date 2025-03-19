@@ -14,6 +14,7 @@ public class BeaconController {
 
     @PostMapping()
     public BaseResponse saveBeacon(@RequestBody BeaconDto beaconDto) {
+        System.out.println("스테이션 id"+beaconDto.getStationId());
         BeaconDto savedBeacon = beaconService.saveBeacon(beaconDto);
         return BaseResponse.ok(savedBeacon);
     }
