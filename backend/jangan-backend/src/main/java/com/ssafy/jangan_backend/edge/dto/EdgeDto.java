@@ -1,41 +1,20 @@
 package com.ssafy.jangan_backend.edge.dto;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.ssafy.jangan_backend.beacon.dto.BeaconDto;
-import com.ssafy.jangan_backend.beacon.entity.Beacon;
-import com.ssafy.jangan_backend.edge.entity.Edge;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
-@AllArgsConstructor
 @Builder
-@ToString
-@JsonInclude(JsonInclude.Include.NON_DEFAULT) // 기본값 아닌 것들만 JSON으로
+@AllArgsConstructor
+@NoArgsConstructor
 public class EdgeDto {
     private Integer edgeId;
-    private Integer stationId;
-    private Integer floor;
-
     @JsonProperty("beacon_a_code")
-    private Integer beaconACode;
-
+    private Integer beaconAcode;
     @JsonProperty("beacon_b_code")
-    private Integer beaconBCode;
-
+    private Integer beaconBcode;
     private Integer distance;
-
-    public Edge toEntity(Beacon beaconA, Beacon beaconB) {
-        return Edge.builder()
-                .beaconA(beaconA)
-                .beaconB(beaconB)
-                .distance(this.distance)
-                .build();
-    }
-
-    public static EdgeDto toDto(Edge edge) {
-        return EdgeDto.builder()
-                .edgeId(edge.getId())
-                .build();
-    }
 }

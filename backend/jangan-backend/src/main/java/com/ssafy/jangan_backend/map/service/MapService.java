@@ -1,7 +1,11 @@
 package com.ssafy.jangan_backend.map.service;
 
 import com.ssafy.jangan_backend.common.util.MinioUtil;
+import com.ssafy.jangan_backend.edge.dto.EdgeDto;
+import com.ssafy.jangan_backend.edge.entity.Edge;
+import com.ssafy.jangan_backend.edge.repository.EdgeRepository;
 import com.ssafy.jangan_backend.map.dto.ResponseMobileMapDto;
+import com.ssafy.jangan_backend.map.dto.ResponseWebAdminMapDto;
 import com.ssafy.jangan_backend.map.entity.Map;
 import com.ssafy.jangan_backend.map.repository.MapRepository;
 import com.ssafy.jangan_backend.station.entity.Station;
@@ -18,6 +22,8 @@ public class MapService {
     private final MapRepository mapRepository;
     private final StationService stationService;
     private final MinioUtil minioUtil;
+    private final EdgeRepository edgeRepository;
+
     public List<ResponseMobileMapDto> getMapsForMobile(Integer stationId) {
         Station station = stationService.findByIdOrElseThrows(stationId);
 
@@ -31,5 +37,10 @@ public class MapService {
                         .build()
                 ).toList();
         return mapUrlList;
+    }
+
+    public List<ResponseWebAdminMapDto> getMapsForWebAdmin(int stationId) {
+        List<Edge> edgeList = edgeRepository.
+        return null;
     }
 }
