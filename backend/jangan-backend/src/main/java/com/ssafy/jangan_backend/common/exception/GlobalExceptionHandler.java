@@ -21,4 +21,10 @@ public class GlobalExceptionHandler {
         log.error("NotFoundException has occurred. {} {} {}", exception.getMessage(), exception.getCause(), exception.getStackTrace()[0]);
         return BaseResponse.status(exception.getStatus());
     }
+
+    @ExceptionHandler(CustomIllegalArgumentException.class)
+    public BaseResponse<BaseResponseStatus> customIllegalArgumentExceptionHandler(CustomIllegalArgumentException exception) {
+        log.error("customIllegalArgumentException has occurred. {} {} {}", exception.getMessage(), exception.getCause(), exception.getStackTrace()[0]);
+        return BaseResponse.status(exception.getStatus());
+    }
 }
