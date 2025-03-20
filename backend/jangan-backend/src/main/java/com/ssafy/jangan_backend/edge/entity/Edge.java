@@ -29,10 +29,10 @@ public class Edge {
     }
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "beaconAId", insertable = false, updatable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+    @JoinColumn(name = "beaconAId", updatable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     private Beacon beaconA;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "beaconBId", insertable = false, updatable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+    @JoinColumn(name = "beaconBId", updatable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     private Beacon beaconB;
 }
