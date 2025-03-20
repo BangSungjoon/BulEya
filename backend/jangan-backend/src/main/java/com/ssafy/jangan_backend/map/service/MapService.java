@@ -1,7 +1,7 @@
 package com.ssafy.jangan_backend.map.service;
 
 import com.ssafy.jangan_backend.common.util.MinioUtil;
-import com.ssafy.jangan_backend.map.dto.ResponseMapDto;
+import com.ssafy.jangan_backend.map.dto.ResponseMobileMapDto;
 import com.ssafy.jangan_backend.map.entity.Map;
 import com.ssafy.jangan_backend.map.repository.MapRepository;
 import com.ssafy.jangan_backend.station.entity.Station;
@@ -17,17 +17,17 @@ import java.util.List;
 public class MapService {
     private final MapRepository mapRepository;
     private final StationService stationService;
-
-    public List<ResponseMapDto.Mobile> getMapsForMobile(Integer stationId) {
+    private final MinioUtil minioUtil;
+    public List<ResponseMobileMapDto> getMapsForMobile(Integer stationId) {
         Station station = stationService.findByIdOrElseThrows(stationId);
 
         //TODO : QueryDSL로 변환하기
-        List<Map> mapList = mapRepository.findAllById(station.getId());
-        List<ResponseMapDto.Mobile> mapUrlList = mapList.stream()
-                .map(map -> ResponseMapDto.Mobile
+        List<Map> mapList = mapRepository.findByStationId(station.getId());
+        List<ResponseMobileMapDto> mapUrlList = mapList.stream()
+                .map(map -> ResponseMobileMapDto
                         .builder()
                         .floor(map.getFloor())
-                        .imageUrl(MinioUtil.getPresignedUrl(map.getBucketName(), map.getImageName()))
+                        .imageUrl(minioUtil.getPresignedUrl(map.getBucketName(), map.getImageName()))
                         .build()
                 ).toList();
         return mapUrlList;
