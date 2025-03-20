@@ -9,7 +9,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@JsonInclude(JsonInclude.Include.NON_NULL) // null값 빼고 전송
+@JsonInclude(JsonInclude.Include.NON_DEFAULT) //
 public class BeaconDto {
     private Integer beaconId;
     private Integer stationId;
