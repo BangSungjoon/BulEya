@@ -2,6 +2,7 @@ package com.ssafy.jangan_backend.map.controller;
 
 import com.ssafy.jangan_backend.common.response.BaseResponse;
 import com.ssafy.jangan_backend.map.dto.ResponseMobileMapDto;
+import com.ssafy.jangan_backend.map.dto.ResponseWebAdminMapDto;
 import com.ssafy.jangan_backend.map.service.MapService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,6 +20,12 @@ public class MapController {
     @GetMapping("/mobile")
     public BaseResponse getMapsForMobile(@RequestParam int stationId) {
         List<ResponseMobileMapDto> list = mapService.getMapsForMobile(stationId);
+        return BaseResponse.ok(list);
+    }
+
+    @GetMapping("/admin")
+    public BaseResponse getMapsForWebAdmin(@RequestParam int stationId) {
+        List<ResponseWebAdminMapDto> list = mapService.getMapsForWebAdmin(stationId);
         return BaseResponse.ok(list);
     }
 }
