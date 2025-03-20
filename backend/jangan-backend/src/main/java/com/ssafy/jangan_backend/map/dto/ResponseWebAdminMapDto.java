@@ -2,14 +2,12 @@ package com.ssafy.jangan_backend.map.dto;
 
 import com.ssafy.jangan_backend.beacon.dto.BeaconDto;
 import com.ssafy.jangan_backend.edge.dto.EdgeDto;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 
 import java.util.List;
 
 @Getter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class ResponseWebAdminMapDto {
@@ -17,4 +15,5 @@ public class ResponseWebAdminMapDto {
     private String imageUrl;
     private List<BeaconDto> beaconList;
     private List<EdgeDto> edgeList;
+
 }

@@ -9,4 +9,5 @@ import lombok.*;
 public class ResponseMobileMapDto {
     private int floor;
     private String imageUrl;
+
 }
