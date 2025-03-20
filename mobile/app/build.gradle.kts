@@ -5,7 +5,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
 
-
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -13,7 +13,7 @@ android {
     compileSdk = 35
     defaultConfig {
         applicationId = "com.ssafy.jangan_mobile"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
@@ -62,4 +62,5 @@ dependencies {
 
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.messaging)
+    implementation("com.google.code.gson:gson:2.10.1")
 }

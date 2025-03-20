@@ -3,8 +3,17 @@ package com.ssafy.jangan_mobile
 import android.content.ContentValues.TAG
 import android.content.pm.PackageManager
 import android.Manifest
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothManager
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.PowerManager
+import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -18,11 +27,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.Firebase
+import com.google.firebase.FirebaseApp
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.messaging
+import com.ssafy.jangan_mobile.service.PersistentService
 import com.ssafy.jangan_mobile.ui.theme.JanganmobileTheme
 
 class MainActivity : ComponentActivity() {
@@ -37,6 +49,9 @@ class MainActivity : ComponentActivity() {
             Toast.makeText(baseContext, "알림이 허용되지 않았습니다.", Toast.LENGTH_SHORT);
         }
     }
+
+    private val bluetoothManager: BluetoothManager = getSystemService(BluetoothManager::class.java)
+    private val bluetoothAdapter: BluetoothAdapter? = bluetoothManager.getAdapter()
 
     // 사용자에게 알림 권한 요청
     private fun askNotificationPermission() {
@@ -57,8 +72,20 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+    // Notification 채널 생성
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channelId = "alert"
+            val channelName = "My Custom Notifications"
+            val importance = NotificationManager.IMPORTANCE_DEFAULT
 
+            val channel = NotificationChannel(channelId, channelName, importance)
+            channel.description = "This is my custom notification channel"
 
+            val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -75,6 +102,7 @@ class MainActivity : ComponentActivity() {
         }
 
         // firebase topic 구독
+        FirebaseApp.initializeApp(this);
         Firebase.messaging.subscribeToTopic("alert")
             .addOnCompleteListener { task ->
                 var msg = "Subscribed"
@@ -85,23 +113,27 @@ class MainActivity : ComponentActivity() {
                 Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
             }
 
-        // (TEST 코드) FCM 토큰 가져오기
-        FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
-            if (!task.isSuccessful) {
-                Log.w(TAG, "Fetching FCM registration token failed", task.exception)
-                return@OnCompleteListener
-            }
-
-            // Get new FCM registration token
-            val token = task.result
-
-            // Log and toast
-            Log.d(TAG, "token:$token")
-            Toast.makeText(baseContext, token, Toast.LENGTH_SHORT).show()
-        })
+        // 알람 채널 생성
+        createNotificationChannel()
 
         // 알림 권한 요청
         askNotificationPermission()
+
+        // 백그라운드에서 동작
+        val serviceIntent = Intent(this, PersistentService::class.java)
+        startForegroundService(serviceIntent)
+
+        // 배터리 최적화 예외 요청
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val intent = Intent()
+            val packageName = packageName
+            val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
+            if (!pm.isIgnoringBatteryOptimizations(packageName)) {
+                intent.action = Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
+                intent.data = Uri.parse("package:$packageName")
+                startActivity(intent)
+            }
+        }
 
     }
 }
