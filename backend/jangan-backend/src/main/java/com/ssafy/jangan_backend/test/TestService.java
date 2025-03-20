@@ -2,6 +2,7 @@ package com.ssafy.jangan_backend.test;
 
 import com.ssafy.jangan_backend.common.exception.InternalServerException;
 import com.ssafy.jangan_backend.common.response.BaseResponseStatus;
+import com.ssafy.jangan_backend.common.util.MinioUtil;
 import io.minio.GetPresignedObjectUrlArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
@@ -17,7 +18,8 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class TestService {
-    private final MinioClient minioClient;
+    private MinioClient minioClient;
+    private MinioUtil minioUtil;
     @Value("${minio.bucket.name}")
     private String bucketName;
 

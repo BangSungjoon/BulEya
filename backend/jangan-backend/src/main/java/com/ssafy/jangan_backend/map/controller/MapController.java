@@ -1,5 +1,6 @@
 package com.ssafy.jangan_backend.map.controller;
 
+import com.ssafy.jangan_backend.common.response.BaseResponse;
 import com.ssafy.jangan_backend.map.dto.ResponseMapDto;
 import com.ssafy.jangan_backend.map.service.MapService;
 import lombok.RequiredArgsConstructor;
@@ -16,8 +17,8 @@ import java.util.List;
 public class MapController {
     private final MapService mapService;
     @GetMapping("/mobile")
-    public List<ResponseMapDto.Mobile> getMapsForMobile(@RequestParam int stationId) {
+    public BaseResponse getMapsForMobile(@RequestParam int stationId) {
         List<ResponseMapDto.Mobile> list = mapService.getMapsForMobile(stationId);
-        return list;
+        return BaseResponse.ok(list);
     }
 }

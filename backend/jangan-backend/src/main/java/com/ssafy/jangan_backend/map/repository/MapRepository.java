@@ -8,5 +8,5 @@ import java.util.List;
 
 @Repository
 public interface MapRepository extends JpaRepository<Map, Integer> {
-    List<Map> findAllById(Integer stationId);
+    List<Map> findByStationId(Integer stationId);
 }

@@ -17,17 +17,17 @@ import java.util.List;
 public class MapService {
     private final MapRepository mapRepository;
     private final StationService stationService;
-
+    private final MinioUtil minioUtil;
     public List<ResponseMapDto.Mobile> getMapsForMobile(Integer stationId) {
         Station station = stationService.findByIdOrElseThrows(stationId);
 
         //TODO : QueryDSL로 변환하기
-        List<Map> mapList = mapRepository.findAllById(station.getId());
+        List<Map> mapList = mapRepository.findByStationId(station.getId());
         List<ResponseMapDto.Mobile> mapUrlList = mapList.stream()
                 .map(map -> ResponseMapDto.Mobile
                         .builder()
                         .floor(map.getFloor())
-                        .imageUrl(MinioUtil.getPresignedUrl(map.getBucketName(), map.getImageName()))
+                        .imageUrl(minioUtil.getPresignedUrl(map.getBucketName(), map.getImageName()))
                         .build()
                 ).toList();
         return mapUrlList;
