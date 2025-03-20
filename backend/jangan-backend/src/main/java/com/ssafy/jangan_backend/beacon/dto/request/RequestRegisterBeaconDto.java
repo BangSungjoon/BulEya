@@ -1,18 +1,18 @@
-package com.ssafy.jangan_backend.beacon.dto;
+package com.ssafy.jangan_backend.beacon.dto.request;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.ssafy.jangan_backend.beacon.entity.Beacon;
 import com.ssafy.jangan_backend.map.entity.Map;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@JsonInclude(JsonInclude.Include.NON_DEFAULT) //
-public class BeaconDto {
-    private Integer beaconId;
-    private Integer mapId;
+public class RequestRegisterBeaconDto {
+    private Integer stationId;
     private Integer floor;
     private Integer beaconCode;
     private String name;
@@ -33,21 +33,6 @@ public class BeaconDto {
                 .isCctv(this.isCctv)
                 .cctvIp(this.cctvIp)
                 .build();
-    }
 
-    public static BeaconDto toDto(Beacon beacon) {
-        return BeaconDto.builder()
-                .beaconId(beacon.getId())
-                .mapId(beacon.getMap().getId())
-                .beaconCode(beacon.getBeaconCode())
-                .name(beacon.getName())
-                .coordX(beacon.getCoordX())
-                .coordY(beacon.getCoordY())
-                .isExit(beacon.getIsExit())
-                .isCctv(beacon.getIsCctv())
-                .cctvIp(beacon.getCctvIp())
-                .build();
     }
 }
-
-
