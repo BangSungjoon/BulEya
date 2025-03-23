@@ -15,7 +15,6 @@ import com.ssafy.jangan_backend.beacon.dto.BeaconNotificationDto;
 import com.ssafy.jangan_backend.beacon.entity.Beacon;
 import com.ssafy.jangan_backend.beacon.repository.BeaconRepository;
 import com.ssafy.jangan_backend.common.exception.CustomIllegalArgumentException;
-import com.ssafy.jangan_backend.common.exception.NotFoundException;
 import com.ssafy.jangan_backend.common.response.BaseResponseStatus;
 import com.ssafy.jangan_backend.common.util.FcmUtil;
 import com.ssafy.jangan_backend.common.util.MinioUtil;
@@ -167,7 +166,7 @@ public class FirelogService {
 
 
 		// 각 비콘과 연결된 모든 간선 리스트
-		List<Edge> edgeList = edgeRepository.findAllbyBeaconAIdIn(beaconList.stream().map(Beacon::getId).toList());
+		List<Edge> edgeList = edgeRepository.findByBeaconAIdIn(beaconList.stream().map(Beacon::getId).toList());
 		// 모든 출구 비콘 리스트
 		List<Beacon> exitList = beaconList.stream().filter(Beacon::getIsExit).toList();
 
