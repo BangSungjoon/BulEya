@@ -23,16 +23,15 @@ public class Edge {
     @Column(updatable = false)
     private LocalDateTime createdAt;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "beacon_a_id", updatable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+    private Beacon beaconA;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "beacon_b_id", updatable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+    private Beacon beaconB;
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
     }
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "beaconAId", updatable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
-    private Beacon beaconA;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "beaconBId", updatable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
-    private Beacon beaconB;
 }

@@ -18,19 +18,19 @@ public class Beacon {
     private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "mapId", updatable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+    @JoinColumn(name = "map_id", updatable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     private Map map;
 
-    @Column(nullable = false)
+    @Column(name = "beacon_code", nullable = false)
     private Integer beaconCode;
 
     @Column(nullable = false, length = 255)
     private String name;
 
-    @Column(nullable = false)
+    @Column(name = "coord_x" , nullable = false)
     private Integer coordX;
 
-    @Column(nullable = false)
+    @Column(name = "coord_y", nullable = false)
     private Integer coordY;
 
     private Boolean isExit;
