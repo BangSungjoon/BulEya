@@ -7,6 +7,7 @@ public enum BaseResponseStatus {
     SUCCESS(true, 200, "요청에 성공하였습니다."),
     INTERNAL_SERVER_ERROR(false, 5001, "서버 에러가 발생했습니다."),
     PRESIGNED_URL_GENERATION_EXCEPTION(false, 5002, "이미지 URL을 가져올 수 없습니다."),
+    IMAGE_UPLOAD_FAIL_EXCEPTION(false, 5003, "이미지를 업로드할 수 없습니다."),
 
     STATION_NOT_FOUND_EXCEPTION(false, 4001, "역 정보를 찾을 수 없습니다."),
     MAP_NOT_FOUND_EXCEPTION(false, 4002, "평면도 정보를 찾을 수 없습니다."),

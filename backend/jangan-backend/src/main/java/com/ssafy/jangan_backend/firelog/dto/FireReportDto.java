@@ -12,5 +12,5 @@ public class FireReportDto {
 	private int stationId;
 
 	@JsonProperty("beacon_list")
-	BeaconFireInfoDto[] beaconList;
+	BeaconFireInfoDto[] beaconFireInfoList;
 }
