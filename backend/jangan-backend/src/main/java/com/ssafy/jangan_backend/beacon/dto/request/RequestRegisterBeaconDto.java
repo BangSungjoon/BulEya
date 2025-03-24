@@ -1,5 +1,6 @@
 package com.ssafy.jangan_backend.beacon.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.ssafy.jangan_backend.beacon.entity.Beacon;
 import com.ssafy.jangan_backend.map.entity.Map;
 import lombok.AllArgsConstructor;
@@ -16,10 +17,15 @@ public class RequestRegisterBeaconDto {
     private Integer floor;
     private Integer beaconCode;
     private String name;
+
+    @JsonProperty("coord_x")
     private Integer coordX;
+
+    @JsonProperty("coord_y")
     private Integer coordY;
-    private boolean isExit;
-    private boolean isCctv;
+
+    private Boolean isExit;
+    private Boolean isCctv;
     private String cctvIp;
 
     public Beacon toEntity(Map map) {
