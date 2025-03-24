@@ -54,4 +54,9 @@ public class TestController {
         fcmUtil.sendMessage("제목", "내용");
         return "done.";
     }
+
+    @GetMapping("/queryDsl")
+    public void testQueryDsl() {
+        service.testQueryDsl();
+    }
 }

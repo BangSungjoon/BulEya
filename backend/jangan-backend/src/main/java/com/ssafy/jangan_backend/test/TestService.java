@@ -1,5 +1,9 @@
 package com.ssafy.jangan_backend.test;
 
+import com.querydsl.core.types.Projections;
+import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.ssafy.jangan_backend.beacon.dto.BeaconDto;
+import com.ssafy.jangan_backend.beacon.entity.QBeacon;
 import com.ssafy.jangan_backend.common.exception.InternalServerException;
 import com.ssafy.jangan_backend.common.response.BaseResponseStatus;
 import com.ssafy.jangan_backend.common.util.MinioUtil;
@@ -13,11 +17,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
+import java.util.List;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class TestService {
+    private final JPAQueryFactory queryFactory;
     private MinioClient minioClient;
     private MinioUtil minioUtil;
     @Value("${minio.bucket.name}")
@@ -71,4 +77,25 @@ public class TestService {
         throw new InternalServerException(BaseResponseStatus.INTERNAL_SERVER_ERROR);
     }
 
+    public void testQueryDsl() {
+        QBeacon beacon = QBeacon.beacon;
+        List<BeaconDto> beaconDtoList = queryFactory
+                .select(Projections.bean(
+                        BeaconDto.class,
+                        beacon.id.as("beaconId"),
+                        beacon.map.id.as("mapId"),
+                        beacon.beaconCode.as("beaconCode"),
+                        beacon.name.as("name"),
+                        beacon.coordX.as("coordX"),
+                        beacon.coordY.as("coordY"),
+                        beacon.cctvIp.as("cctvIp"),
+                        beacon.isCctv.as("isCctv"),
+                        beacon.isExit.as("isExit")
+                ))
+                .from(beacon)
+                .where(beacon.map.id.eq(1))
+                .fetch();
+
+        for(BeaconDto dto : beaconDtoList) System.out.println(dto.toString());
+    }
 }
