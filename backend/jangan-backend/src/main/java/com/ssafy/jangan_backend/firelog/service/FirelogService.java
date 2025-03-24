@@ -9,6 +9,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.ssafy.jangan_backend.beacon.dto.BeaconNotificationDto;
@@ -38,15 +39,16 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Service
 public class FirelogService {
-	private StationRepository stationRepository;
-	private MapRepository mapRepository;
-	private BeaconRepository beaconRepository;
-	private FirelogRepository firelogRepository;
-	private EdgeRepository edgeRepository;
-	private EscapeRouteRepository escapeRouteRepository;
-	private FcmUtil fcmUtil;
-	private MinioUtil minioUtil;
+	private final StationRepository stationRepository;
+	private final MapRepository mapRepository;
+	private final BeaconRepository beaconRepository;
+	private final FirelogRepository firelogRepository;
+	private final EdgeRepository edgeRepository;
+	private final EscapeRouteRepository escapeRouteRepository;
+	private final FcmUtil fcmUtil;
+	private final MinioUtil minioUtil;
 
+	@Transactional
 	public void reportFire(FireReportDto fireReportDto, MultipartFile[] files) throws CustomIllegalArgumentException {
 		int stationId = fireReportDto.getStationId();
 		Optional<Station> stationOptional = stationRepository.findById(stationId);
@@ -114,7 +116,7 @@ public class FirelogService {
 				MultipartFile file = fileNameMap.get(beacon.getBeaconCode());
 				String fileName = minioUtil.uploadFile(fileNameMap.get(beacon.getBeaconCode()), MinioUtil.BUCKET_IMAGELOGS);
 				FireLog fireLog = FireLog.builder()
-					.isActiveFire(false)
+					.isActiveFire(true)
 					.beaconId(beacon.getId())
 					.imageUrl(fileName)
 					.build();
@@ -131,8 +133,10 @@ public class FirelogService {
 			EscapeRoute escapeRoute = dijkstraAllNodes(stationOptional.get(), beaconList, dangerBeacons);
 			escapeRouteRepository.deleteById(stationId);
 			escapeRouteRepository.save(escapeRoute);
+			System.out.println("isChanged.");
 			if(isOnFire){ // 화재 진행 중이면 모바일 알람 전송
 				fcmUtil.sendMessage(fireNotificationDto);
+				System.out.println("isOnFire.");
 			}
 		}
 	}
@@ -160,7 +164,7 @@ public class FirelogService {
 	}
 
 	// 모든 출구로부터 각 정점까지의 최단 거리 계산
-	public EscapeRoute dijkstraAllNodes(Station station, List<Beacon> beaconList, TreeSet<Integer> dangerBeacons){
+	private EscapeRoute dijkstraAllNodes(Station station, List<Beacon> beaconList, TreeSet<Integer> dangerBeacons){
 		EscapeRoute escapeRoute = new EscapeRoute();
 
 		Integer stationId = station.getId();
@@ -185,7 +189,7 @@ public class FirelogService {
 			Beacon B = edge.getBeaconB();
 			if(dangerBeacons.contains(A.getBeaconCode()) || dangerBeacons.contains(B.getBeaconCode()))
 				continue;
-			graph.get(A.getId()).add(edge);
+			graph.get(A.getBeaconCode()).add(edge);
 		}
 		PriorityQueue<Route> pq = new PriorityQueue<>();
 		for(Beacon beacon : exitList){
@@ -200,7 +204,9 @@ public class FirelogService {
 		while(!pq.isEmpty()){
 			Route route = pq.poll();
 			List<Edge> nextEdge = graph.get(route.pos);
-			if(route.distance > dist.get(route.pos)) continue;
+			if(route.distance > dist.get(route.pos)) {
+				continue;
+			}
 			for(Edge edge : nextEdge){
 				int nextBeaconCode = edge.getBeaconB().getBeaconCode();
 				int nextDistance = route.distance + edge.getDistance();
@@ -214,7 +220,6 @@ public class FirelogService {
 				}
 			}
 		}
-
 		return escapeRoute;
 	}
 }

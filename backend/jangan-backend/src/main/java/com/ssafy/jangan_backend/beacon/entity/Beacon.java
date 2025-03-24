@@ -18,8 +18,10 @@ public class Beacon {
     private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "map_id", updatable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+    @JoinColumn(name = "map_id", updatable = false, insertable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     private Map map;
+    @Column(name = "map_id", nullable = false)
+    private Integer mapId;
 
     @Column(name = "beacon_code", nullable = false)
     private Integer beaconCode;

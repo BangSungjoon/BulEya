@@ -1,6 +1,7 @@
 package com.ssafy.jangan_backend.beacon.service;
 
-import com.ssafy.jangan_backend.beacon.dto.BeaconDto;
+import org.springframework.stereotype.Service;
+
 import com.ssafy.jangan_backend.beacon.dto.request.RequestRegisterBeaconDto;
 import com.ssafy.jangan_backend.beacon.dto.response.ResponsBeaconIdDto;
 import com.ssafy.jangan_backend.beacon.entity.Beacon;
@@ -9,8 +10,8 @@ import com.ssafy.jangan_backend.common.exception.CustomIllegalArgumentException;
 import com.ssafy.jangan_backend.common.response.BaseResponseStatus;
 import com.ssafy.jangan_backend.map.entity.Map;
 import com.ssafy.jangan_backend.map.repository.MapRepository;
+
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor

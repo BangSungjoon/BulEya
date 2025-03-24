@@ -37,28 +37,26 @@ public class FcmUtil {
 
 	/**
 	 * alert Topic을 구독한 모든 사용자에게 푸시 데이터를 보낸다.
-	 * @param dto
+	 * @param dto : 전송할 데이터
 	 * @return -1 : 전송 실패, 0 : 전송 성공
 	 */
 	public int sendMessage(Object dto) {
-		try{
+		try {
 			String jsonString = objectMapper.writeValueAsString(dto);
-			ApiFuture<String> messageIdFuture = FirebaseMessaging.getInstance().sendAsync(
-				Message.builder()
-					.putData("payload", jsonString)
-					.setTopic("alert")
-					.build()
-			);
-			messageIdFuture.addListener(() -> {
-				try{
-					String messageId = messageIdFuture.get();
-				}catch(Exception e){
 
-				}
-			}, Executors.newSingleThreadExecutor());
-		} catch(Exception e){
+			Message message = Message.builder()
+				.putData("payload", jsonString)
+				.setTopic("alert")
+				.build();
+
+			// 동기 전송으로 확인
+			String response = FirebaseMessaging.getInstance().send(message);
+
+		} catch (Exception e) {
+			e.printStackTrace();
 			return -1;
 		}
+
 		return 0;
 	}
 }

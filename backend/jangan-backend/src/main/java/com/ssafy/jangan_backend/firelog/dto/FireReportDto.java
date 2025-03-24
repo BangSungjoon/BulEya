@@ -8,9 +8,9 @@ import lombok.Setter;
 @Getter
 @Setter
 public class FireReportDto {
-	@JsonProperty("station_id")
+	@JsonProperty(value = "station_id", required = true)
 	private int stationId;
 
-	@JsonProperty("beacon_list")
+	@JsonProperty(value = "beacon_list", required = true)
 	BeaconFireInfoDto[] beaconFireInfoList;
 }

@@ -12,6 +12,7 @@ import com.ssafy.jangan_backend.firelog.dto.RouteNodeDto;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 /**
  * Redis에 저장될 최단 경로 객체
@@ -20,6 +21,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @RedisHash("escapeRoute")
+@ToString
 public class EscapeRoute {
 	@Id
 	private int stationId;

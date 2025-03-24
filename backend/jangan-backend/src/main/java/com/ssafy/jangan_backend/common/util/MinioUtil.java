@@ -2,6 +2,7 @@ package com.ssafy.jangan_backend.common.util;
 
 import java.io.InputStream;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -16,6 +17,7 @@ import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import io.minio.errors.MinioException;
 import io.minio.http.Method;
+import javax.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 
 @Component
@@ -23,7 +25,14 @@ import lombok.RequiredArgsConstructor;
 public class MinioUtil {
     private final MinioClient minioClient;
     @Value("${minio.bucket.imagelog}")
+    public String bucketImagelogs;
+
     public static String BUCKET_IMAGELOGS;
+
+    @PostConstruct
+    public void init(){
+        BUCKET_IMAGELOGS = bucketImagelogs;
+    }
 
     public String getPresignedUrl(String bucketName, String imageName) {
         try {
@@ -43,7 +52,9 @@ public class MinioUtil {
 
     public String uploadFile(MultipartFile file, String bucketName){
         try{
-            String fileName = LocalDateTime.now().toString() + "_" + file.getOriginalFilename();
+            String timePrefix = LocalDateTime.now()
+                .format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+            String fileName = timePrefix + "_" + file.getOriginalFilename();
             String contentType = file.getContentType();
             long size = file.getSize();
 
@@ -59,8 +70,10 @@ public class MinioUtil {
             }
             return fileName;
         } catch(MinioException e){
+            e.printStackTrace();
             throw new CustomIllegalArgumentException(BaseResponseStatus.IMAGE_UPLOAD_FAIL_EXCEPTION);
         } catch(Exception e) {
+            e.printStackTrace();
             throw new CustomIllegalArgumentException(BaseResponseStatus.INTERNAL_SERVER_ERROR);
         }
     }
