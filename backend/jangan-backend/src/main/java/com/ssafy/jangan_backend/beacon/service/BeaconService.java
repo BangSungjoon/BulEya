@@ -1,5 +1,6 @@
 package com.ssafy.jangan_backend.beacon.service;
 
+import com.ssafy.jangan_backend.beacon.dto.BeaconDto;
 import com.ssafy.jangan_backend.beacon.dto.request.RequestDeleteBeaconDto;
 import com.ssafy.jangan_backend.beacon.dto.request.RequestRegisterBeaconDto;
 import com.ssafy.jangan_backend.beacon.dto.response.ResponseBeaconIdDto;
@@ -12,6 +13,8 @@ import com.ssafy.jangan_backend.map.repository.MapRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -40,5 +43,13 @@ public class BeaconService {
         } catch (EmptyResultDataAccessException e) {
             throw new CustomIllegalArgumentException(BaseResponseStatus.BEACON_NOT_FOUND_EXCEPTION);
         }
+    }
+
+    public List<BeaconDto> getBeaconList(int mapId) {
+        List<BeaconDto> beaconList = beaconRepository.findByMapId(mapId)
+                .stream()
+                .map(beacon -> BeaconDto.fromEntity(beacon))
+                .toList();
+        return beaconList;
     }
 }

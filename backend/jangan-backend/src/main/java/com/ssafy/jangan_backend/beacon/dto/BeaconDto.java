@@ -9,10 +9,10 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@ToString
 public class BeaconDto {
     private Integer beaconId;
     private Integer mapId;
-    private Integer floor;
     private Integer beaconCode;
     private String name;
     private Integer coordX;
@@ -34,7 +34,7 @@ public class BeaconDto {
                 .build();
     }
 
-    public static BeaconDto toDto(Beacon beacon) {
+    public static BeaconDto fromEntity(Beacon beacon) {
         return BeaconDto.builder()
                 .beaconId(beacon.getId())
                 .mapId(beacon.getMap().getId())
