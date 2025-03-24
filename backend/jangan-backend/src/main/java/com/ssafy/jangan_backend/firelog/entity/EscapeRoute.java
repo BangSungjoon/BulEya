@@ -7,6 +7,9 @@ import java.util.Map;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
 
+import com.ssafy.jangan_backend.firelog.dto.FireNotificationDto;
+import com.ssafy.jangan_backend.firelog.dto.RouteNodeDto;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -25,7 +28,7 @@ public class EscapeRoute {
 	 * Key : 시작점 beaconCode
 	 * Value : 이동 경로 beaconId(역방향)
 	 */
-	private final Map<Integer, List<Integer>> routes;
+	private final Map<Integer, List<RouteNodeDto>> routes;
 
 	public EscapeRoute(){
 		routes = new HashMap<>();

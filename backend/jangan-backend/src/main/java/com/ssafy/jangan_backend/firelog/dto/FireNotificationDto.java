@@ -18,4 +18,7 @@ public class FireNotificationDto {
 	public FireNotificationDto(){
 		beaconNotificationDtos = new ArrayList<>();
 	}
+	public FireNotificationDto(List<BeaconNotificationDto> list){
+		beaconNotificationDtos = new ArrayList<>(list);
+	}
 }

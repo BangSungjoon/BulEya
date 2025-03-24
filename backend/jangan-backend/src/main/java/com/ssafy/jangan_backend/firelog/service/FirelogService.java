@@ -23,6 +23,7 @@ import com.ssafy.jangan_backend.edge.repository.EdgeRepository;
 import com.ssafy.jangan_backend.firelog.dto.BeaconFireInfoDto;
 import com.ssafy.jangan_backend.firelog.dto.FireNotificationDto;
 import com.ssafy.jangan_backend.firelog.dto.FireReportDto;
+import com.ssafy.jangan_backend.firelog.dto.RouteNodeDto;
 import com.ssafy.jangan_backend.firelog.entity.EscapeRoute;
 import com.ssafy.jangan_backend.firelog.entity.FireLog;
 import com.ssafy.jangan_backend.firelog.repository.EscapeRouteRepository;
@@ -139,17 +140,18 @@ public class FirelogService {
 	private static class Route implements Comparable<Route>{
 		int pos;
 		int distance;
-		List<Integer> way;
-		Route(int pos, int distance){
-			this.pos = pos;
+		List<RouteNodeDto> way;
+		Route(Beacon beacon, int distance){
+			this.pos = beacon.getBeaconCode();
 			this.distance = distance;
 			way = new ArrayList<>();
-			way.add(pos);
+			way.add(new RouteNodeDto(beacon.getBeaconCode(), beacon.getMap().getFloor(), beacon.getCoordX(), beacon.getCoordY()));
+
 		}
-		Route(int pos, int distance, List<Integer> way){
-			this(pos, distance);
+		Route(Beacon beacon, int distance, List<RouteNodeDto> way){
+			this(beacon, distance);
 			this.way = new ArrayList<>(way);
-			this.way.add(pos);
+			this.way.add(new RouteNodeDto(beacon.getBeaconCode(), beacon.getMap().getFloor(), beacon.getCoordX(), beacon.getCoordY()));
 		}
 		@Override
 		public int compareTo(Route route){
@@ -188,8 +190,10 @@ public class FirelogService {
 		PriorityQueue<Route> pq = new PriorityQueue<>();
 		for(Beacon beacon : exitList){
 			dist.put(beacon.getBeaconCode(), 0);
-			pq.add(new Route(beacon.getBeaconCode(), 0));
-			escapeRoute.getRoutes().put(beacon.getBeaconCode(), new ArrayList<>());
+			pq.add(new Route(beacon, 0));
+			List<RouteNodeDto> routeList = new ArrayList<>();
+			routeList.add(new RouteNodeDto(beacon.getBeaconCode(), beacon.getMap().getFloor(), beacon.getCoordX(), beacon.getCoordY()));
+			escapeRoute.getRoutes().put(beacon.getBeaconCode(), routeList);
 		}
 
 
@@ -202,7 +206,7 @@ public class FirelogService {
 				int nextDistance = route.distance + edge.getDistance();
 				if(nextDistance < dist.get(nextBeaconCode)){
 					dist.put(nextBeaconCode, nextDistance);
-					Route r = new Route(nextBeaconCode, nextDistance, route.way);
+					Route r = new Route(edge.getBeaconB(), nextDistance, route.way);
 					pq.add(r);
 
 					// nextBeacon에 대한 최단 경로 저장
