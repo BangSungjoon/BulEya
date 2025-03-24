@@ -33,3 +33,4 @@ minio:
   secret-key: ${MINIO_SECRET_KEY}
   bucket:
     name: jangan
+    imagelog: ${BUCKET_IMAGELOG}

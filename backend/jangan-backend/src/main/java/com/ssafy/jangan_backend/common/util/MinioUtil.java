@@ -3,6 +3,7 @@ package com.ssafy.jangan_backend.common.util;
 import java.io.InputStream;
 import java.time.LocalDateTime;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -21,7 +22,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class MinioUtil {
     private final MinioClient minioClient;
-    public static final String BUCKET_IMAGELOGS = "imagelogs";
+    @Value("${minio.bucket.imagelog}")
+    public static String BUCKET_IMAGELOGS;
 
     public String getPresignedUrl(String bucketName, String imageName) {
         try {
