@@ -30,7 +30,7 @@ public class EdgeDto {
                 .build();
     }
 
-    public static EdgeDto toDto(Edge edge) {
+    public static EdgeDto fromEntity(Edge edge) {
         return EdgeDto.builder()
                 .edgeId(edge.getId())
                 .beaconACode(edge.getBeaconA().getId())

@@ -68,7 +68,7 @@ public class MapService {
 
             //edgeList -> floorEdgeList로 변환
             List<EdgeDto> floorEdgeList = edgeList.stream()
-                    .map(edge -> EdgeDto.toDto(edge))
+                    .map(edge -> EdgeDto.fromEntity(edge))
                     .toList();
 
             dtoList.add(ResponseWebAdminMapDto.builder()

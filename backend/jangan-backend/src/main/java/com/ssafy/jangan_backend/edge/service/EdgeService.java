@@ -5,6 +5,7 @@ import com.ssafy.jangan_backend.beacon.entity.Beacon;
 import com.ssafy.jangan_backend.beacon.repository.BeaconRepository;
 import com.ssafy.jangan_backend.common.exception.CustomIllegalArgumentException;
 import com.ssafy.jangan_backend.common.response.BaseResponseStatus;
+import com.ssafy.jangan_backend.edge.dto.EdgeDto;
 import com.ssafy.jangan_backend.edge.dto.request.RequestDeleteEdgeDto;
 import com.ssafy.jangan_backend.edge.dto.request.RequestRegisterEdgeDto;
 import com.ssafy.jangan_backend.edge.dto.response.ResponseEdgeIdDto;
