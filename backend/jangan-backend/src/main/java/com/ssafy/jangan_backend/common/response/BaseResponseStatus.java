@@ -11,7 +11,8 @@ public enum BaseResponseStatus {
 
     STATION_NOT_FOUND_EXCEPTION(false, 4001, "역 정보를 찾을 수 없습니다."),
     MAP_NOT_FOUND_EXCEPTION(false, 4002, "평면도 정보를 찾을 수 없습니다."),
-    BEACON_NOT_FOUND_EXCEPTION(false, 4003, "비콘 정보를 찾을 수 없습니다.")
+    BEACON_NOT_FOUND_EXCEPTION(false, 4003, "비콘 정보를 찾을 수 없습니다."),
+    EDGE_NOT_FOUND_EXCEPTION(false, 4004, "간선 정보를 찾을 수 없습니다.")
     /*
         이후 자유롭게 에러 추가
      */

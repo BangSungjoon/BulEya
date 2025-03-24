@@ -35,7 +35,7 @@ public class BeaconService {
 
     public void deleteBeacon(Integer beaconId) {
         if(beaconRepository.existsById(beaconId)) {
-            throw new IllegalArgumentException("해당 비콘 없음");
+            throw new CustomIllegalArgumentException(BaseResponseStatus.BEACON_NOT_FOUND_EXCEPTION);
         }
         beaconRepository.deleteById(beaconId);
     }

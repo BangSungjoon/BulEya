@@ -9,7 +9,6 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@JsonInclude(JsonInclude.Include.NON_DEFAULT) //
 public class BeaconDto {
     private Integer beaconId;
     private Integer mapId;
