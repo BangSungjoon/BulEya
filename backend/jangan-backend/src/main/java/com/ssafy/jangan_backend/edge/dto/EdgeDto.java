@@ -11,13 +11,15 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 @ToString
-@JsonInclude(JsonInclude.Include.NON_DEFAULT) // 기본값 아닌 것들만 JSON으로
 public class EdgeDto {
     private Integer edgeId;
+
     @JsonProperty("beacon_a_code")
     private Integer beaconACode;
+
     @JsonProperty("beacon_b_code")
     private Integer beaconBCode;
+
     private Integer distance;
 
     public Edge toEntity(Beacon beaconA, Beacon beaconB) {
@@ -29,12 +31,6 @@ public class EdgeDto {
     }
 
     public static EdgeDto toDto(Edge edge) {
-        return EdgeDto.builder()
-                .edgeId(edge.getId())
-                .build();
-    }
-
-    public static EdgeDto fromEntity(Edge edge) {
         return EdgeDto.builder()
                 .edgeId(edge.getId())
                 .beaconACode(edge.getBeaconA().getId())
