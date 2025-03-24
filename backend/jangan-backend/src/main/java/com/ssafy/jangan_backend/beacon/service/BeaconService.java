@@ -12,6 +12,8 @@ import com.ssafy.jangan_backend.map.repository.MapRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class BeaconService {
@@ -38,5 +40,13 @@ public class BeaconService {
             throw new IllegalArgumentException("해당 비콘 없음");
         }
         beaconRepository.deleteById(beaconId);
+    }
+
+    public List<BeaconDto> getBeaconList(int mapId) {
+        List<BeaconDto> beaconList = beaconRepository.findByMapId(mapId)
+                .stream()
+                .map(beacon -> BeaconDto.fromEntity(beacon))
+                .toList();
+        return beaconList;
     }
 }

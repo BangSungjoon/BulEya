@@ -1,5 +1,6 @@
 package com.ssafy.jangan_backend.edge.service;
 
+import com.ssafy.jangan_backend.beacon.dto.BeaconDto;
 import com.ssafy.jangan_backend.beacon.entity.Beacon;
 import com.ssafy.jangan_backend.beacon.repository.BeaconRepository;
 import com.ssafy.jangan_backend.common.exception.CustomIllegalArgumentException;
@@ -9,6 +10,8 @@ import com.ssafy.jangan_backend.edge.entity.Edge;
 import com.ssafy.jangan_backend.edge.repository.EdgeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -37,5 +40,13 @@ public class EdgeService {
     public void deleteEdge(EdgeDto edgeDto) {
         Integer edgeId = edgeDto.getEdgeId();
         edgeRepository.deleteById(edgeId);
+    }
+
+    public List<EdgeDto> getEdgeList(Integer beaconId) {
+        List<EdgeDto> edgeList = edgeRepository.findByBeaconAIdOrBeaconBId(beaconId, beaconId)
+                .stream()
+                .map(edge -> EdgeDto.fromEntity(edge))
+                .toList();
+        return edgeList;
     }
 }

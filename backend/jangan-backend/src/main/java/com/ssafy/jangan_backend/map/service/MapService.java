@@ -7,6 +7,7 @@ import com.ssafy.jangan_backend.common.util.MinioUtil;
 import com.ssafy.jangan_backend.edge.dto.EdgeDto;
 import com.ssafy.jangan_backend.edge.entity.Edge;
 import com.ssafy.jangan_backend.edge.repository.EdgeRepository;
+import com.ssafy.jangan_backend.map.dto.MapDto;
 import com.ssafy.jangan_backend.map.dto.ResponseMobileMapDto;
 import com.ssafy.jangan_backend.map.dto.ResponseWebAdminMapDto;
 import com.ssafy.jangan_backend.map.entity.Map;
@@ -56,7 +57,7 @@ public class MapService {
             List<Beacon> beaconList = beaconRepository.findByMapId(map.getId()); //맵에 해당하는 비콘 가져오기
             //한 층에 해당하는 비콘들
             List<BeaconDto>  floorBeaconList = beaconList.stream()
-                    .map(beacon -> BeaconDto.toDto(beacon))
+                    .map(beacon -> BeaconDto.fromEntity(beacon))
                     .toList();
 
             //비콘에 해당하는 간선 가져오기
@@ -78,5 +79,13 @@ public class MapService {
                     .build());
         }
         return dtoList;
+    }
+
+    public List<MapDto> getMapListByStationId(Integer stationId) {
+        List<MapDto> mapList = mapRepository.findByStationId(stationId)
+                .stream()
+                .map(map -> MapDto.fromEntity(map))
+                .toList();
+        return mapList;
     }
 }
