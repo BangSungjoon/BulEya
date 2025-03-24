@@ -8,7 +8,6 @@ import java.util.Optional;
 
 public interface BeaconRepository extends JpaRepository<Beacon, Integer> {
     List<Beacon> findAllByMapIdIn(List<Integer> mapIds);
-    Optional<Beacon> findByMapIdAndBeaconCode(Integer beaconCode, Integer mapId);
     Optional<Beacon> findByMapIdInAndBeaconCode(List<Integer> mapIdList, Integer beaconCode);
     List<Beacon> findByMapId(Integer mapId);
 }

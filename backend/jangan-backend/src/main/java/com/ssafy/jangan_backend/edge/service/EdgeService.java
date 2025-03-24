@@ -15,6 +15,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class EdgeService {
@@ -24,20 +27,16 @@ public class EdgeService {
 
     public ResponseEdgeIdDto saveEdge(RequestRegisterEdgeDto dto) {
         Integer stationId = dto.getStationId();
-        Integer floor = dto.getFloor();
-
-        // stationId와 floor로 mapId 찾기
-        Map map = mapRepository.findByStationIdAndFloor(stationId, floor)
-                .orElseThrow(() -> new CustomIllegalArgumentException(BaseResponseStatus.MAP_NOT_FOUND_EXCEPTION));
-        Integer mapId = map.getId();
-
-        // 비콘 A 찾기
         Integer beaconACode = dto.getBeaconACode();
-        Beacon beaconA = beaconRepository.findByMapIdAndBeaconCode(mapId, beaconACode)
-                .orElseThrow(() -> new CustomIllegalArgumentException(BaseResponseStatus.BEACON_NOT_FOUND_EXCEPTION));
-        // 비콘 B 찾기
         Integer beaconBCode = dto.getBeaconBCode();
-        Beacon beaconB = beaconRepository.findByMapIdAndBeaconCode(mapId, beaconBCode)
+
+        // station의 모든 map의 Id를 리스트로 변환
+        List<Integer> mapIdList = mapRepository.findByStationId(stationId).stream().map(Map::getId).toList();
+
+        // beaconA와 beaconB 찾기
+        Beacon beaconA = beaconRepository.findByMapIdInAndBeaconCode(mapIdList, beaconACode)
+                .orElseThrow(() -> new CustomIllegalArgumentException(BaseResponseStatus.BEACON_NOT_FOUND_EXCEPTION));
+        Beacon beaconB = beaconRepository.findByMapIdInAndBeaconCode(mapIdList, beaconBCode)
                 .orElseThrow(() -> new CustomIllegalArgumentException(BaseResponseStatus.BEACON_NOT_FOUND_EXCEPTION));
 
         // Entity 변환 후 저장
