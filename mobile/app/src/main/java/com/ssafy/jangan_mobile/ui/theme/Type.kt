@@ -6,7 +6,6 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-//import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import com.ssafy.jangan_mobile.R
 
@@ -21,88 +20,57 @@ val roboto = FontFamily(
 )
 
 // 각 스타일별 TextStyle 설정
-val Typography = Typography(
-
-    headlineLarge = TextStyle( // Headline (24sp, Semi Bold)
+val Headline = TextStyle( // Headline (24sp, Semi Bold)
         fontFamily = roboto,
         fontWeight = FontWeight.SemiBold,
         fontSize = 24.sp
-    ),
+    )
 
-    titleLarge = TextStyle( // Subtitle1 (20sp, Semi Bold)
+val Subtitle1 = TextStyle( // Subtitle1 (20sp, Semi Bold)
         fontFamily = roboto,
         fontWeight = FontWeight.SemiBold,
         fontSize = 20.sp
-    ),
+    )
 
-    titleMedium = TextStyle( // Subtitle2 (18sp, Semi Bold)
+val Subtitle2 = TextStyle( // Subtitle2 (18sp, Semi Bold)
         fontFamily = roboto,
         fontWeight = FontWeight.SemiBold,
         fontSize = 18.sp
-    ),
+    )
 
-    bodyLarge = TextStyle( // Body1 (16sp, Regular)
+val Body1 = TextStyle( // Body1 (16sp, Regular)
         fontFamily = roboto,
         fontWeight = FontWeight.Normal,
         fontSize = 16.sp
-    ),
+    )
 
-    bodyMedium = TextStyle( // Body2 (14sp, Regular)
+val Body2 = TextStyle( // Body2 (14sp, Regular)
         fontFamily = roboto,
         fontWeight = FontWeight.Normal,
         fontSize = 14.sp
-    ),
+    )
 
-    labelLarge = TextStyle( // Caption (12sp, Regular)
+val Caption = TextStyle( // Caption (12sp, Regular)
         fontFamily = roboto,
         fontWeight = FontWeight.Normal,
         fontSize = 12.sp
-    ),
+    )
 
-    labelMedium = TextStyle( // Overline (10sp, Regular)
+val Overline = TextStyle( // Overline (10sp, Regular)
         fontFamily = roboto,
         fontWeight = FontWeight.Normal,
         fontSize = 10.sp
     )
-)
 
 
 // Set of Material typography styles to start with
-//val Typography = Typography(
-//
-//    bodyLarge = TextStyle(
-//        fontFamily = FontFamily.Default,
-//        fontWeight = FontWeight.Normal,
-//        fontSize = 16.sp,
-//        lineHeight = 24.sp,
-//        letterSpacing = 0.5.sp
-//    )
-//
-//)
-//
-//// Set of Material typography styles to start with
-//val Typography = Typography(
-//    bodyLarge = TextStyle(
-//        fontFamily = FontFamily.Default,
-//        fontWeight = FontWeight.Normal,
-//        fontSize = 16.sp,
-//        lineHeight = 24.sp,
-//        letterSpacing = 0.5.sp
-//    )
-//    /* Other default text styles to override
-//    titleLarge = TextStyle(
-//        fontFamily = FontFamily.Default,
-//        fontWeight = FontWeight.Normal,
-//        fontSize = 22.sp,
-//        lineHeight = 28.sp,
-//        letterSpacing = 0.sp
-//    ),
-//    labelSmall = TextStyle(
-//        fontFamily = FontFamily.Default,
-//        fontWeight = FontWeight.Medium,
-//        fontSize = 11.sp,
-//        lineHeight = 16.sp,
-//        letterSpacing = 0.5.sp
-//    )
-//    */
-//)
+val Typography = Typography(
+
+    bodyLarge = TextStyle(
+        fontFamily = FontFamily.Default,
+        fontWeight = FontWeight.Normal,
+        fontSize = 16.sp,
+        lineHeight = 24.sp,
+        letterSpacing = 0.5.sp
+    )
+)
