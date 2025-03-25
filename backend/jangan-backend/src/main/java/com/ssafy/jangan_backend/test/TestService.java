@@ -18,8 +18,8 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class TestService {
-    private MinioClient minioClient;
-    private MinioUtil minioUtil;
+    private final MinioClient minioClient;
+    private final MinioUtil minioUtil;
     @Value("${minio.bucket.name}")
     private String bucketName;
 
@@ -54,15 +54,16 @@ public class TestService {
 
     public String getImageUrlOrElseThrow() {
         try {
-            String imageUrl = minioClient.getPresignedObjectUrl(
-                    GetPresignedObjectUrlArgs.builder()
-                            .bucket(bucketName)
-                            .object("map/67ac1169-dd5b-4026-abec-4b0748cfe332_장안의 화재.png")
-                            .method(Method.GET) // GET 요청 가능
-                            .expiry(60 * 60) // 1시간 유효
-                            .build()
-            );
-            return imageUrl;
+			// GET 요청 가능
+			// 1시간 유효
+			return minioClient.getPresignedObjectUrl(
+					GetPresignedObjectUrlArgs.builder()
+							.bucket(bucketName)
+							.object("map/67ac1169-dd5b-4026-abec-4b0748cfe332_장안의 화재.png")
+							.method(Method.GET) // GET 요청 가능
+							.expiry(60 * 60) // 1시간 유효
+							.build()
+			);
         } catch(Exception e) {
             throw new InternalServerException(BaseResponseStatus.INTERNAL_SERVER_ERROR);
         }
