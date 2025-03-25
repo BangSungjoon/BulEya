@@ -59,4 +59,8 @@ public class TestController {
     public void testQueryDsl() {
         service.testQueryDsl();
     }
+    @GetMapping("/performTest")
+    public void performTest() {
+        service.performTest();
+    }
 }
