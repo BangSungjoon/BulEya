@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 
@@ -17,8 +17,16 @@ const navItems = [
 ]
 
 function App() {
-  // 현재 선태된 메뉴 상태 관리 (기본값: map)
-  const [selected, setSelected] = useState('map')
+  // 현재 선택된 메뉴 상태 관리 (기본값: map)
+  // sessionStorage 초기값 불러오기
+  const [selected, setSelected] = useState(() => {
+    return sessionStorage.getItem('navItem') || 'map'
+  })
+
+  // 메뉴 선택 상태가 바뀔 때 sessionStorage에에 저장
+  useEffect(() => {
+    sessionStorage.setItem('navItem', selected)
+  }, [selected])
 
   return (
     // 전체 레이아웃: 사이드 네비게이션 + 본문
