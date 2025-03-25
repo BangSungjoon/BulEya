@@ -28,4 +28,5 @@ public class MapController {
         List<ResponseWebAdminMapDto> list = mapService.getMapsForWebAdmin(stationId);
         return BaseResponse.ok(list);
     }
+
 }
