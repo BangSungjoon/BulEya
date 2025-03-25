@@ -1,8 +1,19 @@
 package com.ssafy.jangan_backend.test;
 
+import com.querydsl.core.types.Projections;
+import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.ssafy.jangan_backend.beacon.dto.BeaconDto;
+import com.ssafy.jangan_backend.beacon.entity.Beacon;
+import com.ssafy.jangan_backend.beacon.entity.QBeacon;
 import com.ssafy.jangan_backend.common.exception.InternalServerException;
 import com.ssafy.jangan_backend.common.response.BaseResponseStatus;
 import com.ssafy.jangan_backend.common.util.MinioUtil;
+import com.ssafy.jangan_backend.edge.dto.EdgeDto;
+import com.ssafy.jangan_backend.edge.entity.Edge;
+import com.ssafy.jangan_backend.map.dto.ResponseWebAdminMapDto;
+import com.ssafy.jangan_backend.map.entity.Map;
+import com.ssafy.jangan_backend.map.service.MapService;
+import com.ssafy.jangan_backend.station.entity.Station;
 import io.minio.GetPresignedObjectUrlArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
@@ -13,13 +24,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class TestService {
+    private final JPAQueryFactory queryFactory;
+    private final MapService mapService;
     private MinioClient minioClient;
-    private MinioUtil minioUtil;
     @Value("${minio.bucket.name}")
     private String bucketName;
 
@@ -71,4 +85,33 @@ public class TestService {
         throw new InternalServerException(BaseResponseStatus.INTERNAL_SERVER_ERROR);
     }
 
+    public void testQueryDsl() {
+        QBeacon beacon = QBeacon.beacon;
+        List<BeaconDto> beaconDtoList = queryFactory
+                .select(Projections.bean(
+                        BeaconDto.class,
+                        beacon.id.as("beaconId"),
+                        beacon.map.id.as("mapId"),
+                        beacon.beaconCode.as("beaconCode"),
+                        beacon.name.as("name"),
+                        beacon.coordX.as("coordX"),
+                        beacon.coordY.as("coordY"),
+                        beacon.cctvIp.as("cctvIp"),
+                        beacon.isCctv.as("isCctv"),
+                        beacon.isExit.as("isExit")
+                ))
+                .from(beacon)
+                .where(beacon.map.id.eq(1))
+                .fetch();
+
+        for(BeaconDto dto : beaconDtoList) System.out.println(dto.toString());
+    }
+
+    public void performTest() {
+        long start = System.currentTimeMillis(); // 시작 시간 기록
+        int stationId = 1;
+        List<ResponseWebAdminMapDto> list = mapService.getMapsForWebAdmin(stationId);
+        long end = System.currentTimeMillis(); // 시작 시간 기록
+        System.out.println("QueryDSL 적용 전 실행 시간: " + (end - start) + " ms (" + (end - start) / 1000.0 + " 초)");
+    }
 }
