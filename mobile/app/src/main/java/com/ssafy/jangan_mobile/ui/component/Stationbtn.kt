@@ -5,18 +5,14 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.material3.Text
@@ -38,8 +34,6 @@ fun StationInfo(
         // 왼쪽 연장된 초록색 선
         Box(
             modifier = Modifier
-//                .border(width = 8.dp, color = primaryColor)
-//                .padding(8.dp)
                 .width(94.5.dp)
                 .height(8.dp)
                 .background(primaryColor)
@@ -49,11 +43,9 @@ fun StationInfo(
         Box(
             modifier = Modifier
                 .width(182.dp)
-                .height(45.dp)
+                .height(61.dp) // 피그마대로 하면 좁은 것 같아서 볼더값만큼 더해줌
                 .background(color = Color.White, shape = RoundedCornerShape(100.dp))
                 .border(width = 8.dp, color = primaryColor, shape = RoundedCornerShape(100.dp)),
-//                .padding(8.dp)
-//                .padding(horizontal = 16.dp, vertical = 12.dp) // 텍스트 여백
             contentAlignment = Alignment.Center
         ) {
                 Text(

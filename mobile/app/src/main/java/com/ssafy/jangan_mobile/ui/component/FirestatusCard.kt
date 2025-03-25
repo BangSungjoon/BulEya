@@ -1,5 +1,6 @@
 package com.ssafy.jangan_mobile.ui.component
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -9,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
@@ -25,7 +27,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
+import com.ssafy.jangan_mobile.R
+import com.ssafy.jangan_mobile.ui.theme.Headline
+import com.ssafy.jangan_mobile.ui.theme.Subtitle2
+import com.ssafy.jangan_mobile.ui.theme.system_red
 
 
 @Composable
@@ -36,52 +43,48 @@ fun StationStatusCard(
 ) {
     Column(
         modifier = Modifier
-            .fillMaxWidth()
-            .background(Color.Black, shape = RoundedCornerShape(16.dp))
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .width(380.dp)
+            .height(213.dp)
+            .background(Color.Black, shape = RoundedCornerShape(40.dp))
+            .padding(vertical = 12.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         // 🚉 역 정보 표시
-        StationInfo(stationName = stationName)
-
-        Spacer(modifier = Modifier.height(20.dp))
         Box(
             modifier = Modifier
-                .fillMaxWidth(0.8f)
-                .background(Color(0xFF90EE90), shape = CircleShape)
-                .padding(vertical = 8.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = stationName,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.Black
-            )
+                .padding(vertical = 24.dp)
+        ){
+            StationInfo(stationName = stationName)
         }
-
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
         // 🔥 상태 + 개찰구 정보
         Row(
             modifier = Modifier
-                .fillMaxWidth(0.9f)
-                .background(Color.Red, shape = RoundedCornerShape(16.dp))
-                .padding(12.dp),
+                .width(360.dp)
+                .height(76.dp)
+                .background(color = system_red, shape = RoundedCornerShape(60.dp))
+                .padding(start = 32.dp, top = 22.dp, end = 32.dp, bottom = 22.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(
-                text = "🔥 $status",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.Black
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Image(
+                    painter = painterResource(id = R.drawable.fireicon),
+                    contentDescription = "Fire Icon",
+                    modifier = Modifier
+                        .height(32.dp) // 원하는 크기로 조정
+                        .padding(1.dp)
+                )
+                Text(
+                    text = " $status",
+                    style = Headline
+                )
+            }
 
             Text(
                 text = gateName,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
+                style = Subtitle2,
                 color = Color.White
             )
         }
@@ -89,12 +92,12 @@ fun StationStatusCard(
 }
 
 
-@Preview(showBackground = true, name = "Fire Status - Emergency")
-@Composable
-fun PreviewFireStatusCardEmergency() {
-    StationStatusCard(
-        stationName = "강남역",
-        status = "화재 발생",
-        gateName = "B3 개찰구"
-    )
-}
+//@Preview(showBackground = true, name = "Fire Status - Emergency")
+//@Composable
+//fun PreviewFireStatusCardEmergency() {
+//    StationStatusCard(
+//        stationName = "강남역",
+//        status = "화재 발생",
+//        gateName = "B3 개찰구"
+//    )
+//}

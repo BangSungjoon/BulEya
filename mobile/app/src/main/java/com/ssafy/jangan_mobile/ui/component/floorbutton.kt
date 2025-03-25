@@ -3,14 +3,11 @@ package com.ssafy.jangan_mobile.ui.component
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -28,7 +25,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.draw.shadow
 import com.ssafy.jangan_mobile.R
+import com.ssafy.jangan_mobile.ui.theme.Subtitle1
+import com.ssafy.jangan_mobile.ui.theme.gray100
+import com.ssafy.jangan_mobile.ui.theme.gray300
+import com.ssafy.jangan_mobile.ui.theme.gray400
+import com.ssafy.jangan_mobile.ui.theme.primaryColor
 
 @Composable
 fun FloorSelector(
@@ -36,44 +39,40 @@ fun FloorSelector(
     selectedFloor: String = "B2",
     onFloorSelected: (String) -> Unit
 ) {
-    Column(
+    Box(
         modifier = Modifier
-            .fillMaxHeight(0.3f) // 전체 화면의 30% 높이 차지
-            .fillMaxWidth(0.2f), // 전체 화면의 20% 너비 차지
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+            .width(72.dp)
+            .height(192.dp)
+            .shadow(elevation = 4.dp, spotColor = gray400, ambientColor = gray400)
+            .border(width = 1.dp, color = gray300, shape = RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(16.dp))
+            .background(color = gray100),
     ) {
-        Box(
-            modifier = Modifier
-                .clip(RoundedCornerShape(16.dp))
-                .background(Color.White)
-                .border(2.dp, Color.LightGray, RoundedCornerShape(16.dp))
+        Column(
+            modifier = Modifier.fillMaxSize()
         ) {
-            Column(
-                modifier = Modifier.fillMaxSize()
-            ) {
-                floors.forEach { floor ->
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f) // 모든 층을 동일한 높이로 설정
-                            .background(if (floor == selectedFloor) Color(0xFF90EE90) else Color.White)
-                            .clickable { onFloorSelected(floor) },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = floor,
-                            style = MaterialTheme.typography.titleMedium,
-                            fontSize = 24.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = if (floor == selectedFloor) Color.Black else Color.Gray
+            floors.forEach { floor ->
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                        .background(
+                            if (floor == selectedFloor) primaryColor else gray100
                         )
-                    }
+                        .clickable { onFloorSelected(floor) },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = floor,
+                        style = Subtitle1,
+                        color = if (floor == selectedFloor) Color.Black else gray100
+                    )
                 }
             }
         }
     }
 }
+
 
 
 //@Preview
