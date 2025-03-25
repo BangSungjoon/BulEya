@@ -4,8 +4,11 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+//    alias(libs.plugins.kotlin.kapt)
 
     id("com.google.gms.google-services")
+//    id("org.jetbrains.kotlin.android")
+    id("org.jetbrains.kotlin.kapt")
 }
 
 android {
@@ -71,4 +74,6 @@ dependencies {
 
     implementation("com.davidgyoungtech:beacon-parsers:1.0")
     implementation("org.altbeacon:android-beacon-library:2+")
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+    kapt("com.github.bumptech.glide:compiler:4.16.0") // ✅ Glide 컴파일러 추가
 }

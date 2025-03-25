@@ -14,9 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.material3.Text
-import androidx.compose.ui.tooling.preview.Preview
 import com.ssafy.jangan_mobile.ui.theme.Subtitle2
 import com.ssafy.jangan_mobile.ui.theme.primaryColor
 
