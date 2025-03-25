@@ -66,4 +66,9 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.messaging)
     implementation("com.google.code.gson:gson:2.10.1")
+
+    implementation("com.mapbox.maps:android:11.10.3")
+
+    implementation("com.davidgyoungtech:beacon-parsers:1.0")
+    implementation("org.altbeacon:android-beacon-library:2+")
 }

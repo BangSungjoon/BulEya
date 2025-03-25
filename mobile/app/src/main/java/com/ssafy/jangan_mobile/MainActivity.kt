@@ -50,8 +50,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private val bluetoothManager: BluetoothManager = getSystemService(BluetoothManager::class.java)
-    private val bluetoothAdapter: BluetoothAdapter? = bluetoothManager.getAdapter()
 
     // 사용자에게 알림 권한 요청
     private fun askNotificationPermission() {
@@ -90,6 +88,10 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        val bluetoothManager = getSystemService(BluetoothManager::class.java)
+        val bluetoothAdapter = bluetoothManager.getAdapter()
+
         setContent {
             JanganmobileTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
