@@ -12,13 +12,13 @@ cctv_fire_detection
 │   │       └── cctv.py        # CCTV 엔드포인트 관리
 │   │
 │   ├── core
-│   │   ├── config.py          # 환경 변수 및 설정
-│   │   └── utils.py           # 공통 유틸리티
+│   │   └── redis.py           # redis 클라이언트
 │   │
 │   ├── schemas
 │   │   └── cctv.py            # 입력 및 출력 Pydantic 스키마
 │   │
 │   ├── services
+|   │   ├── fire_report.py     # Spring 서버로 전달 + Redis 로직
 │   │   └── detection.py       # YOLO 모델 로딩 및 감지 로직 관리
 │   │
 │   └── main.py                # FastAPI 메인 실행파일
