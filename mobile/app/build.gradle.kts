@@ -70,4 +70,6 @@ dependencies {
 
     implementation("com.davidgyoungtech:beacon-parsers:1.0")
     implementation("org.altbeacon:android-beacon-library:2+")
+
+    implementation("io.coil-kt:coil-compose:2.4.0")
 }

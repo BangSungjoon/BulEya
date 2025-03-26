@@ -1,14 +1,12 @@
 package com.ssafy.jangan_mobile
 
-import android.content.ContentValues.TAG
-import android.content.pm.PackageManager
 import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothManager
+import android.content.ContentValues.TAG
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -20,56 +18,62 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.Firebase
 import com.google.firebase.FirebaseApp
-import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.messaging
+import com.google.gson.Gson
 import com.ssafy.jangan_mobile.service.PersistentService
+import com.ssafy.jangan_mobile.service.dto.FireNotificationDto
+import com.ssafy.jangan_mobile.store.FireNotificationStore
+import com.ssafy.jangan_mobile.ui.navigation.AppNavigation
 import com.ssafy.jangan_mobile.ui.theme.JanganmobileTheme
 
 class MainActivity : ComponentActivity() {
 
-    // 알림 권한 허용을 위한 객체
-    private val requestPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestPermission(),
-    ){ isGranted: Boolean ->
-        if(isGranted) {
-            Toast.makeText(baseContext, "알림이 허용되었습니다.", Toast.LENGTH_SHORT);
-        }else {
-            Toast.makeText(baseContext, "알림이 허용되지 않았습니다.", Toast.LENGTH_SHORT);
-        }
-    }
+    private val permissions = mutableListOf<String>().apply {
 
-
-    // 사용자에게 알림 권한 요청
-    private fun askNotificationPermission() {
-        // This is only necessary for API level >= 33 (TIRAMISU)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==
-                PackageManager.PERMISSION_GRANTED
-            ) {
-                // FCM SDK (and your app) can post notifications.
-            } else if (shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS)) {
-                // TODO: display an educational UI explaining to the user the features that will be enabled
-                //       by them granting the POST_NOTIFICATION permission. This UI should provide the user
-                //       "OK" and "No thanks" buttons. If the user selects "OK," directly request the permission.
-                //       If the user selects "No thanks," allow the user to continue without notifications.
-            } else {
-                // Directly ask for the permission
-                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            add(Manifest.permission.POST_NOTIFICATIONS)
+        }
+
+        add(Manifest.permission.ACCESS_FINE_LOCATION)
+        add(Manifest.permission.ACCESS_COARSE_LOCATION)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            add(Manifest.permission.BLUETOOTH_SCAN)
+            add(Manifest.permission.BLUETOOTH_CONNECT)
+            add(Manifest.permission.BLUETOOTH_ADVERTISE)
+        }
+    }.toTypedArray()
+
+    private val multiplePermissionsLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
+            result.entries.forEach { entry ->
+                Log.d("Permission", "${entry.key} : ${if (entry.value) "허용됨" else "거부됨"}")
+            }
+
+            // Background location 별도 요청!
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
+                ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+                backgroundLocationPermissionLauncher.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
             }
         }
+
+    private val backgroundLocationPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            Log.d("Permission", "Background Location: ${if (granted) "허용됨" else "거부됨"}")
+        }
+
+    private fun askPermissions() {
+        multiplePermissionsLauncher.launch(permissions)
     }
+
     // Notification 채널 생성
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -89,18 +93,16 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        val bluetoothManager = getSystemService(BluetoothManager::class.java)
-        val bluetoothAdapter = bluetoothManager.getAdapter()
+        val fromNotification = intent?.getBooleanExtra("fromNotification", false) == true
+        val jsonString = intent?.getStringExtra("notificationString")
+
+        if (fromNotification && jsonString != null) {
+            val dto = Gson().fromJson(jsonString, FireNotificationDto::class.java)
+            FireNotificationStore.setNotification(dto)
+        }
 
         setContent {
-            JanganmobileTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
-            }
+            AppNavigation(startFromNotification = fromNotification)
         }
 
         // firebase topic 구독
@@ -118,8 +120,8 @@ class MainActivity : ComponentActivity() {
         // 알람 채널 생성
         createNotificationChannel()
 
-        // 알림 권한 요청
-        askNotificationPermission()
+        // 권한 요청
+        askPermissions()
 
         // 백그라운드에서 동작
         val serviceIntent = Intent(this, PersistentService::class.java)
