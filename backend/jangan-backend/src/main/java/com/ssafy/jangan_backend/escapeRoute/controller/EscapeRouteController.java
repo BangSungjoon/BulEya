@@ -10,12 +10,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/escapeRoute")
+@RequestMapping("/api/escape-route")
 @RequiredArgsConstructor
 public class EscapeRouteController {
     private final EscapeRouteService escapeRouteService;
     @GetMapping()
-    public BaseResponse getEscaepRoute(@RequestParam Integer stationId, Integer beaconCode) {
+    public BaseResponse getEscaepRoute(@RequestParam("station_id") Integer stationId,
+                                       @RequestParam("beacon_code")Integer beaconCode) {
         EscapeRouteDto escapeRouteDto = escapeRouteService.getEscapeRoute(stationId, beaconCode);
         return BaseResponse.ok(escapeRouteDto);
     }
