@@ -46,7 +46,8 @@ public class MapService {
     }
 
     public List<MapDto> getMapListByStationId(Integer stationId) {
-        List<MapDto> mapList = mapRepository.findByStationId(stationId)
+        Station station = stationService.findByIdOrElseThrows(stationId);
+        List<MapDto> mapList = mapRepository.findByStationId(station.getId())
                 .stream()
                 .map(map -> MapDto.fromEntity(map))
                 .toList();

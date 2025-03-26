@@ -55,18 +55,9 @@ public class EdgeService {
 
     public void deleteEdge(RequestDeleteEdgeDto dto) {
         Integer edgeId = dto.getEdgeId();
-        try {
-            edgeRepository.deleteById(edgeId);
-        } catch (EmptyResultDataAccessException e) {
-            throw new CustomIllegalArgumentException(BaseResponseStatus.EDGE_NOT_FOUND_EXCEPTION);
-        }
+        Edge deletedEdge = edgeRepository.findById(edgeId)
+                .orElseThrow(() -> new CustomIllegalArgumentException(BaseResponseStatus.EDGE_NOT_FOUND_EXCEPTION));
+        edgeRepository.deleteById(deletedEdge.getId());
     }
 
-    public List<EdgeDto> getEdgeList(Integer beaconId) {
-        List<EdgeDto> edgeList = edgeRepository.findByBeaconAIdOrBeaconBId(beaconId, beaconId)
-                .stream()
-                .map(edge -> EdgeDto.fromEntity(edge))
-                .toList();
-        return edgeList;
-    }
 }

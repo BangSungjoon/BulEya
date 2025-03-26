@@ -2,8 +2,10 @@ package com.ssafy.jangan_backend.escapeRoute.service;
 
 import com.ssafy.jangan_backend.beacon.dto.BeaconDto;
 import com.ssafy.jangan_backend.beacon.entity.Beacon;
+import com.ssafy.jangan_backend.beacon.repository.BeaconQueryRepository;
 import com.ssafy.jangan_backend.beacon.service.BeaconService;
 import com.ssafy.jangan_backend.edge.dto.EdgeDto;
+import com.ssafy.jangan_backend.edge.repository.EdgeQueryRepository;
 import com.ssafy.jangan_backend.edge.service.EdgeService;
 import com.ssafy.jangan_backend.escapeRoute.dto.EscapeRouteDto;
 import com.ssafy.jangan_backend.firelog.entity.EscapeRoute;
@@ -19,9 +21,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class EscapeRouteService {
     private final MapService mapService;
-    private final EdgeService edgeService;
-    private final BeaconService  beaconService;
-
+    private final BeaconQueryRepository beaconQueryRepository;
+    private final EdgeQueryRepository edgeQueryRepository;
     //TODO : 최단경로 알고리즘 구현하기
     public EscapeRouteDto getEscapeRoute(Integer stationId, Integer beaconCode) {
         List<MapDto> mapList = mapService.getMapListByStationId(stationId);
@@ -38,14 +39,12 @@ public class EscapeRouteService {
         return null;
     }
     private List<BeaconDto> getBeaconListByMapId(List<MapDto> mapList) {
-        return mapList.stream()
-                .flatMap(mapDto -> beaconService.getBeaconList(mapDto.getId()).stream())
-                .toList();
+        List<Integer> mapIds = mapList.stream().map(MapDto::getId).toList();
+        return beaconQueryRepository.findByMapIds(mapIds);
     }
 
     private List<EdgeDto> getEdgeListByBeaconId(List<BeaconDto> beaconList) {
-        return beaconList.stream()
-                .flatMap(beaconDto -> edgeService.getEdgeList(beaconDto.getBeaconId()).stream())
-                .toList();
+        List<Integer> beaconIds = beaconList.stream().map(BeaconDto::getBeaconId).toList();
+        return edgeQueryRepository.findByBeaconIds(beaconIds);
     }
 }

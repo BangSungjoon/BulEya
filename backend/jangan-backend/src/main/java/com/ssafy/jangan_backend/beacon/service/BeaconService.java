@@ -5,6 +5,7 @@ import com.ssafy.jangan_backend.beacon.dto.request.RequestDeleteBeaconDto;
 import com.ssafy.jangan_backend.beacon.dto.request.RequestRegisterBeaconDto;
 import com.ssafy.jangan_backend.beacon.dto.response.ResponseBeaconIdDto;
 import com.ssafy.jangan_backend.beacon.entity.Beacon;
+import com.ssafy.jangan_backend.beacon.repository.BeaconQueryRepository;
 import com.ssafy.jangan_backend.beacon.repository.BeaconRepository;
 import com.ssafy.jangan_backend.common.exception.CustomIllegalArgumentException;
 import com.ssafy.jangan_backend.common.response.BaseResponseStatus;
@@ -20,6 +21,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BeaconService {
     private final BeaconRepository beaconRepository;
+    private final BeaconQueryRepository beaconQueryRepository;
     private final MapRepository mapRepository;
 
     public ResponseBeaconIdDto saveBeacon(RequestRegisterBeaconDto dto) {
@@ -38,18 +40,8 @@ public class BeaconService {
 
     public void deleteBeacon(RequestDeleteBeaconDto dto) {
         Integer beaconId = dto.getBeaconId();
-        try {
-            beaconRepository.deleteById(beaconId);
-        } catch (EmptyResultDataAccessException e) {
-            throw new CustomIllegalArgumentException(BaseResponseStatus.BEACON_NOT_FOUND_EXCEPTION);
-        }
-    }
-
-    public List<BeaconDto> getBeaconList(int mapId) {
-        List<BeaconDto> beaconList = beaconRepository.findByMapId(mapId)
-                .stream()
-                .map(beacon -> BeaconDto.fromEntity(beacon))
-                .toList();
-        return beaconList;
+        Beacon deletedBeacon = beaconRepository.findById(beaconId)
+                .orElseThrow(() -> new CustomIllegalArgumentException(BaseResponseStatus.BEACON_NOT_FOUND_EXCEPTION));
+        beaconRepository.deleteById(deletedBeacon.getId());
     }
 }

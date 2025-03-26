@@ -3,6 +3,7 @@ package com.ssafy.jangan_backend.firelog.service;
 import java.util.*;
 
 import com.ssafy.jangan_backend.firelog.dto.*;
+import com.ssafy.jangan_backend.station.service.StationService;
 import io.minio.MinioClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -40,16 +41,15 @@ public class FirelogService {
 	private final EscapeRouteRepository escapeRouteRepository;
 	private final FcmUtil fcmUtil;
 	private final MinioUtil minioUtil;
+
+	private final StationService stationService;
 	@Value("${minio.bucket.name}")
 	private String bucketName;
 
 	@Transactional
 	public void reportFire(FireReportDto fireReportDto, MultipartFile[] files) throws CustomIllegalArgumentException {
 		int stationId = fireReportDto.getStationId();
-		Optional<Station> stationOptional = stationRepository.findById(stationId);
-		if(stationOptional.isEmpty())
-			throw new CustomIllegalArgumentException(BaseResponseStatus.STATION_NOT_FOUND_EXCEPTION);
-
+		Station station = stationService.findByIdOrElseThrows(stationId);
 		// 지나갈 수 없는 비콘 목록
 		TreeSet<Integer> dangerBeacons = new TreeSet<>();
 
@@ -65,7 +65,6 @@ public class FirelogService {
 		// 화재 상태 변경 여부
 		boolean isChanged = false;
 		//boolean isOnFire = false;
-		Station station = stationOptional.get();
 
 		// 파일명 가져오기
 		TreeMap<Integer, MultipartFile> fileNameMap = new TreeMap<>();
@@ -127,7 +126,7 @@ public class FirelogService {
 			}
 		}
 		if(isChanged){ // 상태 변화 감지 시 최단 경로 계산
-			EscapeRoute escapeRoute = dijkstraAllNodes(stationOptional.get(), beaconList, dangerBeacons);
+			EscapeRoute escapeRoute = dijkstraAllNodes(station, beaconList, dangerBeacons);
 			escapeRouteRepository.deleteById(stationId);
 			escapeRouteRepository.save(escapeRoute);
 			System.out.println("isChanged.");
@@ -219,6 +218,7 @@ public class FirelogService {
 	}
 
 	public FireImageDto getFireImageDto(int stationId, int beaconCode){
+		Station station = stationService.findByIdOrElseThrows(stationId);
 		// stationId와 비콘 코드로 비콘 찾기
 		List<Integer> mapIdList = mapRepository.findByStationId(stationId)
 				.stream()

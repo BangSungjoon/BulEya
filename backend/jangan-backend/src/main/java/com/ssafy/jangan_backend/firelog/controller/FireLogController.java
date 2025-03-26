@@ -19,9 +19,9 @@ public class FireLogController {
 	private final FirelogService firelogService;
 
 	@PostMapping("/fire-report")
-	public ResponseEntity<?> reportFire(@RequestPart("fireReportDto") FireReportDto fireReportDto, @RequestPart("files") MultipartFile[] files){
+	public BaseResponse reportFire(@RequestPart("fireReportDto") FireReportDto fireReportDto, @RequestPart("files") MultipartFile[] files){
 		firelogService.reportFire(fireReportDto, files);
-		return ResponseEntity.status(HttpStatus.OK).build();
+		return BaseResponse.ok();
 	}
 
 	@GetMapping("cctv-image")
