@@ -1,13 +1,10 @@
 package com.ssafy.jangan_backend.firelog.service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
-import java.util.PriorityQueue;
-import java.util.TreeMap;
-import java.util.TreeSet;
+import java.util.*;
 
+import com.ssafy.jangan_backend.firelog.dto.*;
+import io.minio.MinioClient;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,10 +18,6 @@ import com.ssafy.jangan_backend.common.util.FcmUtil;
 import com.ssafy.jangan_backend.common.util.MinioUtil;
 import com.ssafy.jangan_backend.edge.entity.Edge;
 import com.ssafy.jangan_backend.edge.repository.EdgeRepository;
-import com.ssafy.jangan_backend.firelog.dto.BeaconFireInfoDto;
-import com.ssafy.jangan_backend.firelog.dto.FireNotificationDto;
-import com.ssafy.jangan_backend.firelog.dto.FireReportDto;
-import com.ssafy.jangan_backend.firelog.dto.RouteNodeDto;
 import com.ssafy.jangan_backend.firelog.entity.EscapeRoute;
 import com.ssafy.jangan_backend.firelog.entity.FireLog;
 import com.ssafy.jangan_backend.firelog.repository.EscapeRouteRepository;
@@ -47,6 +40,8 @@ public class FirelogService {
 	private final EscapeRouteRepository escapeRouteRepository;
 	private final FcmUtil fcmUtil;
 	private final MinioUtil minioUtil;
+	@Value("${minio.bucket.name}")
+	private String bucketName;
 
 	@Transactional
 	public void reportFire(FireReportDto fireReportDto, MultipartFile[] files) throws CustomIllegalArgumentException {
@@ -69,7 +64,7 @@ public class FirelogService {
 
 		// 화재 상태 변경 여부
 		boolean isChanged = false;
-		boolean isOnFire = false;
+		//boolean isOnFire = false;
 		Station station = stationOptional.get();
 
 		// 파일명 가져오기
@@ -101,24 +96,24 @@ public class FirelogService {
 					continue;
 
 				// 진행중이던 화재 진압됨
-				MultipartFile file = fileNameMap.get(beacon.getBeaconCode());
-				String fileName = minioUtil.uploadFile(fileNameMap.get(beacon.getBeaconCode()), MinioUtil.BUCKET_IMAGELOGS);
+				// MultipartFile file = fileNameMap.get(beacon.getBeaconCode());
+				// String fileName = minioUtil.uploadFile(fileNameMap.get(beacon.getBeaconCode()), MinioUtil.BUCKET_IMAGELOGS);
 				FireLog fireLog = FireLog.builder()
 					.isActiveFire(false)
 					.beaconId(beacon.getId())
-					.imageUrl(fileName)
+					.imageName(null)
 					.build();
 				firelogRepository.save(fireLog);
 				isChanged = true;
 			}else{ // 화재 상태
-				isOnFire = true;
+				//isOnFire = true;
 				dangerBeacons.add(fireInfo.getBeaconCode());
 				MultipartFile file = fileNameMap.get(beacon.getBeaconCode());
 				String fileName = minioUtil.uploadFile(fileNameMap.get(beacon.getBeaconCode()), MinioUtil.BUCKET_IMAGELOGS);
 				FireLog fireLog = FireLog.builder()
 					.isActiveFire(true)
 					.beaconId(beacon.getId())
-					.imageUrl(fileName)
+					.imageName(fileName)
 					.build();
 				firelogRepository.save(fireLog);
 				// 신규 발생한 화재인 경우
@@ -134,10 +129,8 @@ public class FirelogService {
 			escapeRouteRepository.deleteById(stationId);
 			escapeRouteRepository.save(escapeRoute);
 			System.out.println("isChanged.");
-			if(isOnFire){ // 화재 진행 중이면 모바일 알람 전송
-				fcmUtil.sendMessage(fireNotificationDto);
-				System.out.println("isOnFire.");
-			}
+			fcmUtil.sendMessage(fireNotificationDto);
+			System.out.println("isOnFire.");
 		}
 	}
 
@@ -221,5 +214,24 @@ public class FirelogService {
 			}
 		}
 		return escapeRoute;
+	}
+
+	public FireImageDto getFireImageDto(int stationId, int beaconCode){
+		// stationId와 비콘 코드로 비콘 찾기
+		List<Integer> mapIdList = mapRepository.findByStationId(stationId)
+				.stream()
+				.map(Map::getId)
+				.toList();
+		Beacon beacon = beaconRepository.findByMapIdInAndBeaconCode(mapIdList, beaconCode)
+				.orElseThrow(() -> new CustomIllegalArgumentException(BaseResponseStatus.BEACON_NOT_FOUND_EXCEPTION));
+
+		// 가장 최신의 fireLog 리스트를 찾기
+		FireLog latestFireLog = firelogRepository.findFirstByBeaconIdOrderByCreatedAtDesc(beacon.getId())
+				.orElseThrow(() -> new CustomIllegalArgumentException(BaseResponseStatus.FIRE_LOG_NOT_FOUND_EXCEPTION));
+		String imageName = latestFireLog.getImageName();
+		if(imageName == null || imageName.isEmpty()) {
+			throw new CustomIllegalArgumentException(BaseResponseStatus.FIRE_LOG_NOT_FOUND_EXCEPTION);
+		}
+		return new FireImageDto(imageName);
 	}
 }

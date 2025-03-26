@@ -17,7 +17,7 @@ public class FireLog {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    private String imageUrl;
+    private String imageName;
 
     @Column(nullable = false)
     private Boolean isActiveFire;

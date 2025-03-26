@@ -33,7 +33,10 @@ public class EdgeService {
         Integer beaconBCode = dto.getBeaconBCode();
 
         // station의 모든 map의 Id를 리스트로 변환
-        List<Integer> mapIdList = mapRepository.findByStationId(stationId).stream().map(Map::getId).toList();
+        List<Integer> mapIdList = mapRepository.findByStationId(stationId)
+                .stream()
+                .map(Map::getId)
+                .toList();
 
         // beaconA와 beaconB 찾기
         Beacon beaconA = beaconRepository.findByMapIdInAndBeaconCode(mapIdList, beaconACode)
