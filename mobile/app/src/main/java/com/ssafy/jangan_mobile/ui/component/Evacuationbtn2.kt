@@ -21,15 +21,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.ssafy.jangan_mobile.ui.theme.Subtitle1
 import com.ssafy.jangan_mobile.ui.theme.primaryColor
 
-
 @Composable
-fun EvacuationButton() {
+fun EvacuationButton2() {
     var isGuiding by remember { mutableStateOf(false) } // ✅ 상태 기억 (안내 중인지 여부)
 
     Box(
         modifier = Modifier
             .width(380.dp)
-            .background(color = Color.Black, shape = RoundedCornerShape(20.dp))
+            .background(color = primaryColor, shape = RoundedCornerShape(20.dp))
             .clickable { isGuiding = !isGuiding } // ✅ 클릭 시 상태 변경
             .padding(24.dp), // 내부 패딩으로 버튼 높이 조절
         contentAlignment = Alignment.Center
@@ -37,50 +36,11 @@ fun EvacuationButton() {
         Text(
             text = if (isGuiding) "안내 종료하기" else "대피 경로 찾기", // ✅ 클릭에 따라 문구 변경
             style = Subtitle1,
-            color = primaryColor,
+            color = Color.Black,
             textAlign = TextAlign.Center
         )
     }
 }
-
-
-@Preview(showBackground = true, name = "Evacuation Button")
-@Composable
-fun PreviewEvacuationButton() {
-    EvacuationButton()
-}
-
-
-
-// 버튼 클릭 반영 안했을 때
-//@Composable
-//fun EvacuationButton(
-//    text: String = "대피 경로 찾기",
-////    isActive: Boolean = false, // 🔥 버튼 상태 (false: 검은색, true: 연두색)
-//    onClick: () -> Unit
-//) {
-//    Box(
-//        modifier = Modifier
-//            .width(380.dp)
-//            .background(color = Color.Black, shape = RoundedCornerShape(20.dp))
-//            .clickable { onClick() } // ✅ 클릭 이벤트 적용
-//            .padding(24.dp),
-//        contentAlignment = Alignment.Center
-//    ) {
-//        Text(
-//            text = text,
-//            style = Subtitle1,
-//            color = primaryColor,
-//            textAlign = TextAlign.Center
-//        )
-//    }
-//}
-
-//@Preview(showBackground = true, name = "Evacuation Button")
-//@Composable
-//fun PreviewEvacuationButton() {
-//    EvacuationButton(onClick = { /* no-op */ })
-//}
 
 
 // 높이가 낮은 높이로 미리 정하면 이미 있는 내부 패딩에 글자가 눌려보일 수 있음 -> 패딩으로 높이를 줘야 함.
