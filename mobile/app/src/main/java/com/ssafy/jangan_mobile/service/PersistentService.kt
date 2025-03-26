@@ -9,9 +9,18 @@ import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
+import android.util.Log
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 // 백그라운드에서 앱이 실행되도록 하는 서비스
 class PersistentService : Service() {
+
+    private val serviceScope = CoroutineScope(Dispatchers.Default + Job())
 
     override fun onBind(intent: Intent?): IBinder? {
         return null
@@ -44,5 +53,17 @@ class PersistentService : Service() {
 
     private fun startSomeBackgroundWork() {
         // TODO: 백그라운드에서 돌아갈 작업들 넣기
+        serviceScope.launch {
+            while(true){
+                // 무한반복으로 처리할 작업
+                Log.d("", "background running...")
+                delay(1000)
+            }
+        }
+    }
+
+    override fun onDestroy(){
+        super.onDestroy()
+        serviceScope.cancel()
     }
 }
