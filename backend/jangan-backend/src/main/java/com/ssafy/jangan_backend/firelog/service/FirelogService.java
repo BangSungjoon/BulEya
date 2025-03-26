@@ -78,8 +78,10 @@ public class FirelogService {
 			for (MultipartFile file : files) {
 				String fileName = file.getOriginalFilename();
 				int dotIndex = fileName.lastIndexOf('.');
-				fileName = fileName.substring(0, dotIndex);
-				fileNameMap.put(Integer.parseInt(fileName), file);
+				if(dotIndex > 0) {
+					fileName = fileName.substring(0, dotIndex);
+					fileNameMap.put(Integer.parseInt(fileName), file);
+				}
 			}
 		}
 
