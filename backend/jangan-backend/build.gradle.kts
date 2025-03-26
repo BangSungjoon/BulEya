@@ -36,6 +36,12 @@ dependencies {
 
 	implementation("com.google.firebase:firebase-admin:9.4.3")
 	implementation("org.springframework.boot:spring-boot-starter-data-redis")
+
+	//QueryDSL 설정
+	val querydslVersion = "5.1.0"
+	implementation("com.querydsl:querydsl-jpa:${querydslVersion}:jakarta")
+	annotationProcessor("com.querydsl:querydsl-apt:${querydslVersion}:jakarta")
+	annotationProcessor("jakarta.persistence:jakarta.persistence-api")
 }
 
 tasks.withType<Test> {

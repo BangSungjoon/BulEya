@@ -8,7 +8,9 @@ import com.ssafy.jangan_backend.edge.entity.Edge;
 import lombok.*;
 
 @Getter
+@Setter
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
 @ToString
 public class EdgeDto {

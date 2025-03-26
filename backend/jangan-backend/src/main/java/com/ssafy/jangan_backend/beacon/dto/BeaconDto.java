@@ -6,6 +6,7 @@ import com.ssafy.jangan_backend.map.entity.Map;
 import lombok.*;
 
 @Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
