@@ -27,7 +27,6 @@ public class LocationService {
     public List<ResponseWebAdminMapDto> getMapsForWebAdmin(Integer stationId) {
         List<ResponseWebAdminMapDto> dtoList = new ArrayList<>();
         List<Map> mapList = mapRepository.findByStationId(stationId); //조회하려는 역 아이디의 평면도 전체 조회
-        //TODO : 비콘조회를 Map수만큼 하지말고, mapId를 추출 후 한번에 조회하도록 바꾸기
         for(Map map : mapList) {
             String imageURL = minioUtil.getPresignedUrl(map.getBucketName(), map.getImageName()); //평면도의 url
             //한 층에 해당하는 비콘들 조회
