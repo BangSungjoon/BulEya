@@ -3,12 +3,14 @@ package com.ssafy.jangan_backend.escapeRoute.controller;
 import com.ssafy.jangan_backend.common.response.BaseResponse;
 import com.ssafy.jangan_backend.escapeRoute.dto.EscapeRouteDto;
 import com.ssafy.jangan_backend.escapeRoute.service.EscapeRouteService;
+import io.swagger.v3.oas.annotations.Hidden;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+@Hidden
 @RestController
 @RequestMapping("/api/escape-route")
 @RequiredArgsConstructor

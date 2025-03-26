@@ -7,6 +7,7 @@ import com.ssafy.jangan_backend.common.response.BaseResponse;
 import com.ssafy.jangan_backend.common.util.FcmUtil;
 import com.ssafy.jangan_backend.edge.dto.EdgeDto;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+@Hidden
 @RestController
 @RequestMapping("/api/test")
 @RequiredArgsConstructor
