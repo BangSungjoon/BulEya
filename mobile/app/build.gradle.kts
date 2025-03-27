@@ -76,4 +76,8 @@ dependencies {
     implementation("org.altbeacon:android-beacon-library:2+")
     implementation("com.github.bumptech.glide:glide:4.16.0")
     kapt("com.github.bumptech.glide:compiler:4.16.0") // ✅ Glide 컴파일러 추가
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0") // JSON 변환기 추가
+    //implementation("com.mapbox.maps:android:10.15.1") //MapBox 라이브러리 추가
+   // implementation ("com.mapbox.mapboxsdk:mapbox-android-plugin-annotation-v9:0.9.0") //Mapbox Annotation Plugin 추가
 }

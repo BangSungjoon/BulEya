@@ -8,6 +8,19 @@ pluginManagement {
             }
         }
         mavenCentral()
+
+        // ✅ Mapbox 저장소 추가
+        maven {
+            url = uri("https://api.mapbox.com/downloads/v2/releases/maven")
+            credentials {
+                username = "mapbox"
+                password = providers.gradleProperty("MAPBOX_DOWNLOADS_TOKEN").orNull ?: ""
+            }
+            authentication {
+                create<BasicAuthentication>("basic")
+            }
+        }
+
         gradlePluginPortal()
     }
 }
