@@ -6,8 +6,6 @@ import 'mapbox-gl/dist/mapbox-gl.css'
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN
 
 const MapBoxMap = ({ mode, mapImageUrl }) => {
-  console.log('[🗺️ 지도 url]', mapImageUrl)
-
   // 지도 컨테이너 요소를 참조할 ref
   const mapContainer = useRef(null)
   // Mapbox의 Map 객체를 저장할 ref (재렌더링 방지)
@@ -51,14 +49,18 @@ const MapBoxMap = ({ mode, mapImageUrl }) => {
         layers: [],
       },
       center: convertPixelToLngLat(imageWidth / 2, imageHeight / 2, imageWidth, imageHeight), // 중앙 위치
-      zoom: 0.8,
+      zoom: 1.0,
+      maxZoom: 8.0, // 최대 줌 (더 가까이 못 가게)
       pitch: 0, // 위에서 수직으로 보기
       bearing: 0, // 회전 없음
       interactive: true,
       dragRotate: true,
       renderWorldCopies: false, // 지도 반복 방지
+      maxBounds: [
+        [left, bottom],
+        [right, top],
+      ],
     })
-    console.log('[🗺️ 지도 최초 생성]')
   }, [])
 
   // 2. mapImageUrl이 바뀔 때마다 지도에 이미지 갱신
@@ -103,7 +105,7 @@ const MapBoxMap = ({ mode, mapImageUrl }) => {
 
       // 지도 중심 재설정 (안 해도 되지만 UX상 편리함)
       map.setCenter(convertPixelToLngLat(imageWidth / 2, imageHeight / 2, imageWidth, imageHeight))
-      map.setZoom(0.8)
+      map.setZoom(1.0)
     }
 
     // 스타일이 이미 로드되었다면 바로 추가

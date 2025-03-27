@@ -25,8 +25,6 @@ export default function MapPage() {
         // is_success에 따른 에러 처리 필요
         const data = response.data.result
 
-        console.log('[✅ API 응답]', response.data)
-
         setFloorDataList(data)
         setSelectedFloor(data[0].floor) // 첫 번째 층이 기본
       } catch (error) {
@@ -39,7 +37,6 @@ export default function MapPage() {
 
   // 현재 선택된 층에 해당하는 데이터 추출
   let selectedData = floorDataList.find((f) => f.floor === selectedFloor)
-  console.log('[🧩 선택된 층 데이터]', selectedData)
 
   return (
     <div className="relative h-full w-full">
