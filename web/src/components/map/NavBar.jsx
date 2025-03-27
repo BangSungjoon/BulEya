@@ -1,12 +1,15 @@
 import React from 'react'
 
 // NavBar
-// props: items -> 메뉴 리스트, activeItem -> 현재 선택된 메뉴, onSelect -> 메뉴 선택시 호출되는 함수
+// props:
+// - items: {id, icon, label} 객체들의 배열
+// - activeItem: 현재 선택된 메뉴의 id
+// - onSelect: 메뉴 클릭 시 실행할 콜백 함수
 export default function NavBar({ items, activeItem, onSelect }) {
   return (
     <nav aria-label="Navigation Bar" className="h-screen w-20 bg-gray-600">
       <div className="flex h-full w-full flex-col gap-4">
-        {/* 로고 */}
+        {/* 로고 영역 (클릭 시 기본 상태로 이동: map) */}
         <div
           id="logo"
           className="flex h-20 w-full items-center justify-center text-gray-100"
@@ -14,6 +17,7 @@ export default function NavBar({ items, activeItem, onSelect }) {
         >
           로고
         </div>
+
         {/* 메뉴 리스트 */}
         <ul>
           {items.map((item) => {
@@ -29,7 +33,9 @@ export default function NavBar({ items, activeItem, onSelect }) {
                   aria-current={isActive ? 'page' : undefined}
                 >
                   <item.icon className="h-6 w-6" />
-                  <span className="bg-primary text-body-2 pointer-events-none absolute top-1/2 left-full mx-1 w-full -translate-y-1/2 scale-0 rounded-sm whitespace-nowrap text-gray-600 transition-all group-hover:scale-100">
+
+                  {/* 툴팁 (hover 시 보임) */}
+                  <span className="bg-primary text-body-2 pointer-events-none absolute top-1/2 left-full z-10 mx-2 w-full -translate-y-1/2 scale-0 rounded-sm whitespace-nowrap text-gray-600 transition-all group-hover:scale-100">
                     {item.label}
                   </span>
                 </button>

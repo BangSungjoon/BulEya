@@ -1,3 +1,4 @@
+import { useLocation } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import MapBoxMap from '@/components/map/MapBoxMap'
 // import { IconBoxModal } from '@/components/map/IconBoxModal'
@@ -5,7 +6,10 @@ import MapBoxMap from '@/components/map/MapBoxMap'
 // api 요청
 import { fetchMapImage } from '@/api/axios'
 
-export default function MapPage({ mode }) {
+export default function MapPage() {
+  const location = useLocation()
+  const mode = location.pathname.replace('/', '') || 'map'
+
   const [mapImageUrl, setMapImageUrl] = useState(null)
   const stationId = 222 // 역사 번호 입력 페이지 구현 후 변경 필요
 
