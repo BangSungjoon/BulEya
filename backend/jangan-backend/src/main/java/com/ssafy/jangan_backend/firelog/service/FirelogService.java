@@ -122,7 +122,7 @@ public class FirelogService {
 			}
 		}
 		if(isChanged){ // 상태 변화 감지 시 최단 경로 계산
-			EscapeRoute escapeRoute = escapeRouteService.findEscapeRoute(station, beaconList, dangerBeacons);
+			EscapeRoute escapeRoute = escapeRouteService.calculateEscapeRoute(station, beaconList, dangerBeacons);
 			escapeRouteRepository.deleteById(stationId);
 			escapeRouteRepository.save(escapeRoute);
 			System.out.println("isChanged.");

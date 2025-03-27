@@ -5,7 +5,9 @@ import com.ssafy.jangan_backend.edge.entity.Edge;
 import com.ssafy.jangan_backend.edge.repository.EdgeRepository;
 import com.ssafy.jangan_backend.escapeRoute.dto.RouteNodeDto;
 import com.ssafy.jangan_backend.escapeRoute.entity.EscapeRoute;
+import com.ssafy.jangan_backend.escapeRoute.repository.EscapeRouteRepository;
 import com.ssafy.jangan_backend.station.entity.Station;
+import com.ssafy.jangan_backend.station.service.StationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +17,13 @@ import java.util.*;
 @RequiredArgsConstructor
 public class EscapeRouteService {
     private final EdgeRepository edgeRepository;
+    private final EscapeRouteRepository escapeRouteRepository;
+    private final StationService stationService;
+    public List<EscapeRoute> findEscapeRoute(Integer stationId, Integer beaconCode) {
+        Station station = stationService.findByIdOrElseThrows(stationId);
+
+        return null;
+    }
     private static class Route implements Comparable<Route>{
         int pos;
         int distance;
@@ -41,7 +50,7 @@ public class EscapeRouteService {
      * 다익스트라 알고리즘을 사용하여
      * 모든 출구로부터 각 정점까지의 최단 거리 계산
      */
-    public EscapeRoute findEscapeRoute(Station station, List<Beacon> beaconList, TreeSet<Integer> dangerBeacons){
+    public EscapeRoute calculateEscapeRoute(Station station, List<Beacon> beaconList, TreeSet<Integer> dangerBeacons){
         EscapeRoute escapeRoute = new EscapeRoute();
 
         Integer stationId = station.getId();
