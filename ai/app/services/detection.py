@@ -38,7 +38,11 @@ async def analyze_images(file_dict: dict, cctv_list: list):
             if detect_fire(results_m):
                 print('2차 감지 됨')
                 # 화재 확정
-                fire_images[beacon_code] = image_data
+                fire_images[beacon_code] = {
+                    "filename": upload_file.filename,
+                    "content_type": upload_file.content_type,
+                    "data": image_data
+                }
                 fire_beacons.append(beacon_code)
 
     return fire_images, fire_beacons
