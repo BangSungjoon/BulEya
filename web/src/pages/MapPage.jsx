@@ -1,6 +1,9 @@
 import { useLocation } from 'react-router-dom'
 import { useEffect, useState } from 'react'
+
+// 컴포넌트
 import MapBoxMap from '@/components/map/MapBoxMap'
+import FloorNavigator from '@/components/map/FloorNavigator'
 // import { IconBoxModal } from '@/components/map/IconBoxModal'
 
 // api 요청
@@ -9,41 +12,45 @@ import { fetchMapImage } from '@/api/axios'
 export default function MapPage() {
   const location = useLocation()
   const mode = location.pathname.replace('/', '') || 'map'
-
-  const [mapImageUrl, setMapImageUrl] = useState(null)
   const stationId = 222 // 역사 번호 입력 페이지 구현 후 변경 필요
 
+  const [floorDataList, setFloorDataList] = useState([]) // 전체 응답 저장
+  const [selectedFloor, setSelectedFloor] = useState(null) // 선택된 층 번호
+
+  // API 호출
   useEffect(() => {
-    const loadImageUrl = async () => {
+    const loadFloorData = async () => {
       try {
         const response = await fetchMapImage(stationId)
-        console.log('API 응답:', response.data)
+        // is_success에 따른 에러 처리 필요
+        const data = response.data.result
 
-        setMapImageUrl(response.data.result[0].image_url) // 응답을 바탕으로 setMapImageUrl 설정 (일단 B1층 지도만 가져옴, 추후 변경 필요요)
-        console.log(response.data.result[0].image_url)
-        console.log('지도', mapImageUrl)
+        console.log('[✅ API 응답]', response.data)
+
+        setFloorDataList(data)
+        setSelectedFloor(data[0].floor) // 첫 번째 층이 기본
       } catch (error) {
-        console.error('지도 불러오기 실패 : ', error)
+        console.error('지도 데이터 로드 실패: ', error)
       }
     }
 
-    loadImageUrl()
-    console.log('[imageUrl]', mapImageUrl)
+    loadFloorData()
   }, [stationId])
 
-  useEffect(() => {
-    console.log('이미지 URL:', mapImageUrl)
-    const img = new Image()
-    img.src = mapImageUrl
-    img.onload = () => {
-      console.log('이미지 사이즈:', img.naturalWidth, img.naturalHeight)
-    }
-  }, [mapImageUrl])
+  // 현재 선택된 층에 해당하는 데이터 추출
+  let selectedData = floorDataList.find((f) => f.floor === selectedFloor)
+  console.log('[🧩 선택된 층 데이터]', selectedData)
 
   return (
-    <div className="h-full w-full">
-      {/* 지도 항상 보여줌 */}
-      <MapBoxMap mode={mode} mapImageUrl={mapImageUrl} />
+    <div className="relative h-full w-full">
+      {/* 지도 렌더링 */}
+      {selectedData && <MapBoxMap mode={mode} mapImageUrl={selectedData.image_url} />}
+      {/* 층 선택 UI */}
+      <FloorNavigator
+        floors={floorDataList.map((f) => f.floor)}
+        selected={selectedFloor}
+        onSelect={(floor) => setSelectedFloor(floor)}
+      />
     </div>
   )
 }
