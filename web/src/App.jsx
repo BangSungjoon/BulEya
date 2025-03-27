@@ -35,7 +35,7 @@ function App() {
       <NavBar items={navItems} activeItem={selected} onSelect={setSelected} />
 
       {/* 본문 */}
-      <main className="ml-6 p-4">
+      <main className="ml-6 h-full w-full p-4">
         <MapPage mode={selected} />
       </main>
     </div>
