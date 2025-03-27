@@ -27,7 +27,8 @@ public class FireLogController {
 			description = "화재 감지 시 로그 기록/ 화재 감지 시 알림/ 화재 감지 시 최단경로 계산"
 	)
 	@PostMapping("/fire-report")
-	public BaseResponse reportFire(@RequestPart("fireReportDto") FireReportDto fireReportDto, @RequestPart("files") MultipartFile[] files){
+	public BaseResponse reportFire(@RequestPart("json") FireReportDto fireReportDto,
+								   @RequestPart("files") MultipartFile[] files){
 		firelogService.reportFire(fireReportDto, files);
 		return BaseResponse.ok();
 	}

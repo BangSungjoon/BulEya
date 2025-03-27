@@ -1,6 +1,7 @@
 package com.ssafy.jangan_backend.escapeRoute.controller;
 
 import com.ssafy.jangan_backend.common.response.BaseResponse;
+import com.ssafy.jangan_backend.escapeRoute.dto.RouteNodeDto;
 import com.ssafy.jangan_backend.escapeRoute.entity.EscapeRoute;
 import com.ssafy.jangan_backend.escapeRoute.service.EscapeRouteService;
 import io.swagger.v3.oas.annotations.Hidden;
@@ -21,7 +22,7 @@ public class EscapeRouteController {
     @GetMapping()
     public BaseResponse getEscaepRoute(@RequestParam("station_id") Integer stationId,
                                        @RequestParam("beacon_code")Integer beaconCode) {
-        List<EscapeRoute> escapeRouteDto = escapeRouteService.findEscapeRoute(stationId, beaconCode);
-        return BaseResponse.ok(escapeRouteDto);
+        List<RouteNodeDto> routeNodeDtoList = escapeRouteService.findEscapeRoute(stationId, beaconCode);
+        return BaseResponse.ok(routeNodeDtoList);
     }
 }
