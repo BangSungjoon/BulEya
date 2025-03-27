@@ -2,9 +2,9 @@ package com.ssafy.jangan_backend.firelog.service;
 
 import java.util.*;
 
+import com.ssafy.jangan_backend.escapeRoute.service.EscapeRouteService;
 import com.ssafy.jangan_backend.firelog.dto.*;
 import com.ssafy.jangan_backend.station.service.StationService;
-import io.minio.MinioClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,30 +17,26 @@ import com.ssafy.jangan_backend.common.exception.CustomIllegalArgumentException;
 import com.ssafy.jangan_backend.common.response.BaseResponseStatus;
 import com.ssafy.jangan_backend.common.util.FcmUtil;
 import com.ssafy.jangan_backend.common.util.MinioUtil;
-import com.ssafy.jangan_backend.edge.entity.Edge;
-import com.ssafy.jangan_backend.edge.repository.EdgeRepository;
-import com.ssafy.jangan_backend.firelog.entity.EscapeRoute;
+import com.ssafy.jangan_backend.escapeRoute.entity.EscapeRoute;
 import com.ssafy.jangan_backend.firelog.entity.FireLog;
-import com.ssafy.jangan_backend.firelog.repository.EscapeRouteRepository;
+import com.ssafy.jangan_backend.escapeRoute.repository.EscapeRouteRepository;
 import com.ssafy.jangan_backend.firelog.repository.FirelogRepository;
 import com.ssafy.jangan_backend.map.entity.Map;
 import com.ssafy.jangan_backend.map.repository.MapRepository;
 import com.ssafy.jangan_backend.station.entity.Station;
-import com.ssafy.jangan_backend.station.repository.StationRepository;
 
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Service
 public class FirelogService {
-	private final StationRepository stationRepository;
 	private final MapRepository mapRepository;
 	private final BeaconRepository beaconRepository;
 	private final FirelogRepository firelogRepository;
-	private final EdgeRepository edgeRepository;
 	private final EscapeRouteRepository escapeRouteRepository;
 	private final FcmUtil fcmUtil;
 	private final MinioUtil minioUtil;
+	private final EscapeRouteService escapeRouteService;
 
 	private final StationService stationService;
 	@Value("${minio.bucket.name}")
@@ -126,7 +122,7 @@ public class FirelogService {
 			}
 		}
 		if(isChanged){ // 상태 변화 감지 시 최단 경로 계산
-			EscapeRoute escapeRoute = dijkstraAllNodes(station, beaconList, dangerBeacons);
+			EscapeRoute escapeRoute = escapeRouteService.findEscapeRoute(station, beaconList, dangerBeacons);
 			escapeRouteRepository.deleteById(stationId);
 			escapeRouteRepository.save(escapeRoute);
 			System.out.println("isChanged.");
@@ -135,87 +131,6 @@ public class FirelogService {
 		}
 	}
 
-	private static class Route implements Comparable<Route>{
-		int pos;
-		int distance;
-		List<RouteNodeDto> way;
-		Route(Beacon beacon, int distance){
-			this.pos = beacon.getBeaconCode();
-			this.distance = distance;
-			way = new ArrayList<>();
-			way.add(new RouteNodeDto(beacon.getBeaconCode(), beacon.getMap().getFloor(), beacon.getCoordX(), beacon.getCoordY()));
-
-		}
-		Route(Beacon beacon, int distance, List<RouteNodeDto> way){
-			this(beacon, distance);
-			this.way = new ArrayList<>(way);
-			this.way.add(new RouteNodeDto(beacon.getBeaconCode(), beacon.getMap().getFloor(), beacon.getCoordX(), beacon.getCoordY()));
-		}
-		@Override
-		public int compareTo(Route route){
-			return distance - route.distance;
-		}
-	}
-
-	// 모든 출구로부터 각 정점까지의 최단 거리 계산
-	private EscapeRoute dijkstraAllNodes(Station station, List<Beacon> beaconList, TreeSet<Integer> dangerBeacons){
-		EscapeRoute escapeRoute = new EscapeRoute();
-
-		Integer stationId = station.getId();
-		escapeRoute.setStationId(stationId);
-
-
-		// 각 비콘과 연결된 모든 간선 리스트
-		List<Edge> edgeList = edgeRepository.findByBeaconAIdIn(beaconList.stream().map(Beacon::getId).toList());
-		// 모든 출구 비콘 리스트
-		List<Beacon> exitList = beaconList.stream().filter(Beacon::getIsExit).toList();
-
-		HashMap<Integer, List<Edge>> graph = new HashMap<>();
-		HashMap<Integer, Integer> dist = new HashMap<>();
-
-		// 다익스트라 초기화
-		for(Beacon beacon : beaconList){
-			dist.put(beacon.getBeaconCode(), Integer.MAX_VALUE);
-			graph.put(beacon.getBeaconCode(), new ArrayList<>());
-		}
-		for(Edge edge : edgeList){
-			Beacon A = edge.getBeaconA();
-			Beacon B = edge.getBeaconB();
-			if(dangerBeacons.contains(A.getBeaconCode()) || dangerBeacons.contains(B.getBeaconCode()))
-				continue;
-			graph.get(A.getBeaconCode()).add(edge);
-		}
-		PriorityQueue<Route> pq = new PriorityQueue<>();
-		for(Beacon beacon : exitList){
-			dist.put(beacon.getBeaconCode(), 0);
-			pq.add(new Route(beacon, 0));
-			List<RouteNodeDto> routeList = new ArrayList<>();
-			routeList.add(new RouteNodeDto(beacon.getBeaconCode(), beacon.getMap().getFloor(), beacon.getCoordX(), beacon.getCoordY()));
-			escapeRoute.getRoutes().put(beacon.getBeaconCode(), routeList);
-		}
-
-
-		while(!pq.isEmpty()){
-			Route route = pq.poll();
-			List<Edge> nextEdge = graph.get(route.pos);
-			if(route.distance > dist.get(route.pos)) {
-				continue;
-			}
-			for(Edge edge : nextEdge){
-				int nextBeaconCode = edge.getBeaconB().getBeaconCode();
-				int nextDistance = route.distance + edge.getDistance();
-				if(nextDistance < dist.get(nextBeaconCode)){
-					dist.put(nextBeaconCode, nextDistance);
-					Route r = new Route(edge.getBeaconB(), nextDistance, route.way);
-					pq.add(r);
-
-					// nextBeacon에 대한 최단 경로 저장
-					escapeRoute.getRoutes().put(nextBeaconCode, new ArrayList<>(r.way));
-				}
-			}
-		}
-		return escapeRoute;
-	}
 
 	public FireImageDto getFireImageDto(int stationId, int beaconCode){
 		Station station = stationService.findByIdOrElseThrows(stationId);
