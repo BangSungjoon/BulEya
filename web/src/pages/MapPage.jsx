@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 // 컴포넌트
 import MapBoxMap from '@/components/map/MapBoxMap'
 import FloorNavigator from '@/components/map/FloorNavigator'
-// import { IconBoxModal } from '@/components/map/IconBoxModal'
+import IconBox from '@/components/map/IconBox'
 
 // api 요청
 import { fetchMapImage } from '@/api/axios'
@@ -17,7 +17,7 @@ export default function MapPage() {
   const [floorDataList, setFloorDataList] = useState([]) // 전체 응답 저장
   const [selectedFloor, setSelectedFloor] = useState(null) // 선택된 층 번호
 
-  // API 호출
+  // 지도 이미지 불러오는 API 호출
   useEffect(() => {
     const loadFloorData = async () => {
       try {
@@ -38,16 +38,25 @@ export default function MapPage() {
   // 현재 선택된 층에 해당하는 데이터 추출
   let selectedData = floorDataList.find((f) => f.floor === selectedFloor)
 
+  // ----------------------
+  // IconBox 관련
+  // ----------------------
+  const [selectedIcon, setSelectedIcon] = useState(null)
+
   return (
     <div className="relative h-full w-full">
       {/* 지도 렌더링 */}
       {selectedData && <MapBoxMap mode={mode} mapImageUrl={selectedData.image_url} />}
+
       {/* 층 선택 UI */}
       <FloorNavigator
         floors={floorDataList.map((f) => f.floor)}
         selected={selectedFloor}
         onSelect={(floor) => setSelectedFloor(floor)}
       />
+
+      {/* 아이콘 선택 UI는 add 모드일 때만 */}
+      {mode === 'add' && <IconBox selectedIcon={selectedIcon} onSelect={setSelectedIcon} />}
     </div>
   )
 }
