@@ -49,10 +49,14 @@ const getAvailablePort = () => {
 };
 
 // 프레임 데이터를 저장할 배열
+const cctvListData = cctvData.cctvList;
 let files = [];
 
+// 각 CCTV의 프레임 캡처 상태 추적
+const captureStatus = new Map();
+
 // 프레임 단위 이미지 추출
-const extractFrame = (rtspUrl, beaconCode) => {
+const extractFrame = (rtspUrl, beaconCode, onFrameCaptured) => {
   const ffmpeg = spawn('ffmpeg', [
     '-rtsp_transport', 'tcp',
     '-i', rtspUrl,
@@ -63,12 +67,34 @@ const extractFrame = (rtspUrl, beaconCode) => {
     'pipe:1', // jpeg 데이터를 파일에 저장하지 않고 stdout으로 출력
   ]);
 
+  let frameBuffer = Buffer.alloc(0);
+
   ffmpeg.stdout.on('data', (chunk) => {
+    frameBuffer = Buffer.concat([frameBuffer, chunk]);
     console.log(`프레임 데이터 수신 (크기: ${chunk.length})`);
-    form.append('files', chunk, {
-      filename: `${beaconCode}.jpg`,
-      contentType: 'image/jpeg',
-    });
+
+    // MJPEG 프레임 구분 (0xFF 0xD8 시작, 0xFF 0xD9 종료)
+    const startMarker = Buffer.from([0xFF, 0xD8]);
+    const endMarker = Buffer.from([0xFF, 0xD9]);
+    let startIndex = 0;
+
+    while (true) {
+      const start = frameBuffer.indexOf(startMarker, startIndex);
+      if (start === -1) break;
+
+      const end = frameBuffer.indexOf(endMarker, start + 2);
+      if (end === -1) break;
+
+      const frame = frameBuffer.slice(start, end + 2);
+      files.push({ beaconCode, frame }); // 프레임 저장
+      captureStatus.set(beaconCode, true); // 캡처 상태 업데이트
+
+      // 모든 CCTV에서 프레임 캡처 완료 여부 확인
+      onFrameCaptured();
+
+      startIndex = end + 2;
+      frameBuffer = frameBuffer.slice(startIndex); // 버퍼에서 처리된 부분 제거
+    }
   });
 
   ffmpeg.stderr.on('data', (data) => {
@@ -89,18 +115,44 @@ const sendFrames = async () => {
 
   try {
     form.append('station_id', 1);
-    form.append('cctv_list', JSON.stringify());
-    form.append('files', jpegBuffer, {
-      filename: '1.jpg',
-      contentType: 'image/jpeg',
+
+    // // cctv_list 동적 구성
+    // const cctvListData = [...new Set(files.map(item => {
+    //   const cctv = cctvList.find(cctv => cctv.beacon_code === item.beaconCode);
+    //   if (!cctv) {
+    //     console.error(`beacon_code ${item.beaconCode}에 해당하는 cctv 데이터가 없습니다.`);
+    //     return null;
+    //   }
+    //   return {
+    //     beacon_code: item.beaconCode.toString(),
+    //     rtsp_ip: cctv.rtsp_url
+    //   };
+    // }).filter(item => item !== null))];
+
+    // if (cctvListData.length === 0) {
+    //   console.error('cctv_list가 비어있습니다. 요청을 건너뜁니다.');
+    //   files.length = 0;
+    //   return;
+    // }
+    form.append('cctv_list', JSON.stringify(cctvListData));
+
+    // files 필드에 프레임 추가
+    files.forEach(({ beaconCode, frame }) => {
+      console.log(`프레임 추가: beacon_code=${beaconCode}, 크기=${frame.length}`);
+      form.append('files', frame, {
+        filename: `${beaconCode}.jpg`,
+        contentType: 'image/jpeg',
+      });
     });
 
     const response = await axios.post(`${fastapi_url}/ai/cctv-frame`, form, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      },
+      headers: form.getHeaders(),
     });
     console.log('전송 성공:', response.status);
+
+    // 전송 후 files 초기화
+    files.length = 0;
+    captureStatus.clear();
   } catch (error) {
     console.error('전송 에러 ', error.message, error.response?.data || '');
   }
@@ -110,19 +162,26 @@ const sendFrames = async () => {
 const startStream = async () => {
   console.log('스트림 시작');
   try {
+    // 모든 CCTV에서 프레임 캡처 완료 여부 확인
+    const checkAllCaptured = () => {
+      const allCaptured = cctvList.every(cctv => captureStatus.get(cctv.beacon_code) === true);
+      if (allCaptured) {
+        console.log('모든 CCTV에서 프레임 캡처 완료, 전송 시작');
+        sendFrames().then(() => {
+          // 전송 후 다시 스트림 시작
+          startStream();
+        });
+      }
+    };
+
     // 각 RTSP URL에서 프레임 추출 시작
-    for (const cctv of cctvList) {
+    const processes = cctvList.map((cctv) => {
       const rtspUrl = cctv.rtsp_url;
       const beaconCode = cctv.beacon_code;
-
-      // 프레임 추출 시작
-      extractFrame(rtspUrl, beaconCode);
-    }
-
-    // 1초마다 프레임 전송
-    setInterval(() => {
-      sendFrames();
-    }, 1000);
+      const wsPort = getAvailablePort();
+      console.log('rtsp 주소:', rtspUrl, 'on port:', wsPort);
+      return extractFrame(rtspUrl, beaconCode, checkAllCaptured);
+    });
 
     // // 1. rtsp url로 웹 소켓 서버 생성
     // for (const cctv of cctvList) {
@@ -164,7 +223,7 @@ const startStream = async () => {
       // console.log('db에 저장할 웹소캣 주소', wsUrl);
     // }
   } catch (error) {
-    console.error('fetch 실패');
+    console.error('fetch 실패', error.message);
   }
 }
 
