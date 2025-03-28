@@ -6,6 +6,10 @@ import MapBoxMap from '@/components/map/MapBoxMap'
 import FloorNavigator from '@/components/map/FloorNavigator'
 import IconBox from '@/components/map/IconBox'
 
+import CCTV from '@/assets/icons/CCTV.svg?react'
+import Beacon from '@/assets/icons/Beacon.svg?react'
+import Exit from '@/assets/icons/Exit.svg?react'
+
 // api 요청
 import { fetchMapImage } from '@/api/axios'
 
@@ -43,6 +47,31 @@ export default function MapPage() {
   // ----------------------
   const [selectedIcon, setSelectedIcon] = useState(null)
 
+  // 마우스 위치 상태
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
+
+  const iconComponent = {
+    cctv: CCTV,
+    beacon: Beacon,
+    exit: Exit,
+  }[selectedIcon]
+
+  const Icon = iconComponent
+
+  useEffect(() => {
+    const handelMouseMove = (event) => {
+      setMousePosition({ x: event.clientX, y: event.clientY })
+    }
+
+    if (selectedIcon) {
+      window.addEventListener('mousemove', handelMouseMove)
+    }
+
+    return () => {
+      window.removeEventListener('movemove', handelMouseMove)
+    }
+  }, [selectedIcon])
+
   return (
     <div className="relative h-full w-full">
       {/* 지도 렌더링 */}
@@ -52,11 +81,24 @@ export default function MapPage() {
       <FloorNavigator
         floors={floorDataList.map((f) => f.floor)}
         selected={selectedFloor}
-        onSelect={(floor) => setSelectedFloor(floor)}
+        onSelect={setSelectedFloor}
       />
 
       {/* 아이콘 선택 UI는 add 모드일 때만 */}
       {mode === 'add' && <IconBox selectedIcon={selectedIcon} onSelect={setSelectedIcon} />}
+
+      {/* 마우스 따라다니는 아이콘 렌더링 위치 */}
+      {selectedIcon && iconComponent && (
+        <div
+          className="fixed z-50"
+          style={{
+            top: mousePosition.y - 10,
+            left: mousePosition.x - 10,
+          }}
+        >
+          <Icon className="text-primary h-6 w-6" />
+        </div>
+      )}
     </div>
   )
 }
