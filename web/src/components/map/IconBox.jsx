@@ -19,7 +19,7 @@ export default function IconBox({ selectedIcon, onSelect }) {
         >
           <item.icon className="h-8 w-8" />
           {/* hover 중일 때만 설명 */}
-          <span className="text-h3 h-0 w-0 origin-left scale-0 p-0 text-gray-600 transition-all duration-200 group-hover:h-fit group-hover:w-fit group-hover:scale-100 group-hover:pr-4 group-hover:pl-2">
+          <span className="text-h3 max-w-0 origin-left scale-0 overflow-hidden whitespace-nowrap text-gray-600 opacity-0 transition-all duration-200 group-hover:max-w-[100px] group-hover:scale-100 group-hover:pr-4 group-hover:pl-2 group-hover:opacity-100">
             {item.label}
           </span>
         </button>
