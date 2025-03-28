@@ -11,4 +11,5 @@ import lombok.Setter;
 public class BeaconNotificationDto{
 	private String beaconName;
 	private String imageUrl;
+	private boolean isNewFire;
 }
