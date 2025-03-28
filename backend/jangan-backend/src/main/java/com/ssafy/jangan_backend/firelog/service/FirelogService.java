@@ -6,6 +6,7 @@ import com.ssafy.jangan_backend.escapeRoute.service.EscapeRouteService;
 import com.ssafy.jangan_backend.firelog.dto.*;
 import com.ssafy.jangan_backend.station.service.StationService;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -37,6 +38,7 @@ public class FirelogService {
 	private final FcmUtil fcmUtil;
 	private final MinioUtil minioUtil;
 	private final EscapeRouteService escapeRouteService;
+	private final RedisTemplate<String, EscapeRoute> redisTemplate;
 
 	private final StationService stationService;
 	@Value("${minio.bucket.name}")
@@ -125,11 +127,12 @@ public class FirelogService {
 		}
 		if(isChanged){ // 상태 변화 감지 시 최단 경로 계산
 			EscapeRoute escapeRoute = escapeRouteService.calculateEscapeRoute(station, beaconList, dangerBeacons);
-			escapeRouteRepository.deleteById(stationId);
-			escapeRouteRepository.save(escapeRoute);
+
+			//	escapeRouteRepository.save(escapeRoute);
+			redisTemplate.opsForValue().set("escapeRoute:" + stationId, escapeRoute);
+
 			System.out.println("isChanged.");
 			fcmUtil.sendMessage(fireNotificationDto);
-			System.out.println("isOnFire.");
 		}
 	}
 

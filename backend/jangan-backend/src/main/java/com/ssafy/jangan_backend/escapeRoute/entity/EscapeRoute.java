@@ -9,7 +9,9 @@ import org.springframework.data.redis.core.RedisHash;
 
 import com.ssafy.jangan_backend.escapeRoute.dto.RouteNodeDto;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
@@ -21,6 +23,7 @@ import lombok.ToString;
 @Setter
 @RedisHash("escapeRoute")
 @ToString
+@AllArgsConstructor
 public class EscapeRoute {
 	@Id
 	private int stationId;

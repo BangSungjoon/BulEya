@@ -8,8 +8,11 @@ import org.springframework.data.redis.connection.RedisPassword;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+
+import com.ssafy.jangan_backend.escapeRoute.entity.EscapeRoute;
 
 @Configuration
 public class RedisConfig {
@@ -29,7 +32,7 @@ public class RedisConfig {
 		config.setHostName(host);
 		config.setPort(port);
 		config.setPassword(RedisPassword.of(password));
-
+		RedisTemplate<String, EscapeRoute> template = new RedisTemplate<>();
 		return new LettuceConnectionFactory(config);
 	}
 
@@ -41,8 +44,8 @@ public class RedisConfig {
 		redisTemplate.setKeySerializer(new StringRedisSerializer());
 		redisTemplate.setHashKeySerializer(new StringRedisSerializer());
 
-		redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<>(Object.class));
-		redisTemplate.setHashValueSerializer(new Jackson2JsonRedisSerializer<>(Object.class));
+		redisTemplate.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+		redisTemplate.setHashValueSerializer(new GenericJackson2JsonRedisSerializer());
 		return redisTemplate;
 	}
 }
