@@ -1,25 +1,17 @@
 package com.ssafy.jangan_mobile.service
 
-import android.content.Context
-import android.util.Log
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.Observer
-import androidx.lifecycle.findViewTreeLifecycleOwner
-import org.altbeacon.beacon.AltBeaconParser
-import org.altbeacon.beacon.Beacon
-import org.altbeacon.beacon.BeaconManager
-import org.altbeacon.beacon.BeaconRegion
+import android.app.Service
+import android.content.Intent
+import android.os.IBinder
 
-class BeaconService {
-    val rangingObserver = Observer<Collection<Beacon>> { beacons ->
-        for(beacon: Beacon in beacons){
-
-        }
+// 앱이 켜져 있는 동안 주기적으로 현재 위치를 갱신한다.
+class BeaconService: Service(){
+    override fun onBind(intent: Intent?): IBinder? {
+        return null
     }
-    fun scanBeacon(context: Context, owner: LifecycleOwner, major: Int){
-        val beaconManager = BeaconManager.getInstanceForApplication(context)
-        val region = BeaconRegion("wildcard altbeacon", AltBeaconParser(), null, major.toString(), null)
-        beaconManager.getRegionViewModel(region).rangedBeacons.observe(owner, rangingObserver)
-        beaconManager.startRangingBeacons(region)
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+
+        return super.onStartCommand(intent, flags, startId)
     }
 }
