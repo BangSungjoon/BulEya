@@ -146,7 +146,7 @@ export default function MapPage() {
       {/* 마우스 따라다니는 아이콘 렌더링 위치 */}
       {selectedIcon && iconComponent && (
         <div
-          className="fixed z-50"
+          className="pointer-events-none fixed z-50"
           style={{
             top: mousePosition.y - 10,
             left: mousePosition.x - 10,
