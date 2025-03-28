@@ -7,6 +7,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.ssafy.jangan_mobile.screen.FireNotificationScreen
 import com.ssafy.jangan_mobile.screen.HomeScreen
+import com.ssafy.jangan_mobile.ui.screen.MapViewScreen
 
 @Composable
 fun AppNavigation(startFromNotification: Boolean){
@@ -17,8 +18,9 @@ fun AppNavigation(startFromNotification: Boolean){
             navController.navigate("fire_notification")
         }
     }
-    NavHost(navController = navController, startDestination = "home"){
+    NavHost(navController = navController, startDestination = "map_screen"){
         composable("home") { HomeScreen(navController) }
         composable("fire_notification") { FireNotificationScreen(navController) }
+        composable("map_screen"){MapViewScreen(navController)}
     }
 }
