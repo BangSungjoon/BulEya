@@ -1,4 +1,4 @@
-package com.ssafy.jangan_backend.firelog.entity;
+package com.ssafy.jangan_backend.escapeRoute.entity;
 
 import java.util.HashMap;
 import java.util.List;
@@ -7,8 +7,7 @@ import java.util.Map;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
 
-import com.ssafy.jangan_backend.firelog.dto.FireNotificationDto;
-import com.ssafy.jangan_backend.firelog.dto.RouteNodeDto;
+import com.ssafy.jangan_backend.escapeRoute.dto.RouteNodeDto;
 
 import lombok.Getter;
 import lombok.Setter;

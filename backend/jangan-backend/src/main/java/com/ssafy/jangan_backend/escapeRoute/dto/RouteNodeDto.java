@@ -1,4 +1,4 @@
-package com.ssafy.jangan_backend.firelog.dto;
+package com.ssafy.jangan_backend.escapeRoute.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

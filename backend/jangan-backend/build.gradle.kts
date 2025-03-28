@@ -42,6 +42,9 @@ dependencies {
 	implementation("com.querydsl:querydsl-jpa:${querydslVersion}:jakarta")
 	annotationProcessor("com.querydsl:querydsl-apt:${querydslVersion}:jakarta")
 	annotationProcessor("jakarta.persistence:jakarta.persistence-api")
+
+	// Springdoc OpenAPI 의존성 추가
+	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.3")
 }
 
 tasks.withType<Test> {
