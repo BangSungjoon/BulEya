@@ -1,24 +1,26 @@
 package com.ssafy.jangan_backend.escapeRoute.service;
 
-import com.ssafy.jangan_backend.beacon.dto.BeaconDto;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.PriorityQueue;
+import java.util.TreeSet;
+
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.stereotype.Service;
+
 import com.ssafy.jangan_backend.beacon.entity.Beacon;
 import com.ssafy.jangan_backend.beacon.repository.BeaconQueryRepository;
-import com.ssafy.jangan_backend.common.exception.InternalServerException;
-import com.ssafy.jangan_backend.common.exception.NotFoundException;
-import com.ssafy.jangan_backend.common.response.BaseResponseStatus;
 import com.ssafy.jangan_backend.edge.entity.Edge;
 import com.ssafy.jangan_backend.edge.repository.EdgeRepository;
 import com.ssafy.jangan_backend.escapeRoute.dto.RouteNodeDto;
 import com.ssafy.jangan_backend.escapeRoute.entity.EscapeRoute;
 import com.ssafy.jangan_backend.escapeRoute.repository.EscapeRouteRepository;
-import com.ssafy.jangan_backend.map.dto.MapDto;
 import com.ssafy.jangan_backend.map.repository.MapQueryRepository;
 import com.ssafy.jangan_backend.station.entity.Station;
 import com.ssafy.jangan_backend.station.service.StationService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 
-import java.util.*;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -28,15 +30,19 @@ public class EscapeRouteService {
     private final StationService stationService;
     private final BeaconQueryRepository beaconQueryRepository;
     private final MapQueryRepository mapQueryRepository;
+    private final RedisTemplate<String, EscapeRoute> redisTemplate;
     public List<RouteNodeDto> findEscapeRoute(Integer stationId, Integer beaconCode) {
         Station station = stationService.findByIdOrElseThrows(stationId);
-        //역에 맞는 탈출 경로 조회 후, 비콘코드에 맞는 탈출 경로 조회
-        List<RouteNodeDto> routeNodeList = escapeRouteRepository.findById(station.getId())
-                .orElseThrow(() -> new NotFoundException(BaseResponseStatus.STATION_NOT_FOUND_EXCEPTION))
-                .getRoutes()
-                .get(beaconCode);
-        //TODO: 탈출 경로가 없는 경우 처리할 것
-        //불이난 위치에 있는 사람, 불에 둘러싸인 사람 ??
+        // //역에 맞는 탈출 경로 조회 후, 비콘코드에 맞는 탈출 경로 조회
+        // List<RouteNodeDto> routeNodeList = escapeRouteRepository.findById(station.getId())
+        //         .orElseThrow(() -> new NotFoundException(BaseResponseStatus.STATION_NOT_FOUND_EXCEPTION))
+        //         .getRoutes()
+        //         .get(beaconCode);
+        // //TODO: 탈출 경로가 없는 경우 처리할 것
+        // //불이난 위치에 있는 사람, 불에 둘러싸인 사람 ??
+
+        EscapeRoute escapeRoute = redisTemplate.opsForValue().get("escapeRoute:" + stationId);
+        List<RouteNodeDto> routeNodeList = escapeRoute.getRoutes().get(beaconCode);
         if(routeNodeList==null) {
 
         }
