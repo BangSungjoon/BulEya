@@ -29,11 +29,13 @@ class MapViewModel : ViewModel() {
             try {
                 Log.d("✅MapViewModel", "fetchMapImage 호출됨! stationId=$stationId")
                 val response = RetrofitInstance.api.getMapImage(stationId)
+                Log.d("✅MapViewModel", "fetchMapImage2 호출됨! stationId=$stationId")
                 if (response.isSuccessful) {
                     Log.d("✅MapViewModel", "API 응답 성공")
 
                     val floorImages = response.body()?.result
-                    val targetFloor = floorImages?.find { it.floor == 1 } // 1층만 일단 사용
+                    Log.d("✅MapViewModel", "전체 층 이미지 응답: $floorImages")
+                    val targetFloor = floorImages?.find { it.floor == 1001 } // 1층만 일단 사용
                     Log.d("✅MapViewModel", "선택된 층: $targetFloor")
 
                     _mapImageUrl.value = targetFloor?.imageUrl
