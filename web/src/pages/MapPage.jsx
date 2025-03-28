@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react'
 import MapBoxMap from '@/components/map/MapBoxMap'
 import FloorNavigator from '@/components/map/FloorNavigator'
 import IconBox from '@/components/map/IconBox'
+import FacilityEditModal from '@/components/modals/FacilityEditModal'
 
 import CCTV from '@/assets/icons/CCTV.svg?react'
 import Beacon from '@/assets/icons/Beacon.svg?react'
@@ -115,7 +116,7 @@ export default function MapPage() {
         : null // map일 경우는 null
 
   return (
-    <div className="relative h-full w-full">
+    <div className="h-full w-full">
       {/* 지도 렌더링 */}
       {selectedData && (
         <MapBoxMap
@@ -146,7 +147,7 @@ export default function MapPage() {
       {/* 마우스 따라다니는 아이콘 렌더링 위치 */}
       {selectedIcon && iconComponent && (
         <div
-          className="fixed z-50"
+          className="pointer-events-none fixed z-50"
           style={{
             top: mousePosition.y - 10,
             left: mousePosition.x - 10,
@@ -155,6 +156,20 @@ export default function MapPage() {
           <Icon className="text-primary h-6 w-6" />
         </div>
       )}
+      <div className="pointer-events-none absolute inset-0 z-10 mx-5 mt-30 mb-5 grid grid-cols-12">
+        {/* 장비 등록/삭제/수정 모달 */}
+        {/* FacilityEditModal만 pointer-events 살림 */}
+        <div className="pointer-events-auto col-span-3">
+          <FacilityEditModal
+            initialData={{
+              station_id: stationId,
+              floor: selectedFloor,
+              coord_x: tempMarker?.coord_x,
+              coord_y: tempMarker?.coord_y,
+            }}
+          />
+        </div>
+      </div>
     </div>
   )
 }

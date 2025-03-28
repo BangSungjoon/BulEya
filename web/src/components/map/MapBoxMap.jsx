@@ -124,26 +124,14 @@ const MapBoxMap = ({ mode, mapImageUrl, onMapClick, tempMarker }) => {
   // 지도 클릭 이벤트 전달 로직
   useEffect(() => {
     const map = mapRef.current
-    if (!map) return
+    if (!map || !onMapClick) return
 
-    // 지도 클릭 이벤트
     const handleClick = (event) => {
-      const { lng, lat } = event.lngLat // 사용자가 클릭한 위치의 경도(coord_x), 위도(coord_y)
-
-      console.log('지도클릭')
-
-      if (onMapClick) {
-        onMapClick({ coord_x: lng, coord_y: lat }) // props로 전달된 onMapClick 함수가 있으면 호출해줌
-      }
+      const { lng, lat } = event.lngLat
+      onMapClick({ coord_x: lng, coord_y: lat })
     }
 
-    // Mapbox 지도 객체에 이벤트 등록
-    if (onMapClick) {
-      map.on('click', handleClick)
-      return () => {
-        map.off('click', handleClick)
-      }
-    }
+    map.on('click', handleClick)
 
     return () => {
       map.off('click', handleClick)
