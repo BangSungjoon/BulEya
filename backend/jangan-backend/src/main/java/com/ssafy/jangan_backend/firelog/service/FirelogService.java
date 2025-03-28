@@ -116,10 +116,10 @@ public class FirelogService {
 				// 신규 발생한 화재인 경우
 				if(firelogOptional.isEmpty() || !firelogOptional.get().getIsActiveFire()){
 					String presignedUrl = minioUtil.getPresignedUrl(MinioUtil.BUCKET_IMAGELOGS, fileName);
-					fireNotificationDto.getBeaconNotificationDtos().add(new BeaconNotificationDto(beacon.getName(), presignedUrl, true));
+					fireNotificationDto.getBeaconNotificationDtos().add(new BeaconNotificationDto(beacon.getName(), presignedUrl, 1));
 					isChanged = true;
 				} else {
-					fireNotificationDto.getBeaconNotificationDtos().add(new BeaconNotificationDto(beacon.getName(), null, false));
+					fireNotificationDto.getBeaconNotificationDtos().add(new BeaconNotificationDto(beacon.getName(), null, 0));
 				}
 			}
 		}
