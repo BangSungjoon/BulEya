@@ -2,10 +2,14 @@ import { useRef, useEffect } from 'react'
 import mapboxgl from 'mapbox-gl'
 import 'mapbox-gl/dist/mapbox-gl.css'
 
+import CCTV from '@/assets/icons/CCTV.svg?react'
+import Beacon from '@/assets/icons/Beacon.svg?react'
+import Exit from '@/assets/icons/Exit.svg?react'
+
 // MapBox access 토큰
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN
 
-const MapBoxMap = ({ mode, mapImageUrl }) => {
+const MapBoxMap = ({ mode, mapImageUrl, onMapClick, tempMarker }) => {
   // 지도 컨테이너 요소를 참조할 ref
   const mapContainer = useRef(null)
   // Mapbox의 Map 객체를 저장할 ref (재렌더링 방지)
@@ -117,7 +121,69 @@ const MapBoxMap = ({ mode, mapImageUrl }) => {
     }
   }, [mapImageUrl])
 
-  return <div ref={mapContainer} className="h-full w-full" />
+  // 지도 클릭 이벤트 전달 로직
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map) return
+
+    // 지도 클릭 이벤트
+    const handleClick = (event) => {
+      const { lng, lat } = event.lngLat // 사용자가 클릭한 위치의 경도(coord_x), 위도(coord_y)
+
+      console.log('지도클릭')
+
+      if (onMapClick) {
+        onMapClick({ coord_x: lng, coord_y: lat }) // props로 전달된 onMapClick 함수가 있으면 호출해줌
+      }
+    }
+
+    // Mapbox 지도 객체에 이벤트 등록
+    if (onMapClick) {
+      map.on('click', handleClick)
+      return () => {
+        map.off('click', handleClick)
+      }
+    }
+
+    return () => {
+      map.off('click', handleClick)
+    }
+  }, [onMapClick])
+
+  return (
+    <div className="relative h-full w-full">
+      {/* 실제 map을 그릴 container */}
+      <div ref={mapContainer} className="h-full w-full" />
+
+      {/* tempMarker가 있을 경우 미리보기 마커 아이콘 표시 */}
+      {tempMarker &&
+        mapRef.current &&
+        (() => {
+          const projected = mapRef.current.project([tempMarker.coord_x, tempMarker.coord_y])
+
+          const iconMap = {
+            cctv: CCTV,
+            beacon: Beacon,
+            exit: Exit,
+          }
+
+          const Icon = iconMap[tempMarker.iconId]
+
+          return (
+            <div
+              className="pointer-events-none absolute z-50"
+              style={{
+                top: `${projected.y}px`,
+                left: `${projected.x}px`,
+                transform: 'translate(-50%, -100%)',
+              }}
+            >
+              {Icon && <Icon className="text-primary h-6 w-6" />}
+            </div>
+          )
+        })()}
+    </div>
+  )
 }
 
 export default MapBoxMap
