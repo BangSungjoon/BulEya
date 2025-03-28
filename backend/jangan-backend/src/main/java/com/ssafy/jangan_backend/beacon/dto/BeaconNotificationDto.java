@@ -10,6 +10,10 @@ import lombok.Setter;
 @AllArgsConstructor
 public class BeaconNotificationDto{
 	private String beaconName;
+	private Integer beaconCode;
+	private Integer coordX;
+	private Integer coordY;
+	private Integer floor;
 	private String imageUrl;
 	private Integer isNewFire;
 }
