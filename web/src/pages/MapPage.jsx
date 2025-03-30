@@ -159,7 +159,7 @@ export default function MapPage() {
       <div className="pointer-events-none absolute inset-0 z-10 mx-5 mt-30 mb-5 grid grid-cols-12">
         {/* 장비 등록/삭제/수정 모달 */}
         {/* FacilityEditModal만 pointer-events 살림 */}
-        <div className="pointer-events-auto col-span-3">
+        <div className="pointer-events-auto col-span-5 md:col-span-3">
           <FacilityEditModal
             initialData={{
               station_id: stationId,
