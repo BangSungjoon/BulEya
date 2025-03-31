@@ -31,6 +31,7 @@ public class RequestRegisterBeaconDto {
     public Beacon toEntity(Map map) {
         return Beacon.builder()
                 .map(map)
+                .mapId(map.getId())
                 .beaconCode(this.beaconCode)
                 .name(this.name)
                 .coordX(this.coordX)
@@ -39,6 +40,5 @@ public class RequestRegisterBeaconDto {
                 .isCctv(this.isCctv)
                 .cctvIp(this.cctvIp)
                 .build();
-
     }
 }
