@@ -6,10 +6,12 @@ import MapBoxMap from '@/components/map/MapBoxMap'
 import FloorNavigator from '@/components/map/FloorNavigator'
 import IconBox from '@/components/map/IconBox'
 import FacilityEditModal from '@/components/modals/FacilityEditModal'
+import FacilityDetailModal from '@/components/modals/FacilityDetailModal'
 
 import CCTV from '@/assets/icons/CCTV.svg?react'
 import Beacon from '@/assets/icons/Beacon.svg?react'
 import Exit from '@/assets/icons/Exit.svg?react'
+import Pin from '@/assets/icons/Pin.svg?react'
 
 // api 요청
 import { fetchMapImage } from '@/api/axios'
@@ -98,8 +100,8 @@ export default function MapPage() {
     if (!selectedIcon) return
 
     setTempMarker({
-      coord_x,
-      coord_y,
+      coord_x: Math.round(coord_x),
+      coord_y: Math.round(coord_y),
       iconId: selectedIcon,
       floor: selectedFloor,
     })
@@ -113,6 +115,63 @@ export default function MapPage() {
       console.log('🟢 tempMarker 업데이트됨:', tempMarker)
     }
   }, [tempMarker])
+
+  // ==================
+  // 모달 관련
+  // ==================
+  const isCctv = tempMarker?.iconId === 'cctv'
+  const isExit = tempMarker?.iconId === 'exit'
+
+  const handleCloseModal = () => {
+    setIsModalVisible(false) // 먼저 애니메이션 시작
+
+    setTimeout(() => {
+      setTempMarker(null) // 애니메이션 끝난 후 제거, 모달 닫으면 임시 마커 삭제
+    }, 300) // duration과 맞춰주기 (ms)
+  }
+
+  // 모달 애니메이션
+  const [isModalVisible, setIsModalVisible] = useState(false)
+
+  useEffect(() => {
+    if (tempMarker) {
+      setIsModalVisible(true)
+    }
+  }, [tempMarker])
+
+  // ==================
+  // 마커 선택 관련
+  // =================
+  const [selectedFacility, setSelectedFacility] = useState(null)
+
+  const [isDetailVisible, setIsDetailVisible] = useState(false)
+
+  useEffect(() => {
+    if (selectedFacility) {
+      setIsDetailVisible(true)
+    }
+  }, [selectedFacility])
+
+  const handleCloseDetailModal = () => {
+    setIsDetailVisible(false) // 애니메이션 먼저
+
+    setTimeout(() => {
+      setSelectedFacility(null) // 모달 실제 제거
+    }, 300) // transition duration과 맞춰주기 (ms 단위)
+  }
+
+  // 임시 데이터
+  useEffect(() => {
+    if (mode === 'map') {
+      setSelectedFacility({
+        name: 'B3 개찰구 CCTV',
+        beacon_code: '1234567890',
+        cctv_ip: 'rtsp://your-test-stream',
+        is_cctv: true,
+        is_exit: true,
+      })
+    }
+  }, [mode])
 
   // -------------------
   // 안내문 관련
@@ -134,8 +193,27 @@ export default function MapPage() {
           beaconList={selectedData.beacon_list}
           edgeList={selectedData.edge_list}
           selectedIcon={selectedIcon}
+          onMapClick={mode === 'add' ? handleMapClick : undefined}
+          tempMarker={tempMarker}
         />
       )}
+
+      {/* 모드 안내 문구 */}
+      {modeGuideText && (
+        <div className="text-primary text-caption absolute top-4 left-1/2 z-40 h-fit w-fit -translate-x-1/2 rounded-full bg-gray-600 px-4 py-2 text-sm whitespace-nowrap shadow-md">
+          {modeGuideText}
+        </div>
+      )}
+
+      {/* 역사 번호 안내 */}
+      <div className="text-caption absolute top-5 left-5 flex flex-row items-center gap-2 rounded-full bg-gray-600 px-2 py-1">
+        <Pin />
+        <p className="text-gray-100">강남역</p>
+        <p className="text-gray-400">{stationId}</p>
+      </div>
+
+      {/* 아이콘 선택 UI는 add 모드일 때만 */}
+      {mode === 'add' && <IconBox selectedIcon={selectedIcon} onSelect={setSelectedIcon} />}
 
       {/* 층 선택 UI */}
       <FloorNavigator
@@ -156,20 +234,38 @@ export default function MapPage() {
           <Icon className="text-primary h-6 w-6" />
         </div>
       )}
-      <div className="pointer-events-none absolute inset-0 z-10 mx-5 mt-30 mb-5 grid grid-cols-12">
-        {/* 장비 등록/삭제/수정 모달 */}
-        {/* FacilityEditModal만 pointer-events 살림 */}
-        <div className="pointer-events-auto col-span-3">
-          <FacilityEditModal
-            initialData={{
-              station_id: stationId,
-              floor: selectedFloor,
-              coord_x: tempMarker?.coord_x,
-              coord_y: tempMarker?.coord_y,
-            }}
-          />
+
+      {/* 장비 등록/수정 모달 */}
+      {mode === 'add' && tempMarker && (
+        <div className="pointer-events-none absolute inset-0 z-20 mx-5 mt-30 mb-5 grid grid-cols-12">
+          <div
+            className={`pointer-events-auto col-span-5 transform transition-all duration-300 md:col-span-3 ${isModalVisible ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0'}`}
+          >
+            <FacilityEditModal
+              initialData={{
+                station_id: stationId,
+                floor: selectedFloor,
+                coord_x: tempMarker.coord_x,
+                coord_y: tempMarker.coord_y,
+                is_cctv: isCctv,
+                is_exit: isExit,
+              }}
+              onClose={handleCloseModal}
+            />
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* 장비 상세 모달 */}
+      {selectedFacility && (
+        <div className="pointer-events-none absolute inset-0 z-20 mx-5 mt-5 mb-5 grid grid-cols-12">
+          <div
+            className={`pointer-events-auto col-span-5 transform transition-all duration-300 md:col-span-3 ${isDetailVisible ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0'} `}
+          >
+            <FacilityDetailModal data={selectedFacility} onClose={handleCloseDetailModal} />
+          </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -15,3 +15,8 @@ export const fetchMapImage = async (stationId) => {
     },
   })
 }
+
+// 장비 정보 등록하는 API
+export const createFacility = async (data) => {
+  return instance.post('/api/beacon', data)
+}

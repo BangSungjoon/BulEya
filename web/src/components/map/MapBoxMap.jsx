@@ -11,7 +11,15 @@ import Exit from '@/assets/icons/Exit.svg?react'
 // MapBox access 토큰
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN
 
-const MapBoxMap = ({ mode, mapImageUrl, beaconList = [], edgeList = [], selectedIcon }) => {
+const MapBoxMap = ({
+  mode,
+  mapImageUrl,
+  beaconList = [],
+  edgeList = [],
+  selectedIcon,
+  onMapClick,
+  tempMarker,
+}) => {
   // 지도 컨테이너 요소를 참조할 ref
   const mapContainer = useRef(null)
   // Mapbox의 Map 객체를 저장할 ref (재렌더링 방지)
@@ -128,6 +136,23 @@ const MapBoxMap = ({ mode, mapImageUrl, beaconList = [], edgeList = [], selected
     }
   }, [mapImageUrl])
 
+  // 지도 클릭 이벤트 전달 로직
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map || !onMapClick) return
+
+    const handleClick = (event) => {
+      const { lng, lat } = event.lngLat
+      onMapClick({ coord_x: lng, coord_y: lat })
+    }
+
+    map.on('click', handleClick)
+
+    return () => {
+      map.off('click', handleClick)
+    }
+  }, [onMapClick])
+
   useEffect(() => {
     const map = mapRef.current
     if (!map) return
@@ -139,8 +164,8 @@ const MapBoxMap = ({ mode, mapImageUrl, beaconList = [], edgeList = [], selected
         markerRefList.current = []
 
         // 더미 데이터 때문에 크기 조정
-        const xScale = imageWidth / 600
-        const yScale = imageHeight / 400
+        // const xScale = imageWidth / 600
+        // const yScale = imageHeight / 400
 
         // beacon_code → [lng, lat] 매핑용 객체
         const beaconMap = {}
@@ -149,9 +174,10 @@ const MapBoxMap = ({ mode, mapImageUrl, beaconList = [], edgeList = [], selected
           console.log('비콘:', beacon)
           const { coord_x, coord_y, isExit, isCctv, name, beacon_code } = beacon
 
-          const scaledX = (coord_x + 100) * xScale
-          const scaledY = coord_y * yScale
-          const [lng, lat] = convertPixelToLngLat(scaledX, scaledY, imageWidth, imageHeight)
+          // const scaledX = (coord_x + 100) * xScale
+          // const scaledY = coord_y * yScale
+          // const [lng, lat] = convertPixelToLngLat(coord_x, coord_y, imageWidth, imageHeight)
+          const [lng, lat] = [coord_x, coord_y]
 
           // 위치 저장
           beaconMap[beacon_code] = [lng, lat]
@@ -226,7 +252,40 @@ const MapBoxMap = ({ mode, mapImageUrl, beaconList = [], edgeList = [], selected
     }
   }, [beaconList, edgeList, mapImageUrl])
 
-  return <div ref={mapContainer} className="h-full w-full" />
+  return (
+    <div className="relative h-full w-full">
+      {/* 실제 map을 그릴 container */}
+      <div ref={mapContainer} className="h-full w-full" />
+
+      {/* tempMarker가 있을 경우 미리보기 마커 아이콘 표시 */}
+      {tempMarker &&
+        mapRef.current &&
+        (() => {
+          const projected = mapRef.current.project([tempMarker.coord_x, tempMarker.coord_y])
+
+          const iconMap = {
+            cctv: CCTV,
+            beacon: Beacon,
+            exit: Exit,
+          }
+
+          const Icon = iconMap[tempMarker.iconId]
+
+          return (
+            <div
+              className="pointer-events-none absolute z-10"
+              style={{
+                top: `${projected.y}px`,
+                left: `${projected.x}px`,
+                transform: 'translate(-50%, -100%)',
+              }}
+            >
+              {Icon && <Icon className="text-primary h-6 w-6" />}
+            </div>
+          )
+        })()}
+    </div>
+  )
 }
 
 export default MapBoxMap
