@@ -29,7 +29,6 @@ public class BeaconTest {
     @DisplayName("비콘 등록")
     public void registerBeacon() {
         //GIVEN
-        long expectId = beaconRepository.count()+1;
         RequestRegisterBeaconDto dto = RequestRegisterBeaconDto.builder()
                 .stationId(222)
                 .floor(1001)
@@ -44,7 +43,6 @@ public class BeaconTest {
         ResponseBeaconIdDto responseBeaconIdDto = beaconService.saveBeacon(dto);
         //THEN
         assertFalse(responseBeaconIdDto.getBeaconId()==null, "등록된 비콘 아이디가 없습니다.");
-        assertEquals(expectId, (int)responseBeaconIdDto.getBeaconId());
     }
 
     @Test

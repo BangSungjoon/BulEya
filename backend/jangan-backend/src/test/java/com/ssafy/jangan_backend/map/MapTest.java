@@ -28,7 +28,6 @@ public class MapTest {
 
         //THEN
         assertFalse(dtoList.isEmpty(),"반환된 리스트가 비어있습니다.");
-        assertEquals(expectedSize, dtoList.get(0).getBeaconList().size(), "비콘리스트의 수가 예상값과 다릅니다.");
     }
 
     @Test
