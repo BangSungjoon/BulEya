@@ -33,16 +33,13 @@ public class EscapeRouteService {
     private final RedisTemplate<String, EscapeRoute> redisTemplate;
     public List<RouteNodeDto> findEscapeRoute(Integer stationId, Integer beaconCode) {
         Station station = stationService.findByIdOrElseThrows(stationId);
-        // //역에 맞는 탈출 경로 조회 후, 비콘코드에 맞는 탈출 경로 조회
-        // List<RouteNodeDto> routeNodeList = escapeRouteRepository.findById(station.getId())
-        //         .orElseThrow(() -> new NotFoundException(BaseResponseStatus.STATION_NOT_FOUND_EXCEPTION))
-        //         .getRoutes()
-        //         .get(beaconCode);
-        // //TODO: 탈출 경로가 없는 경우 처리할 것
-        // //불이난 위치에 있는 사람, 불에 둘러싸인 사람 ??
 
+        // //역에 맞는 탈출 경로 조회 후, 비콘코드에 맞는 탈출 경로 조회
         EscapeRoute escapeRoute = redisTemplate.opsForValue().get("escapeRoute:" + stationId);
         List<RouteNodeDto> routeNodeList = escapeRoute.getRoutes().get(beaconCode);
+
+        //TODO: 탈출 경로가 없는 경우 처리할 것
+        //불이난 위치에 있는 사람, 불에 둘러싸인 사람 ??
         if(routeNodeList==null) {
 
         }
