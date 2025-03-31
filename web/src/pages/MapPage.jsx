@@ -6,6 +6,7 @@ import MapBoxMap from '@/components/map/MapBoxMap'
 import FloorNavigator from '@/components/map/FloorNavigator'
 import IconBox from '@/components/map/IconBox'
 import FacilityEditModal from '@/components/modals/FacilityEditModal'
+import FacilityDetailModal from '@/components/modals/FacilityDetailModal'
 
 import CCTV from '@/assets/icons/CCTV.svg?react'
 import Beacon from '@/assets/icons/Beacon.svg?react'
@@ -119,7 +120,7 @@ export default function MapPage() {
     }, 300) // duration과 맞춰주기 (ms)
   }
 
-  // 모달 애니메이션션
+  // 모달 애니메이션
   const [isModalVisible, setIsModalVisible] = useState(false)
 
   useEffect(() => {
@@ -127,6 +128,40 @@ export default function MapPage() {
       setIsModalVisible(true)
     }
   }, [tempMarker])
+
+  // ==================
+  // 마커 선택 관련
+  // =================
+  const [selectedFacility, setSelectedFacility] = useState(null)
+
+  const [isDetailVisible, setIsDetailVisible] = useState(false)
+
+  useEffect(() => {
+    if (selectedFacility) {
+      setIsDetailVisible(true)
+    }
+  }, [selectedFacility])
+
+  const handleCloseDetailModal = () => {
+    setIsDetailVisible(false) // 애니메이션 먼저
+
+    setTimeout(() => {
+      setSelectedFacility(null) // 모달 실제 제거
+    }, 300) // transition duration과 맞춰주기 (ms 단위)
+  }
+
+  // 임시 데이터
+  useEffect(() => {
+    if (mode === 'map') {
+      setSelectedFacility({
+        name: 'B3 개찰구 CCTV',
+        beacon_code: '1234567890',
+        cctv_ip: 'rtsp://your-test-stream',
+        is_cctv: true,
+        is_exit: true,
+      })
+    }
+  }, [mode])
 
   // -------------------
   // 안내문 관련
@@ -180,7 +215,7 @@ export default function MapPage() {
         </div>
       )}
 
-      {/* 장비 등록/삭제/수정 모달 */}
+      {/* 장비 등록/수정 모달 */}
       {mode === 'add' && tempMarker && (
         <div className="pointer-events-none absolute inset-0 z-40 mx-5 mt-30 mb-5 grid grid-cols-12">
           <div
@@ -197,6 +232,17 @@ export default function MapPage() {
               }}
               onClose={handleCloseModal}
             />
+          </div>
+        </div>
+      )}
+
+      {/* 장비 상세 모달 */}
+      {selectedFacility && (
+        <div className="pointer-events-none absolute inset-0 z-40 mx-5 mt-5 mb-5 grid grid-cols-12">
+          <div
+            className={`pointer-events-auto col-span-5 transform transition-all duration-300 md:col-span-3 ${isDetailVisible ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0'} `}
+          >
+            <FacilityDetailModal data={selectedFacility} onClose={handleCloseDetailModal} />
           </div>
         </div>
       )}
