@@ -11,6 +11,7 @@ import FacilityDetailModal from '@/components/modals/FacilityDetailModal'
 import CCTV from '@/assets/icons/CCTV.svg?react'
 import Beacon from '@/assets/icons/Beacon.svg?react'
 import Exit from '@/assets/icons/Exit.svg?react'
+import Pin from '@/assets/icons/Pin.svg?react'
 
 // api 요청
 import { fetchMapImage } from '@/api/axios'
@@ -192,6 +193,13 @@ export default function MapPage() {
         </div>
       )}
 
+      {/* 역사 번호 안내 */}
+      <div className="text-caption absolute top-5 left-5 flex flex-row items-center gap-2 rounded-full bg-gray-600 px-2 py-1">
+        <Pin />
+        <p className="text-gray-100">강남역</p>
+        <p className="text-gray-400">{stationId}</p>
+      </div>
+
       {/* 아이콘 선택 UI는 add 모드일 때만 */}
       {mode === 'add' && <IconBox selectedIcon={selectedIcon} onSelect={setSelectedIcon} />}
 
@@ -217,7 +225,7 @@ export default function MapPage() {
 
       {/* 장비 등록/수정 모달 */}
       {mode === 'add' && tempMarker && (
-        <div className="pointer-events-none absolute inset-0 z-40 mx-5 mt-30 mb-5 grid grid-cols-12">
+        <div className="pointer-events-none absolute inset-0 z-20 mx-5 mt-30 mb-5 grid grid-cols-12">
           <div
             className={`pointer-events-auto col-span-5 transform transition-all duration-300 md:col-span-3 ${isModalVisible ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0'}`}
           >
@@ -238,7 +246,7 @@ export default function MapPage() {
 
       {/* 장비 상세 모달 */}
       {selectedFacility && (
-        <div className="pointer-events-none absolute inset-0 z-40 mx-5 mt-5 mb-5 grid grid-cols-12">
+        <div className="pointer-events-none absolute inset-0 z-20 mx-5 mt-5 mb-5 grid grid-cols-12">
           <div
             className={`pointer-events-auto col-span-5 transform transition-all duration-300 md:col-span-3 ${isDetailVisible ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0'} `}
           >

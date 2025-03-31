@@ -67,7 +67,7 @@ export default function FacilityDetailModal({ data, onClose }) {
       {/* 버튼 영역 */}
       <div className="flex gap-2 p-4">
         <button className="bg-primary hover:bg-primary/80 text-h3 h-10 flex-1 rounded-lg text-gray-600 transition-all duration-200 hover:-translate-y-0.5">
-          저장
+          수정
         </button>
         <button className="text-h3 h-10 flex-1 rounded-lg bg-red-500 text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-red-400">
           삭제
