@@ -35,7 +35,7 @@ export default function NavBar({ items, activeItem, onSelect }) {
                   <item.icon className="h-6 w-6" />
 
                   {/* 툴팁 (hover 시 보임) */}
-                  <span className="bg-primary text-body-2 pointer-events-none absolute top-1/2 left-full z-10 mx-2 w-full -translate-y-1/2 scale-0 rounded-sm whitespace-nowrap text-gray-600 transition-all group-hover:scale-100">
+                  <span className="bg-primary text-body-2 pointer-events-none absolute top-1/2 left-full z-50 mx-2 w-full -translate-y-1/2 scale-0 rounded-sm whitespace-nowrap text-gray-600 transition-all group-hover:scale-100">
                     {item.label}
                   </span>
                 </button>
