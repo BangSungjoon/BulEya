@@ -89,8 +89,8 @@ export default function MapPage() {
     if (!selectedIcon) return
 
     setTempMarker({
-      coord_x,
-      coord_y,
+      coord_x: Math.round(coord_x),
+      coord_y: Math.round(coord_y),
       iconId: selectedIcon,
       floor: selectedFloor,
     })
@@ -102,6 +102,29 @@ export default function MapPage() {
   useEffect(() => {
     if (tempMarker) {
       console.log('🟢 tempMarker 업데이트됨:', tempMarker)
+    }
+  }, [tempMarker])
+
+  // ==================
+  // 모달 관련
+  // ==================
+  const isCctv = tempMarker?.iconId === 'cctv'
+  const isExit = tempMarker?.iconId === 'exit'
+
+  const handleCloseModal = () => {
+    setIsModalVisible(false) // 먼저 애니메이션 시작
+
+    setTimeout(() => {
+      setTempMarker(null) // 애니메이션 끝난 후 제거, 모달 닫으면 임시 마커 삭제
+    }, 300) // duration과 맞춰주기 (ms)
+  }
+
+  // 모달 애니메이션션
+  const [isModalVisible, setIsModalVisible] = useState(false)
+
+  useEffect(() => {
+    if (tempMarker) {
+      setIsModalVisible(true)
     }
   }, [tempMarker])
 
@@ -156,20 +179,27 @@ export default function MapPage() {
           <Icon className="text-primary h-6 w-6" />
         </div>
       )}
-      <div className="pointer-events-none absolute inset-0 z-10 mx-5 mt-30 mb-5 grid grid-cols-12">
-        {/* 장비 등록/삭제/수정 모달 */}
-        {/* FacilityEditModal만 pointer-events 살림 */}
-        <div className="pointer-events-auto col-span-5 md:col-span-3">
-          <FacilityEditModal
-            initialData={{
-              station_id: stationId,
-              floor: selectedFloor,
-              coord_x: tempMarker?.coord_x,
-              coord_y: tempMarker?.coord_y,
-            }}
-          />
+
+      {/* 장비 등록/삭제/수정 모달 */}
+      {mode === 'add' && tempMarker && (
+        <div className="pointer-events-none absolute inset-0 z-40 mx-5 mt-30 mb-5 grid grid-cols-12">
+          <div
+            className={`pointer-events-auto col-span-5 transform transition-all duration-300 md:col-span-3 ${isModalVisible ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0'}`}
+          >
+            <FacilityEditModal
+              initialData={{
+                station_id: stationId,
+                floor: selectedFloor,
+                coord_x: tempMarker.coord_x,
+                coord_y: tempMarker.coord_y,
+                is_cctv: isCctv,
+                is_exit: isExit,
+              }}
+              onClose={handleCloseModal}
+            />
+          </div>
         </div>
-      </div>
+      )}
     </div>
   )
 }

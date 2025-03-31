@@ -159,7 +159,7 @@ const MapBoxMap = ({ mode, mapImageUrl, onMapClick, tempMarker }) => {
 
           return (
             <div
-              className="pointer-events-none absolute z-50"
+              className="pointer-events-none absolute z-10"
               style={{
                 top: `${projected.y}px`,
                 left: `${projected.x}px`,
