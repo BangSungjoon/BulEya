@@ -23,17 +23,31 @@ export default function MapPage() {
 
   const [floorDataList, setFloorDataList] = useState([]) // 전체 응답 저장
   const [selectedFloor, setSelectedFloor] = useState(null) // 선택된 층 번호
+  const [selectedIcon, setSelectedIcon] = useState(null) // IconBox 관련
 
   // 지도 이미지 불러오는 API 호출
   useEffect(() => {
     const loadFloorData = async () => {
       try {
         const response = await fetchMapImage(stationId)
+        console.log('응답:', response.data)
+        const result = response.data.result
         // is_success에 따른 에러 처리 필요
-        const data = response.data.result
+        // const data = response.data.result
 
-        setFloorDataList(data)
-        setSelectedFloor(data[0].floor) // 첫 번째 층이 기본
+        // setFloorDataList(data)
+        // setSelectedFloor(data[0].floor) // 첫 번째 층이 기본
+
+        const parsedData = result.map((data) => ({
+          floor: data.floor, // 층 정보가 이 안에 있다고 가정
+          image_url: data.image_url,
+          beacon_list: data.beacon_list,
+          edge_list: data.edge_list,
+        }))
+        console.log('파싱된 데이터:', parsedData)
+
+        setFloorDataList(parsedData)
+        setSelectedFloor(parsedData[0].floor) // 첫 번째 층이 기본
       } catch (error) {
         console.error('지도 데이터 로드 실패: ', error)
       }
@@ -43,12 +57,7 @@ export default function MapPage() {
   }, [stationId])
 
   // 현재 선택된 층에 해당하는 데이터 추출
-  let selectedData = floorDataList.find((f) => f.floor === selectedFloor)
-
-  // ----------------------
-  // IconBox 관련
-  // ----------------------
-  const [selectedIcon, setSelectedIcon] = useState(null)
+  const selectedData = floorDataList.find((f) => f.floor === selectedFloor)
 
   // -----------------------
   // 마우스 아이콘 관련
@@ -181,6 +190,9 @@ export default function MapPage() {
         <MapBoxMap
           mode={mode}
           mapImageUrl={selectedData.image_url}
+          beaconList={selectedData.beacon_list}
+          edgeList={selectedData.edge_list}
+          selectedIcon={selectedIcon}
           onMapClick={mode === 'add' ? handleMapClick : undefined}
           tempMarker={tempMarker}
         />

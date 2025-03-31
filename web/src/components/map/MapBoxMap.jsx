@@ -1,19 +1,31 @@
 import { useRef, useEffect } from 'react'
 import mapboxgl from 'mapbox-gl'
 import 'mapbox-gl/dist/mapbox-gl.css'
+import ReactDOM from 'react-dom/client'
 
-import CCTV from '@/assets/icons/CCTV.svg?react'
+// 아이콘 경로
 import Beacon from '@/assets/icons/Beacon.svg?react'
+import CCTV from '@/assets/icons/CCTV.svg?react'
 import Exit from '@/assets/icons/Exit.svg?react'
 
 // MapBox access 토큰
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN
 
-const MapBoxMap = ({ mode, mapImageUrl, onMapClick, tempMarker }) => {
+const MapBoxMap = ({
+  mode,
+  mapImageUrl,
+  beaconList = [],
+  edgeList = [],
+  selectedIcon,
+  onMapClick,
+  tempMarker,
+}) => {
   // 지도 컨테이너 요소를 참조할 ref
   const mapContainer = useRef(null)
   // Mapbox의 Map 객체를 저장할 ref (재렌더링 방지)
   const mapRef = useRef(null)
+  // 기존 마커들을 지우기 위해 따로 저장
+  const markerRefList = useRef([])
 
   // 이미지 사이즈 (픽셀)
   const imageWidth = 5000
@@ -31,6 +43,9 @@ const MapBoxMap = ({ mode, mapImageUrl, onMapClick, tempMarker }) => {
   const bottom = -coordinateHeight / 2 // -30
   const left = -coordinateWidth / 2 // -19.25
   const right = coordinateWidth / 2 // +19.25
+
+  // 간선 레이어 ID 고정
+  const lineLayerId = 'beacon-edges'
 
   // 픽셀 좌표를 가상의 위경도 좌표로 변환하는 함수
   const convertPixelToLngLat = (x, y, width, height) => {
@@ -137,6 +152,105 @@ const MapBoxMap = ({ mode, mapImageUrl, onMapClick, tempMarker }) => {
       map.off('click', handleClick)
     }
   }, [onMapClick])
+
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map) return
+
+    const drawAll = () => {
+      try {
+        // 기존 마커 제거
+        markerRefList.current.forEach((m) => m.remove())
+        markerRefList.current = []
+
+        // 더미 데이터 때문에 크기 조정
+        // const xScale = imageWidth / 600
+        // const yScale = imageHeight / 400
+
+        // beacon_code → [lng, lat] 매핑용 객체
+        const beaconMap = {}
+
+        beaconList.forEach((beacon) => {
+          console.log('비콘:', beacon)
+          const { coord_x, coord_y, isExit, isCctv, name, beacon_code } = beacon
+
+          // const scaledX = (coord_x + 100) * xScale
+          // const scaledY = coord_y * yScale
+          // const [lng, lat] = convertPixelToLngLat(coord_x, coord_y, imageWidth, imageHeight)
+          const [lng, lat] = [coord_x, coord_y]
+
+          // 위치 저장
+          beaconMap[beacon_code] = [lng, lat]
+
+          let IconComponent = Beacon
+          if (isExit) IconComponent = Exit
+          else if (isCctv) IconComponent = CCTV
+
+          const container = document.createElement('div')
+          ReactDOM.createRoot(container).render(<IconComponent className="text-primary h-8 w-8" />)
+
+          // 이벤트 여기다 넣어!!
+          container.addEventListener('click', () => {
+            alert(`[마커 클릭] ${name}`)
+          })
+
+          const marker = new mapboxgl.Marker({ element: container })
+            .setLngLat([lng, lat])
+            .addTo(map)
+
+          markerRefList.current.push(marker)
+        })
+
+        // 기존 선 레이어 제거
+        if (map.getLayer(lineLayerId)) map.removeLayer(lineLayerId)
+        if (map.getSource(lineLayerId)) map.removeSource(lineLayerId)
+
+        // edgeList → GeoJSON 변환
+        const lineFeatures = edgeList
+          .map((edge) => {
+            const a = beaconMap[edge.beacon_a_code]
+            const b = beaconMap[edge.beacon_b_code]
+            if (!a || !b) return null
+            return {
+              type: 'Feature',
+              geometry: {
+                type: 'LineString',
+                coordinates: [a, b],
+              },
+              properties: {},
+            }
+          })
+          .filter(Boolean)
+
+        // GeoJSON source 생성
+        map.addSource(lineLayerId, {
+          type: 'geojson',
+          data: {
+            type: 'FeatureCollection',
+            features: lineFeatures,
+          },
+        })
+
+        // 선 레이어 추가
+        map.addLayer({
+          id: lineLayerId,
+          type: 'line',
+          source: lineLayerId,
+          paint: {
+            'line-color': '#8aea52',
+            'line-width': 3,
+          },
+        })
+      } catch (error) {
+        console.error('지도 그리기 실패:', error)
+      }
+    }
+    if (map.isStyleLoaded()) {
+      drawAll()
+    } else {
+      map.once('styledata', drawAll)
+    }
+  }, [beaconList, edgeList, mapImageUrl])
 
   return (
     <div className="relative h-full w-full">
