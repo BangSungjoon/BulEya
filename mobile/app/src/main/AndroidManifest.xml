@@ -57,10 +57,5 @@
             android:exported="false"
             android:foregroundServiceType="remoteMessaging">
         </service>
-        <service
-            android:name=".service.BeaconService"
-            android:exported="false"
-            android:foregroundServiceType="location">
-        </service>
     </application>
 </manifest>
