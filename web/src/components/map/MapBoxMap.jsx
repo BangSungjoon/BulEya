@@ -18,6 +18,7 @@ const MapBoxMap = ({
   edgeList = [],
   selectedIcon,
   onMapClick,
+  onMarkerClick,
   tempMarker,
 }) => {
   // 지도 컨테이너 요소를 참조할 ref
@@ -171,7 +172,6 @@ const MapBoxMap = ({
         const beaconMap = {}
 
         beaconList.forEach((beacon) => {
-          console.log('비콘:', beacon)
           const { coord_x, coord_y, isExit, isCctv, name, beacon_code } = beacon
 
           // const scaledX = (coord_x + 100) * xScale
@@ -191,7 +191,13 @@ const MapBoxMap = ({
 
           // 이벤트 여기다 넣어!!
           container.addEventListener('click', () => {
-            alert(`[마커 클릭] ${name}`)
+            if (mode === 'route') {
+              console.log('여기!!!!!!')
+
+              onMarkerClick?.(beacon) // ❗존재할 때만 호출
+            } else {
+              alert(`[마커 클릭] ${name}`)
+            }
           })
 
           const marker = new mapboxgl.Marker({ element: container })

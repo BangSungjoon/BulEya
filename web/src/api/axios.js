@@ -20,3 +20,8 @@ export const fetchMapImage = async (stationId) => {
 export const createFacility = async (data) => {
   return instance.post('/api/beacon', data)
 }
+
+// 간선 등록 API
+export const createEdge = async (data) => {
+  return instance.post('/api/edge', data)
+}

@@ -14,7 +14,7 @@ import Exit from '@/assets/icons/Exit.svg?react'
 import Pin from '@/assets/icons/Pin.svg?react'
 
 // api 요청
-import { fetchMapImage } from '@/api/axios'
+import { fetchMapImage, createEdge } from '@/api/axios'
 
 export default function MapPage() {
   const location = useLocation()
@@ -155,7 +155,7 @@ export default function MapPage() {
   }
 
   // 시설 등록 되면 호출될 함수
-  const handleFacilitySaved = async () => {
+  const reloadFloorData = async () => {
     try {
       const response = await fetchMapImage(stationId)
       const result = response.data.result
@@ -170,7 +170,7 @@ export default function MapPage() {
       setFloorDataList(parsedData)
       setSelectedFloor((prev) => prev) // 현재 층 그대로 유지
     } catch (err) {
-      console.error('마커 재로딩 실패:', err)
+      console.error('설비 재로딩 실패:', err)
     }
   }
 
@@ -186,6 +186,72 @@ export default function MapPage() {
       })
     }
   }, [mode])
+
+  // ==================
+  // 간선 등록 관련
+  // ==================
+  const [selectedNodes, setSelectedNodes] = useState([])
+
+  // 간선 모드일 때 비콘 클릭 핸들러
+  const handleMarkerClick = (beacon) => {
+    if (mode !== 'route') return // route 모드가 아니면 무시
+
+    // 상태 업데이트 함수에 콜백 패턴 사용
+    setSelectedNodes((prev) => {
+      // 이미 선택된 비콘이면 중복 클릭 방지
+      const alreadySelected = prev.some((b) => b.beacon_code === beacon.beacon_code)
+      if (alreadySelected) {
+        console.log('⚠️ 이미 선택된 비콘입니다:')
+        return prev
+      }
+
+      const updated = [...prev, beacon] // 새로 선택된 비콘 추가
+      console.log('🟢 선택된 비콘 목록:', updated)
+      // 두 개 선택된 경우: 간선 등록 수행
+      if (updated.length === 2) {
+        const [a, b] = updated
+        const distance = calcDistance(a, b)
+
+        registerEdge({
+          station_id: stationId,
+          floor: selectedFloor,
+          beacon_a_code: a.beacon_code,
+          beacon_b_code: b.beacon_code,
+          distance: distance,
+        })
+
+        return [] // 등록 후 상태 초기화
+      }
+
+      return updated // 아직 1개만 선택된 경우는 저장
+    })
+  }
+
+  // 거리 계산 함수
+  const calcDistance = (a, b) => {
+    const dx = a.coord_x - b.coord_x
+    const dy = a.coord_y - b.coord_y
+    return Math.round(Math.sqrt(dx * dx + dy * dy))
+  }
+
+  // 간선 등록 API 호출 함수
+  const registerEdge = async (payload) => {
+    try {
+      console.log('자 여기!!', payload)
+
+      const response = await createEdge(payload)
+      alert('✅ 간선 등록 완료!')
+
+      console.log('서버 응답:', response)
+
+      setSelectedNodes([])
+      await reloadFloorData()
+    } catch (err) {
+      console.error('❌ 간선 등록 실패:', err)
+      alert('간선 등록에 실패했습니다.')
+      setSelectedNodes([])
+    }
+  }
 
   // -------------------
   // 안내문 관련
@@ -208,7 +274,9 @@ export default function MapPage() {
           edgeList={selectedData.edge_list}
           selectedIcon={selectedIcon}
           onMapClick={mode === 'add' ? handleMapClick : undefined}
+          onMarkerClick={mode === 'route' ? handleMarkerClick : undefined}
           tempMarker={tempMarker}
+          selectedNodes={selectedNodes} // 간선 추가 시 선택된 노트 하이라이트
         />
       )}
 
@@ -265,7 +333,7 @@ export default function MapPage() {
                 is_exit: isExit,
               }}
               onClose={handleCloseModal}
-              onSuccess={handleFacilitySaved}
+              onSuccess={reloadFloorData}
             />
           </div>
         </div>
