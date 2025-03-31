@@ -5,7 +5,7 @@ import Check from '@/assets/icons/Check.svg?react'
 
 import { createFacility } from '@/api/axios'
 
-export default function FacilityEditModal({ initialData, onClose }) {
+export default function FacilityEditModal({ initialData, onClose, onSuccess }) {
   const [formData, setFormData] = useState({
     beacon_code: '',
     name: '',
@@ -33,8 +33,8 @@ export default function FacilityEditModal({ initialData, onClose }) {
       const response = await createFacility(payload)
       console.log('✅ 저장 성공:', response.data)
 
-      // 모달 닫기
-      onClose?.()
+      onSuccess?.() // 저장 성공 시 호출
+      onClose?.() // 모달 닫기
     } catch (error) {
       console.error('❌ 저장 실패:', error)
       alert('저장 중 오류가 발생했습니다!')

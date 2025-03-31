@@ -110,12 +110,6 @@ export default function MapPage() {
     setSelectedIcon(null)
   }
 
-  useEffect(() => {
-    if (tempMarker) {
-      console.log('🟢 tempMarker 업데이트됨:', tempMarker)
-    }
-  }, [tempMarker])
-
   // ==================
   // 모달 관련
   // ==================
@@ -158,6 +152,26 @@ export default function MapPage() {
     setTimeout(() => {
       setSelectedFacility(null) // 모달 실제 제거
     }, 300) // transition duration과 맞춰주기 (ms 단위)
+  }
+
+  // 시설 등록 되면 호출될 함수
+  const handleFacilitySaved = async () => {
+    try {
+      const response = await fetchMapImage(stationId)
+      const result = response.data.result
+
+      const parsedData = result.map((data) => ({
+        floor: data.floor,
+        image_url: data.image_url,
+        beacon_list: data.beacon_list,
+        edge_list: data.edge_list,
+      }))
+
+      setFloorDataList(parsedData)
+      setSelectedFloor((prev) => prev) // 현재 층 그대로 유지
+    } catch (err) {
+      console.error('마커 재로딩 실패:', err)
+    }
   }
 
   // 임시 데이터
@@ -251,6 +265,7 @@ export default function MapPage() {
                 is_exit: isExit,
               }}
               onClose={handleCloseModal}
+              onSuccess={handleFacilitySaved}
             />
           </div>
         </div>
