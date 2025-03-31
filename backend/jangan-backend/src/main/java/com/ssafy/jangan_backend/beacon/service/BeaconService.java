@@ -26,7 +26,6 @@ public class BeaconService {
 
     public ResponseBeaconIdDto saveBeacon(RequestRegisterBeaconDto dto) {
         // staionId와 floor로 mapId 찾기
-        System.out.println( "===========" + dto.getStationId() + " " + dto.getFloor());
         Map map = mapRepository.findByStationIdAndFloor(dto.getStationId(), dto.getFloor())
                 .orElseThrow(() -> new CustomIllegalArgumentException(BaseResponseStatus.MAP_NOT_FOUND_EXCEPTION));
 
