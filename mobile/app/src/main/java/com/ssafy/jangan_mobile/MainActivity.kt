@@ -23,10 +23,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.OnLifecycleEvent
 import com.google.firebase.Firebase
 import com.google.firebase.FirebaseApp
 import com.google.firebase.messaging.messaging
 import com.google.gson.Gson
+import com.ssafy.jangan_mobile.screen.FireNotificationScreen
 import com.ssafy.jangan_mobile.service.PersistentService
 import com.ssafy.jangan_mobile.service.dto.FireNotificationDto
 import com.ssafy.jangan_mobile.store.FireNotificationStore
@@ -94,13 +97,13 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         val fromNotification = intent?.getBooleanExtra("fromNotification", false) == true
-        val jsonString = intent?.getStringExtra("notificationString")
+        val jsonString = intent?.getStringExtra("jsonString")
+        val fireNotificationDto = Gson().fromJson(jsonString, FireNotificationDto::class.java)
+        val nearestBeaconCode = intent?.getIntExtra("nearestBeaconCode", -1)
+        val notificationBeaconCode = intent?.getIntExtra("notificationBeaconCode", -1)
 
-        if (fromNotification && jsonString != null) {
-            val dto = Gson().fromJson(jsonString, FireNotificationDto::class.java)
-            FireNotificationStore.setNotification(dto)
-        }
-
+        FireNotificationStore.setNotification(fireNotificationDto)
+        FireNotificationStore.setCurrentNotificationBeaconCode(notificationBeaconCode)
         setContent {
             AppNavigation(startFromNotification = fromNotification)
         }
@@ -138,8 +141,9 @@ class MainActivity : ComponentActivity() {
                 startActivity(intent)
             }
         }
-
     }
+
+
 }
 
 @Composable

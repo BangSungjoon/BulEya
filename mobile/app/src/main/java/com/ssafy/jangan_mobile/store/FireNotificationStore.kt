@@ -10,7 +10,19 @@ object FireNotificationStore {
     private val _fireNotificationDto = MutableLiveData<FireNotificationDto?>()
     val fireNotificationDto: LiveData<FireNotificationDto?> = _fireNotificationDto
 
+    private val _currentNotificationBeaconCode = MutableLiveData<Int?>()
+    val currentNotificationBeaconCode = _currentNotificationBeaconCode
+
+    private val _currentLocationBeaconCode = MutableLiveData<Int?>()
+    val currentLocationBeaconCode = _currentLocationBeaconCode
+
     fun setNotification(dto: FireNotificationDto?){
         _fireNotificationDto.value = dto
+    }
+    fun setCurrentNotificationBeaconCode(beaconCode: Int?){
+        _currentNotificationBeaconCode.value = beaconCode
+    }
+    fun setCurrentLocationBeaconCode(beaconCode: Int?){
+        _currentLocationBeaconCode.value = beaconCode
     }
 }

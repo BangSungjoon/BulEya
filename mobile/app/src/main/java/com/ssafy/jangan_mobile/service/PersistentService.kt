@@ -10,6 +10,7 @@ import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
+import androidx.lifecycle.findViewTreeLifecycleOwner
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -32,7 +33,7 @@ class PersistentService : Service() {
         }
 
         // 여기에 백그라운드 작업 넣기
-        startSomeBackgroundWork()
+        //startSomeBackgroundWork()
 
         return START_STICKY
     }
