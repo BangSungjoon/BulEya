@@ -7,12 +7,14 @@ import com.ssafy.jangan_mobile.service.dto.FireNotificationDto
 object FireNotificationStore {
     //var fireNotificationDto: FireNotificationDto? = null
 
+    // 화재 정보 코드, 추적해야하는 것
     private val _fireNotificationDto = MutableLiveData<FireNotificationDto?>()
     val fireNotificationDto: LiveData<FireNotificationDto?> = _fireNotificationDto
 
     private val _currentNotificationBeaconCode = MutableLiveData<Int?>()
     val currentNotificationBeaconCode = _currentNotificationBeaconCode
 
+    //현재 위치 코드, 추적해야하는 것
     private val _currentLocationBeaconCode = MutableLiveData<Int?>()
     val currentLocationBeaconCode = _currentLocationBeaconCode
 

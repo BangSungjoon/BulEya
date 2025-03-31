@@ -1,5 +1,8 @@
 package com.ssafy.jangan_mobile.service.dto
 
+import retrofit2.http.GET
+import retrofit2.http.Query
+
 interface EscapeRouteApi {
     @GET("/api/escape-route")
     suspend fun getEscapeRoute(

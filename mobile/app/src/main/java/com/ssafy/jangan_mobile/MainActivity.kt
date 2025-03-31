@@ -35,7 +35,11 @@ import com.ssafy.jangan_mobile.service.dto.FireNotificationDto
 import com.ssafy.jangan_mobile.store.FireNotificationStore
 import com.ssafy.jangan_mobile.ui.navigation.AppNavigation
 import com.ssafy.jangan_mobile.ui.theme.JanganmobileTheme
+import dagger.hilt.android.AndroidEntryPoint
+import dagger.hilt.android.HiltAndroidApp
 
+
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     private val permissions = mutableListOf<String>().apply {

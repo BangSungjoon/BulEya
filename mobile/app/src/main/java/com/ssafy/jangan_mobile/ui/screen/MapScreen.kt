@@ -4,6 +4,7 @@ import android.graphics.BitmapFactory
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -12,24 +13,25 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.mapbox.geojson.Point
-import com.mapbox.maps.MapView
-import com.mapbox.maps.Style
+import com.mapbox.maps.CameraBoundsOptions
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.CoordinateBounds
+import com.mapbox.maps.MapView
 import com.mapbox.maps.extension.style.image.image
 import com.mapbox.maps.extension.style.layers.generated.backgroundLayer
 import com.mapbox.maps.extension.style.layers.generated.rasterLayer
 import com.mapbox.maps.extension.style.sources.generated.imageSource
 import com.mapbox.maps.extension.style.style
-import com.mapbox.maps.plugin.annotation.generated.LineAnnotationOptions
 import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
-import com.mapbox.maps.plugin.annotation.generated.createLineAnnotationManager
+import com.mapbox.maps.plugin.annotation.annotations
 import com.mapbox.maps.plugin.annotation.generated.createPointAnnotationManager
+import com.mapbox.maps.plugin.annotation.generated.createPolylineAnnotationManager
+import com.mapbox.maps.plugin.annotation.generated.PolylineAnnotationOptions
 import com.mapbox.maps.plugin.gestures.gestures
 import com.ssafy.jangan_mobile.R
 import com.ssafy.jangan_mobile.store.FireNotificationStore
-import com.ssafy.jangan_mobile.ui.viewmodel.EscapeRouteViewModel
-import kotlinx.coroutines.launch
+import com.ssafy.jangan_mobile.ui.viewmodel.MapViewModel
+import com.ssafy.jangan_mobile.viewmodel.EscapeRouteViewModel
 
 @Composable
 fun EscapeRouteMapScreen(
@@ -64,15 +66,18 @@ fun EscapeRouteMapScreen(
     }
 
     LaunchedEffect(Unit) {
-        mapViewModel.fetchMapImage("222") // 실제 역코드로 교체
+        mapViewModel.fetchMapImage("222")
     }
 
     LaunchedEffect(imageUrl) {
         if (imageUrl != null) {
             mapView.getMapboxMap().loadStyle(
                 style {
-                    +backgroundLayer("background") { backgroundColor("#EFF0F1") }
+                    +backgroundLayer("background") {
+                        backgroundColor("#EFF0F1")
+                    }
                     +image("marker-icon", BitmapFactory.decodeResource(context.resources, R.drawable.marker_icon)) {}
+                    +image("fire-icon", BitmapFactory.decodeResource(context.resources, R.drawable.fire)) {}
                     +imageSource("custom-map") {
                         url(imageUrl!!)
                         coordinates(
@@ -80,11 +85,13 @@ fun EscapeRouteMapScreen(
                                 convertPixelToLngLat(0, 0),
                                 convertPixelToLngLat(imageWidth, 0),
                                 convertPixelToLngLat(imageWidth, imageHeight),
-                                convertPixelToLngLat(0, imageHeight)
+                                convertPixelToLngLat(0, imageHeight),
                             )
                         )
                     }
-                    +rasterLayer("custom-map-layer", "custom-map") { rasterOpacity(1.0) }
+                    +rasterLayer("custom-map-layer", "custom-map") {
+                        rasterOpacity(1.0)
+                    }
                 }
             ) {
                 val center = convertPixelToLngLat(imageWidth / 2, imageHeight / 2)
@@ -94,23 +101,53 @@ fun EscapeRouteMapScreen(
                         .zoom(1.0)
                         .build()
                 )
+
                 mapView.getMapboxMap().setBounds(
-                    CoordinateBounds(
-                        Point.fromLngLat(left, bottom),
-                        Point.fromLngLat(right, top)
-                    )
+                    CameraBoundsOptions.Builder()
+                        .bounds(
+                            CoordinateBounds(
+                                Point.fromLngLat(left, bottom),
+                                Point.fromLngLat(right, top)
+                            )
+                        )
+                        .build()
                 )
+
                 mapView.gestures.pitchEnabled = true
                 mapView.gestures.rotateEnabled = true
                 mapView.gestures.doubleTapToZoomInEnabled = true
-                mapView.getMapboxMap().setRenderWorldCopies(false)
 
-                fireNotificationDto?.let { fire ->
-                    val firePos = convertPixelToLngLat(fire.coordX, fire.CoordY)
+                val annotationApi = mapView.annotations
+                val pointAnnotationManager = annotationApi.createPointAnnotationManager()
+
+                fireNotificationDto?.beaconNotificationDtos?.forEach { beacon ->
+                    val pos = convertPixelToLngLat(beacon.coordX, beacon.coordY)
                     val fireMarker = PointAnnotationOptions()
-                        .withPoint(Point.fromLngLat(firePos[0], firePos[1]))
-                        .withIconImage("marker-icon")
-                    mapView.annotations.createPointAnnotationManager().create(fireMarker)
+                        .withPoint(Point.fromLngLat(pos[0], pos[1]))
+                        .withIconImage("fire-icon")
+                    pointAnnotationManager.create(fireMarker)
+                }
+
+                fireNotificationDto?.beaconNotificationDtos
+                    ?.find { it.beaconCode == currentLocationCode }
+                    ?.let { beacon ->
+                        val pos = convertPixelToLngLat(beacon.coordX, beacon.coordY)
+                        val myMarker = PointAnnotationOptions()
+                            .withPoint(Point.fromLngLat(pos[0], pos[1]))
+                            .withIconImage("marker-icon")
+                        pointAnnotationManager.create(myMarker)
+                    }
+
+                if (showRoute.value && routePoints.isNotEmpty()) {
+                    val polylineManager = annotationApi.createPolylineAnnotationManager()
+                    val polyline = PolylineAnnotationOptions()
+                        .withPoints(routePoints.map {
+                            val lngLat = convertPixelToLngLat(it.x, it.y)
+                            Point.fromLngLat(lngLat[0], lngLat[1])
+                        })
+                        .withLineColor("#00FF00")
+                        .withLineWidth(6.0)
+                    polylineManager.create(polyline)
                 }
             }
         }
@@ -121,19 +158,17 @@ fun EscapeRouteMapScreen(
 
         fireNotificationDto?.let {
             Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
-                Text("🔥 화재 발생!", color = Color.Red)
+                Text("\uD83D\uDD25 화재 발생!", color = Color.Red)
                 Spacer(modifier = Modifier.height(8.dp))
-                // 좌표로 임시테스트
                 Button(onClick = {
-                    viewModel.loadMockRoute()  // 실제 API 호출 대신 임시 경로
+                    viewModel.loadMockRoute()
                     showRoute.value = true
                 }) {
                     Text("대피경로 테스트")
                 }
-                // 실제 API 호출
                 Button(onClick = {
                     currentLocationCode?.let { code ->
-                        viewModel.fetchEscapeRoute(222, code) // 222는 station_id 예시
+                        viewModel.fetchEscapeRoute(222, code)
                         showRoute.value = true
                     }
                 }) {
@@ -142,23 +177,176 @@ fun EscapeRouteMapScreen(
             }
         }
     }
-
-    if (showRoute.value && routePoints.isNotEmpty()) {
-        LaunchedEffect(routePoints) {
-            mapView.getMapboxMap().getStyle()?.let {
-                val lineManager = mapView.annotations.createLineAnnotationManager()
-                val line = LineAnnotationOptions()
-                    .withPoints(routePoints.map { pt ->
-                        val lngLat = convertPixelToLngLat(pt.x, pt.y)
-                        Point.fromLngLat(lngLat[0], lngLat[1])
-                    })
-                    .withLineColor("#00FF00")
-                    .withLineWidth(6.0)
-                lineManager.create(line)
-            }
-        }
-    }
 }
+
+
+//package com.ssafy.jangan_mobile.ui.screen
+//
+//import android.graphics.BitmapFactory
+//import androidx.compose.foundation.layout.*
+//import androidx.compose.material3.*
+//import androidx.compose.runtime.*
+//import androidx.compose.runtime.livedata.observeAsState
+//import androidx.compose.ui.Modifier
+//import androidx.compose.ui.graphics.Color
+//import androidx.compose.ui.platform.LocalContext
+//import androidx.compose.ui.res.painterResource
+//import androidx.compose.ui.unit.dp
+//import androidx.hilt.navigation.compose.hiltViewModel
+//import androidx.navigation.NavController
+//import com.mapbox.geojson.Point
+//import com.mapbox.maps.CameraBoundsOptions
+//import com.mapbox.maps.CameraOptions
+//import com.mapbox.maps.CoordinateBounds
+//import com.mapbox.maps.MapboxMap
+//import com.mapbox.maps.extension.compose.MapboxMap
+//import com.mapbox.maps.compose.annotation.*
+//import com.mapbox.maps.compose.style.sources.generated.imageSource
+//import com.mapbox.maps.compose.style.layers.generated.backgroundLayer
+//import com.mapbox.maps.compose.style.layers.generated.rasterLayer
+//import com.mapbox.maps.compose.style.*
+//import com.mapbox.maps.extension.style.layers.generated.backgroundLayer
+//import com.ssafy.jangan_mobile.R
+//import com.ssafy.jangan_mobile.store.FireNotificationStore
+//import com.ssafy.jangan_mobile.ui.viewmodel.MapViewModel
+//import com.ssafy.jangan_mobile.viewmodel.EscapeRouteViewModel
+//
+//@Composable
+//fun EscapeRouteMapScreen(
+//    navController: NavController,
+//    viewModel: EscapeRouteViewModel = hiltViewModel(),
+//    mapViewModel: MapViewModel = hiltViewModel()
+//) {
+//    val context = LocalContext.current
+//
+//    val fireNotificationDto by FireNotificationStore.fireNotificationDto.observeAsState()
+//    val currentLocationCode by FireNotificationStore.currentLocationBeaconCode.observeAsState()
+//    val routePoints by viewModel.route.observeAsState(emptyList())
+//    val imageUrl by mapViewModel.mapImageUrl.collectAsState()
+//
+//    val showRoute = remember { mutableStateOf(false) }
+//
+//    // 지도 이미지 크기 및 범위 설정
+//    val imageWidth = 5000
+//    val imageHeight = 7800
+//    val aspectRatio = imageWidth.toDouble() / imageHeight.toDouble()
+//    val coordinateHeight = 60.0
+//    val coordinateWidth = coordinateHeight * aspectRatio
+//    val top = coordinateHeight / 2
+//    val bottom = -coordinateHeight / 2
+//    val left = -coordinateWidth / 2
+//    val right = coordinateWidth / 2
+//
+//    fun convertPixelToLngLat(x: Int, y: Int): List<Double> {
+//        val lng = left + (x.toDouble() / imageWidth) * (right - left)
+//        val lat = top - (y.toDouble() / imageHeight) * (top - bottom)
+//        return listOf(lng, lat)
+//    }
+//
+//    LaunchedEffect(Unit) {
+//        mapViewModel.fetchMapImage("222")
+//    }
+//
+//    val markerIcon = rememberIconImage(
+//        key = "marker-icon",
+//        painter = painterResource(R.drawable.marker_icon)
+//    )
+//    val fireIcon = rememberIconImage(
+//        key = "fire-icon",
+//        painter = painterResource(R.drawable.fire)
+//    )
+//
+//    Box(modifier = Modifier.fillMaxSize()) {
+//        if (imageUrl != null) {
+//            MapboxMap(
+//                modifier = Modifier.fillMaxSize(),
+//                cameraOptions = CameraOptions.Builder()
+//                    .center(Point.fromLngLat(0.0, 0.0))
+//                    .zoom(1.0)
+//                    .build(),
+//                cameraBounds = CameraBoundsOptions.Builder()
+//                    .bounds(CoordinateBounds(
+//                        Point.fromLngLat(left, bottom),
+//                        Point.fromLngLat(right, top)
+//                    )).build(),
+//                style = {
+//                    backgroundLayer("background") {
+//                        backgroundColor("#EFF0F1")
+//                    }
+//                    imageSource("custom-map") {
+//                        url(imageUrl!!)
+//                        coordinates(
+//                            listOf(
+//                                convertPixelToLngLat(0, 0),
+//                                convertPixelToLngLat(imageWidth, 0),
+//                                convertPixelToLngLat(imageWidth, imageHeight),
+//                                convertPixelToLngLat(0, imageHeight)
+//                            )
+//                        )
+//                    }
+//                    rasterLayer("custom-map-layer", "custom-map") {
+//                        rasterOpacity(1.0)
+//                    }
+//                }
+//            ) {
+//                // 🔥 화재 마커 표시
+//                fireNotificationDto?.beaconNotificationDtos?.forEach { beacon ->
+//                    val pos = convertPixelToLngLat(beacon.coordX, beacon.coordY)
+//                    PointAnnotation(point = Point.fromLngLat(pos[0], pos[1])) {
+//                        iconImage = fireIcon
+//                    }
+//                }
+//
+//                // 🧍 내 위치 마커 표시
+//                fireNotificationDto?.beaconNotificationDtos
+//                    ?.find { it.beaconCode == currentLocationCode }
+//                    ?.let { beacon ->
+//                        val pos = convertPixelToLngLat(beacon.coordX, beacon.coordY)
+//                        PointAnnotation(point = Point.fromLngLat(pos[0], pos[1])) {
+//                            iconImage = markerIcon
+//                        }
+//                    }
+//
+//                // ➤ 대피 경로 표시
+//                if (showRoute.value && routePoints.isNotEmpty()) {
+//                    PolylineAnnotation(
+//                        points = routePoints.map {
+//                            val lngLat = convertPixelToLngLat(it.x, it.y)
+//                            Point.fromLngLat(lngLat[0], lngLat[1])
+//                        }
+//                    ) {
+//                        lineColor = Color.Green
+//                        lineWidth = 6.0
+//                    }
+//                }
+//            }
+//        }
+//
+//        // 버튼 UI
+//        fireNotificationDto?.let {
+//            Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+//                Text("\uD83D\uDD25 화재 발생!", color = Color.Red)
+//                Spacer(modifier = Modifier.height(8.dp))
+//                Button(onClick = {
+//                    viewModel.loadMockRoute()
+//                    showRoute.value = true
+//                }) {
+//                    Text("대피경로 테스트")
+//                }
+//                Button(onClick = {
+//                    currentLocationCode?.let { code ->
+//                        viewModel.fetchEscapeRoute(222, code)
+//                        showRoute.value = true
+//                    }
+//                }) {
+//                    Text("대피경로 찾기")
+//                }
+//            }
+//        }
+//    }
+//}
+
+
 
 
 //

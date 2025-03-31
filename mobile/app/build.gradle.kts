@@ -24,7 +24,21 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        buildFeatures {
+            compose = true
+        }
     }
+    // 🔽 중복 클래스 제외
+//    packagingOptions {
+//        resources {
+//            excludes += setOf(
+//                "META-INF/DEPENDENCIES",
+//                "META-INF/INDEX.LIST",
+//                "dash-sdk.properties"
+//            )
+//        }
+//    }
 
     buildTypes {
         release {
@@ -61,6 +75,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
     implementation(libs.androidx.runtime.android)
     implementation(libs.play.services.maps)
+    implementation(libs.androidx.runtime.livedata)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -73,7 +88,9 @@ dependencies {
     implementation(libs.firebase.messaging)
     implementation("com.google.code.gson:gson:2.10.1")
 
+    // ✅ 맵박스
     implementation("com.mapbox.maps:android:11.10.3")
+//    implementation("com.mapbox.maps:extension-compose:11.10.3")
 
     implementation("com.davidgyoungtech:beacon-parsers:1.0")
     implementation("org.altbeacon:android-beacon-library:2+")
@@ -83,12 +100,14 @@ dependencies {
     kapt("com.github.bumptech.glide:compiler:4.16.0") // ✅ Glide 컴파일러 추가
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0") // JSON 변환기 추가
-    //implementation("com.mapbox.maps:android:10.15.1") //MapBox 라이브러리 추가
-   // implementation ("com.mapbox.mapboxsdk:mapbox-android-plugin-annotation-v9:0.9.0") //Mapbox Annotation Plugin 추가
 
     // Hilt 의존성
     implementation("com.google.dagger:hilt-android:2.50")
     kapt("com.google.dagger:hilt-compiler:2.50")
+
+    // ViewModel에서 Hilt 쓰려면 추가 (Compose에서는 없어도 되지만 안정성 위해 추가)
+    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+    kapt("androidx.hilt:hilt-compiler:1.2.0")
 
 
 }
