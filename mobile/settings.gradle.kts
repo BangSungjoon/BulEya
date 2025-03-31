@@ -20,6 +20,10 @@ pluginManagement {
                 create<BasicAuthentication>("basic")
             }
         }
+        // Hilt 추가
+        plugins {
+            id("com.google.dagger.hilt.android") version "2.50" // ✅ 여기서도 필요
+        }
 
         gradlePluginPortal()
     }

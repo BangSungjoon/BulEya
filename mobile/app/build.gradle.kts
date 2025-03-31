@@ -9,6 +9,8 @@ plugins {
     id("com.google.gms.google-services")
 //    id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.kapt")
+    id("com.google.dagger.hilt.android")
+
 }
 
 android {
@@ -58,6 +60,7 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.8.9")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
     implementation(libs.androidx.runtime.android)
+    implementation(libs.play.services.maps)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -82,4 +85,10 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-gson:2.9.0") // JSON 변환기 추가
     //implementation("com.mapbox.maps:android:10.15.1") //MapBox 라이브러리 추가
    // implementation ("com.mapbox.mapboxsdk:mapbox-android-plugin-annotation-v9:0.9.0") //Mapbox Annotation Plugin 추가
+
+    // Hilt 의존성
+    implementation("com.google.dagger:hilt-android:2.50")
+    kapt("com.google.dagger:hilt-compiler:2.50")
+
+
 }
