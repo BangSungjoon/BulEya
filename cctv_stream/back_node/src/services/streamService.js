@@ -1,5 +1,6 @@
 const Stream = require('node-rtsp-stream');
-const { initializeDb, storeCctvData } = require('../config/database');
+const { storeCctvData } = require('../config/database');
+const os = require('os');
 
 const usedPorts = new Set();
 const BASE_WS_PORT = 9999;
@@ -13,8 +14,6 @@ const getAvailablePort = () => {
 };
 
 const startStreams = async (stationId, cctvList) => {
-  await initializeDb(); // DB 초기화
-
   await Promise.all(
     cctvList.map(async (cctv) => {
       const { rtsp_url, beacon_code } = cctv;
@@ -25,16 +24,18 @@ const startStreams = async (stationId, cctvList) => {
         return;
       }
 
-      console.log(`스트림 시작: ${rtsp_url} on ws://localhost:${wsPort}`);
-
       const stream = new Stream({
         name: `rtsp_stream_${stationId}_${wsPort}`,
         streamUrl: rtsp_url,
         wsPort: wsPort,
       });
+      
+      //로컬 ip 주소
+      const ipAddress = Object.values(os.networkInterfaces()).flat().find(iface => iface.family === 'IPv4' && !iface.internal)?.address;
+      // const ipAddress = 'localhost'; // 로컬에서 테스트할 때는 localhost 사용
 
       stream.wsServer.on('connection', () => {
-        console.log(`웹소켓 연결됨: ws://localhost:${wsPort}`);
+        console.log(`웹 소켓 연결됨: ws://${ipAddress}:${wsPort}`);
       });
 
       stream.on('error', (err) => {
@@ -46,7 +47,7 @@ const startStreams = async (stationId, cctvList) => {
       activeStreams.set(beacon_code, stream);
 
       try {
-        const wsUrl = `ws://localhost:${wsPort}`;
+        const wsUrl = `ws://${ipAddress}:${wsPort}`;
         await storeCctvData(stationId, beacon_code, wsUrl);
         console.log(`DB에 저장된 웹소켓 주소: ${wsUrl}`);
       } catch (err) {

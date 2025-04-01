@@ -93,21 +93,7 @@ const sendFrames = async (stationId, cctvList) => {
   });
 
   await Promise.all(filePromises);
-
-//   console.log('FormData 내용 확인:');
-//   const formDataObj = {};
-//   for (const [key, value] of form.entries()) {
-//     if (key === 'files') {
-//       formDataObj[key] = formDataObj[key] || [];
-//       formDataObj[key].push({
-//         filename: value.name || 'unknown',
-//       });
-//     } else {
-//       formDataObj[key] = value;
-//     }
-//   }
-//   console.log(JSON.stringify(formDataObj, null, 2));
-
+  
   try {
     const response = await axios.post(`${fast_api_url}/ai/cctv-frame`, form, {
       headers: { 'Content-Type': 'multipart/form-data' },

@@ -34,4 +34,13 @@ const storeCctvData = (station_id, beacon_code, ws_url) => {
     });
 };
 
-module.exports = { initializeDb, storeCctvData };
+const getCctvData = (station_id, beacon_code) => {
+    return new Promise((resolve, reject) => {
+      db.get('SELECT ws_url FROM cctv_info WHERE station_id = ? AND beacon_code = ?', [station_id, beacon_code], (err, row) => {
+        if (err) reject(err);
+        else resolve(row ? row.ws_url : null);
+      });
+    });
+}
+
+module.exports = { initializeDb, storeCctvData, getCctvData };
