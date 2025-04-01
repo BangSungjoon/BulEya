@@ -25,3 +25,8 @@ export const createFacility = async (data) => {
 export const createEdge = async (data) => {
   return instance.post('/api/edge', data)
 }
+
+// 간선 삭제 API
+export const deleteEdge = async (data) => {
+  return instance.delete('/api/edge', { data })
+}

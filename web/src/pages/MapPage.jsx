@@ -14,7 +14,7 @@ import Exit from '@/assets/icons/Exit.svg?react'
 import Pin from '@/assets/icons/Pin.svg?react'
 
 // api 요청
-import { fetchMapImage, createEdge } from '@/api/axios'
+import { fetchMapImage, createEdge, deleteEdge } from '@/api/axios'
 
 export default function MapPage() {
   const location = useLocation()
@@ -253,6 +253,20 @@ export default function MapPage() {
     }
   }
 
+  // ==================
+  // 간선 삭제 관련
+  // ==================
+  const handleDeleteEdge = async (edgeId) => {
+    try {
+      await deleteEdge({ edge_id: edgeId })
+      alert('✅ 간선 삭제 완료')
+      await reloadFloorData()
+    } catch (err) {
+      console.error('삭제 실패:', err)
+      alert('❌ 간선 삭제 실패')
+    }
+  }
+
   // -------------------
   // 안내문 관련
   // -------------------
@@ -275,6 +289,7 @@ export default function MapPage() {
           selectedIcon={selectedIcon}
           onMapClick={mode === 'add' ? handleMapClick : undefined}
           onMarkerClick={mode === 'route' ? handleMarkerClick : undefined}
+          onDeleteEdge={handleDeleteEdge}
           tempMarker={tempMarker}
           selectedNodes={selectedNodes} // 간선 추가 시 선택된 노트 하이라이트
         />

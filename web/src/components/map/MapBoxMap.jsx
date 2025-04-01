@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect, useState } from 'react'
 import mapboxgl from 'mapbox-gl'
 import 'mapbox-gl/dist/mapbox-gl.css'
 import ReactDOM from 'react-dom/client'
@@ -7,6 +7,7 @@ import ReactDOM from 'react-dom/client'
 import Beacon from '@/assets/icons/Beacon.svg?react'
 import CCTV from '@/assets/icons/CCTV.svg?react'
 import Exit from '@/assets/icons/Exit.svg?react'
+import Delete from '@/assets/icons/Delete.svg?react'
 
 // MapBox access 토큰
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN
@@ -19,6 +20,7 @@ const MapBoxMap = ({
   selectedIcon,
   onMapClick,
   onMarkerClick,
+  onDeleteEdge,
   tempMarker,
 }) => {
   // 지도 컨테이너 요소를 참조할 ref
@@ -54,6 +56,33 @@ const MapBoxMap = ({
     const lat = top - (y / height) * (top - bottom) // Y축은 반대로 내려가므로 빼줌
     return [lng, lat]
   }
+
+  // =============
+  // 간선 삭제
+  // =============
+
+  // 삭제 버튼 상태
+  const [selectedEdge, setSelectedEdge] = useState(null)
+
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map) return
+
+    const handleClick = (e) => {
+      if (mode !== 'route') return
+
+      const edgeFeature = e.features?.[0]
+      if (edgeFeature?.properties?.edge_id) {
+        setSelectedEdge(edgeFeature)
+      }
+    }
+
+    map.on('click', lineLayerId, handleClick)
+
+    return () => {
+      map.off('click', lineLayerId, handleClick)
+    }
+  }, [mode])
 
   // 1. 최초 지도 객체 생성
   useEffect(() => {
@@ -223,7 +252,9 @@ const MapBoxMap = ({
                 type: 'LineString',
                 coordinates: [a, b],
               },
-              properties: {},
+              properties: {
+                edge_id: edge.edge_id, // 간선 삭제를 위해 추가
+              },
             }
           })
           .filter(Boolean)
@@ -244,7 +275,7 @@ const MapBoxMap = ({
           source: lineLayerId,
           paint: {
             'line-color': '#8aea52',
-            'line-width': 3,
+            'line-width': 6,
           },
         })
       } catch (error) {
@@ -290,6 +321,39 @@ const MapBoxMap = ({
             </div>
           )
         })()}
+
+      {/* X 버튼: hoveredEdge가 있을 때만 */}
+      {mode === 'route' && selectedEdge && (
+        <div
+          className="absolute z-50"
+          style={{
+            left: `${
+              (mapRef.current.project(selectedEdge.geometry.coordinates[0]).x +
+                mapRef.current.project(selectedEdge.geometry.coordinates[1]).x) /
+              2
+            }px`,
+            top: `${
+              (mapRef.current.project(selectedEdge.geometry.coordinates[0]).y +
+                mapRef.current.project(selectedEdge.geometry.coordinates[1]).y) /
+              2
+            }px`,
+            transform: 'translate(-50%, -50%)',
+          }}
+        >
+          <button
+            onClick={() => {
+              const edgeId = selectedEdge.properties.edge_id
+              if (edgeId) {
+                onDeleteEdge?.(edgeId)
+              }
+              setSelectedEdge(null)
+            }}
+            className="rounded-sm bg-red-600 p-1 text-xs text-white shadow-md hover:bg-red-500"
+          >
+            <Delete className="h-6 w-6" />
+          </button>
+        </div>
+      )}
     </div>
   )
 }
