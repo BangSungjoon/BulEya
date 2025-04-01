@@ -20,9 +20,9 @@ public class BeaconDto {
     private Integer coordX;
     private Integer coordY;
     private String cctvIp;
-    @JsonProperty("isCctv")
+    @JsonProperty("is_cctv")
     private Boolean isCctv;
-    @JsonProperty("isExit")
+    @JsonProperty("is_exit")
     private Boolean isExit;
 
 
@@ -53,5 +53,3 @@ public class BeaconDto {
                 .build();
     }
 }
-
-
