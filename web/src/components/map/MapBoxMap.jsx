@@ -3,7 +3,7 @@ import mapboxgl from 'mapbox-gl'
 import 'mapbox-gl/dist/mapbox-gl.css'
 import ReactDOM from 'react-dom/client'
 
-// 아이콘 경로
+// 아이콘
 import Beacon from '@/assets/icons/Beacon.svg?react'
 import CCTV from '@/assets/icons/CCTV.svg?react'
 import Exit from '@/assets/icons/Exit.svg?react'
@@ -30,6 +30,10 @@ const MapBoxMap = ({
   // 기존 마커들을 지우기 위해 따로 저장
   const markerRefList = useRef([])
 
+  // ===========================================
+  // 지도 좌표계 설정
+  // ===========================================
+
   // 이미지 사이즈 (픽셀)
   const imageWidth = 5000
   const imageHeight = 7800
@@ -46,6 +50,7 @@ const MapBoxMap = ({
   const bottom = -coordinateHeight / 2 // -30
   const left = -coordinateWidth / 2 // -19.25
   const right = coordinateWidth / 2 // +19.25
+  // ===========================================
 
   // 간선 레이어 ID 고정
   const lineLayerId = 'beacon-edges'
@@ -57,6 +62,7 @@ const MapBoxMap = ({
     return [lng, lat]
   }
 
+  // 최신 props 유지
   const modeRef = useRef(mode)
   const onMarkerClickRef = useRef(onMarkerClick)
 
@@ -72,9 +78,11 @@ const MapBoxMap = ({
   // 간선 삭제
   // =============
 
-  // 삭제 버튼 상태
+  // 간선 선택 상태
   const [selectedEdge, setSelectedEdge] = useState(null)
+  const [xButtonTick, setXButtonTick] = useState(0) // 간선 삭제 버튼 위치 리렌더링용 상태태
 
+  // 선 클릭 → selectedEdge 설정
   useEffect(() => {
     const map = mapRef.current
     if (!map) return
@@ -94,6 +102,21 @@ const MapBoxMap = ({
       map.off('click', lineLayerId, handleClick)
     }
   }, [mode])
+
+  // X 버튼 지도에 따라다니게
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map) return
+
+    const handleMove = () => {
+      if (selectedEdge) {
+        setXButtonTick((prev) => prev + 1) // 리렌더 트리거
+      }
+    }
+
+    map.on('move', handleMove)
+    return () => map.off('move', handleMove)
+  }, [selectedEdge])
 
   // 1. 최초 지도 객체 생성
   useEffect(() => {
@@ -194,6 +217,7 @@ const MapBoxMap = ({
     }
   }, [onMapClick])
 
+  // 마커 및 간선 그리기
   useEffect(() => {
     const map = mapRef.current
     if (!map) return
@@ -333,37 +357,36 @@ const MapBoxMap = ({
         })()}
 
       {/* X 버튼: hoveredEdge가 있을 때만 */}
-      {mode === 'route' && selectedEdge && (
-        <div
-          className="absolute z-50"
-          style={{
-            left: `${
-              (mapRef.current.project(selectedEdge.geometry.coordinates[0]).x +
-                mapRef.current.project(selectedEdge.geometry.coordinates[1]).x) /
-              2
-            }px`,
-            top: `${
-              (mapRef.current.project(selectedEdge.geometry.coordinates[0]).y +
-                mapRef.current.project(selectedEdge.geometry.coordinates[1]).y) /
-              2
-            }px`,
-            transform: 'translate(-50%, -50%)',
-          }}
-        >
-          <button
-            onClick={() => {
-              const edgeId = selectedEdge.properties.edge_id
-              if (edgeId) {
-                onDeleteEdge?.(edgeId)
-              }
-              setSelectedEdge(null)
-            }}
-            className="rounded-sm bg-red-600 p-1 text-xs text-white shadow-md hover:bg-red-500"
-          >
-            <Delete className="h-6 w-6" />
-          </button>
-        </div>
-      )}
+      {mode === 'route' &&
+        selectedEdge &&
+        (() => {
+          const [a, b] = selectedEdge.geometry.coordinates
+          const projectedA = mapRef.current.project(a)
+          const projectedB = mapRef.current.project(b)
+
+          return (
+            <div
+              key={xButtonTick} // 리렌더 유도
+              className="absolute z-50"
+              style={{
+                left: `${(projectedA.x + projectedB.x) / 2}px`,
+                top: `${(projectedA.y + projectedB.y) / 2}px`,
+                transform: 'translate(-50%, -50%)',
+              }}
+            >
+              <button
+                onClick={() => {
+                  const edgeId = selectedEdge.properties.edge_id
+                  if (edgeId) onDeleteEdge?.(edgeId)
+                  setSelectedEdge(null)
+                }}
+                className="rounded-sm bg-red-600 p-1 text-xs text-white shadow-md hover:bg-red-500"
+              >
+                <Delete className="h-6 w-6" />
+              </button>
+            </div>
+          )
+        })()}
     </div>
   )
 }
