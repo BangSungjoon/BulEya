@@ -5,8 +5,6 @@ import androidx.lifecycle.MutableLiveData
 import com.ssafy.jangan_mobile.service.dto.FireNotificationDto
 
 object FireNotificationStore {
-    //var fireNotificationDto: FireNotificationDto? = null
-
     // 화재 정보 코드, 추적해야하는 것
     private val _fireNotificationDto = MutableLiveData<FireNotificationDto?>()
     val fireNotificationDto: LiveData<FireNotificationDto?> = _fireNotificationDto
@@ -15,6 +13,9 @@ object FireNotificationStore {
     val currentNotificationBeaconCode = _currentNotificationBeaconCode
 
     //현재 위치 코드, 추적해야하는 것
+    private val _currentLocationStationId = MutableLiveData<Int?>()
+    val currentLocationStationId = _currentLocationStationId
+
     private val _currentLocationBeaconCode = MutableLiveData<Int?>()
     val currentLocationBeaconCode = _currentLocationBeaconCode
 
@@ -23,6 +24,9 @@ object FireNotificationStore {
     }
     fun setCurrentNotificationBeaconCode(beaconCode: Int?){
         _currentNotificationBeaconCode.value = beaconCode
+    }
+    fun setCurrentLocationStationId(stationId: Int?){
+        _currentLocationStationId.value = stationId
     }
     fun setCurrentLocationBeaconCode(beaconCode: Int?){
         _currentLocationBeaconCode.value = beaconCode

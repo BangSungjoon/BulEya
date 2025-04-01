@@ -65,6 +65,7 @@ fun EscapeRouteMapScreen(
         return listOf(lng, lat)
     }
 
+
     LaunchedEffect(Unit) {
         mapViewModel.fetchMapImage("222")
     }
@@ -117,9 +118,12 @@ fun EscapeRouteMapScreen(
                 mapView.gestures.rotateEnabled = true
                 mapView.gestures.doubleTapToZoomInEnabled = true
 
+
                 val annotationApi = mapView.annotations
                 val pointAnnotationManager = annotationApi.createPointAnnotationManager()
 
+
+                // 🔥 화재 위치
                 fireNotificationDto?.beaconNotificationDtos?.forEach { beacon ->
                     val pos = convertPixelToLngLat(beacon.coordX, beacon.coordY)
                     val fireMarker = PointAnnotationOptions()
@@ -128,6 +132,7 @@ fun EscapeRouteMapScreen(
                     pointAnnotationManager.create(fireMarker)
                 }
 
+                // 🧍 내 위치
                 fireNotificationDto?.beaconNotificationDtos
                     ?.find { it.beaconCode == currentLocationCode }
                     ?.let { beacon ->
@@ -138,6 +143,7 @@ fun EscapeRouteMapScreen(
                         pointAnnotationManager.create(myMarker)
                     }
 
+                // 경로 연결
                 if (showRoute.value && routePoints.isNotEmpty()) {
                     val polylineManager = annotationApi.createPolylineAnnotationManager()
                     val polyline = PolylineAnnotationOptions()

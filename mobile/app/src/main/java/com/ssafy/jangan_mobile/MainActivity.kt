@@ -1,8 +1,10 @@
 package com.ssafy.jangan_mobile
 
 import android.Manifest
+import android.app.Activity
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.bluetooth.BluetoothAdapter
 import android.content.ContentValues.TAG
 import android.content.Context
 import android.content.Intent
@@ -23,13 +25,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.OnLifecycleEvent
+import androidx.lifecycle.MutableLiveData
 import com.google.firebase.Firebase
 import com.google.firebase.FirebaseApp
 import com.google.firebase.messaging.messaging
 import com.google.gson.Gson
-import com.ssafy.jangan_mobile.screen.FireNotificationScreen
 import com.ssafy.jangan_mobile.service.PersistentService
 import com.ssafy.jangan_mobile.service.dto.FireNotificationDto
 import com.ssafy.jangan_mobile.store.FireNotificationStore
@@ -37,10 +37,22 @@ import com.ssafy.jangan_mobile.ui.navigation.AppNavigation
 import com.ssafy.jangan_mobile.ui.theme.JanganmobileTheme
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.HiltAndroidApp
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import org.altbeacon.beacon.Beacon
+import org.altbeacon.beacon.BeaconManager
+import org.altbeacon.beacon.BeaconParser
+import org.altbeacon.beacon.Region
 
-
-@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    private lateinit var region: Region
+    private val scope = CoroutineScope(Dispatchers.Main + Job())
+    private var checkBeaconsJob: Job? = null
+    var beaconManager: BeaconManager? = null
+    val bluetoothAdapter: BluetoothAdapter? = BluetoothAdapter.getDefaultAdapter()
 
     private val permissions = mutableListOf<String>().apply {
 
@@ -81,6 +93,22 @@ class MainActivity : ComponentActivity() {
         multiplePermissionsLauncher.launch(permissions)
     }
 
+    fun processBeacons(beacons: MutableLiveData<Collection<Beacon>>?) {
+
+        val filtered = beacons?.value?.filter { it.id1.toString().startsWith("AAAAA204", ignoreCase = true) }
+        filtered?.forEach { beacon ->
+            run {
+                Log.d("Beacon scanned. : ", "id2: ${beacon.id2}  id3: ${beacon.id3}")
+            }
+        }
+        val closest = filtered?.minByOrNull { it.distance }
+        closest?.let {
+            Log.d("BeaconScan", "가장 가까운 비콘: ${it.id3}, 거리: ${it.distance}")
+            FireNotificationStore.setCurrentLocationStationId(it.id2.toInt())
+            FireNotificationStore.setCurrentLocationBeaconCode(it.id3.toInt())
+        }
+    }
+
     // Notification 채널 생성
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -96,14 +124,40 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    override fun onPostResume() {
+        Log.d("cycle", "onPostResume() called.")
+        // 실시간 현재 위치 추적을 위한 비콘 스캔
+        region = Region("current-location-scan", null, null, null)
+        beaconManager = BeaconManager.getInstanceForApplication(this)
+        beaconManager?.foregroundScanPeriod = 2000L
+        beaconManager?.foregroundBetweenScanPeriod = 0L
+        beaconManager?.updateScanPeriods()
+        beaconManager?.beaconParsers?.clear()
+        beaconManager?.beaconParsers?.add(
+            BeaconParser().setBeaconLayout("m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24")
+        )
+        beaconManager?.startRangingBeacons(region)
+        if(checkBeaconsJob?.isActive != true) {
+            checkBeaconsJob = scope.launch {
+                while (true) {
+                    val beacons = beaconManager?.getRegionViewModel(region)?.rangedBeacons
+                    processBeacons(beacons)
+                    delay(2000)
+                }
+            }
+            checkBeaconsJob?.start()
+        }
+        super.onPostResume()
+    }
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Log.d("lifecycle:", "onCreate called")
         enableEdgeToEdge()
-
         val fromNotification = intent?.getBooleanExtra("fromNotification", false) == true
         val jsonString = intent?.getStringExtra("jsonString")
         val fireNotificationDto = Gson().fromJson(jsonString, FireNotificationDto::class.java)
-        val nearestBeaconCode = intent?.getIntExtra("nearestBeaconCode", -1)
         val notificationBeaconCode = intent?.getIntExtra("notificationBeaconCode", -1)
 
         FireNotificationStore.setNotification(fireNotificationDto)
@@ -123,7 +177,6 @@ class MainActivity : ComponentActivity() {
                 Log.d(TAG, msg)
                 Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
             }
-
         // 알람 채널 생성
         createNotificationChannel()
 
@@ -145,9 +198,29 @@ class MainActivity : ComponentActivity() {
                 startActivity(intent)
             }
         }
+
+        // 블루투스 켜기 요청
+        val enableBluetoothLauncher = registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                Log.d("Bluetooth", "사용자가 블루투스를 켰습니다.")
+            } else {
+                Log.d("Bluetooth", "사용자가 블루투스를 켜지 않았습니다.")
+            }
+        }
+        if (bluetoothAdapter != null && !bluetoothAdapter.isEnabled) {
+            val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
+            enableBluetoothLauncher.launch(enableBtIntent)
+        }
     }
 
-
+    override fun onDestroy() {
+        checkBeaconsJob?.cancel()
+        beaconManager?.stopRangingBeacons(region)
+        Log.d("lifecycle:", "onDestroy() called.")
+        super.onDestroy()
+    }
 }
 
 @Composable

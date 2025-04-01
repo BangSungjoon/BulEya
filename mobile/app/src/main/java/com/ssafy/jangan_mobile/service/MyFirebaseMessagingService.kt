@@ -1,5 +1,6 @@
 package com.ssafy.jangan_mobile.service
 
+import android.app.ActivityManager
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.ContentValues.TAG
@@ -9,16 +10,13 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import androidx.core.app.NotificationCompat
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.google.gson.Gson
 import com.ssafy.jangan_mobile.MainActivity
 import com.ssafy.jangan_mobile.R
-import com.ssafy.jangan_mobile.service.dto.BeaconNotificationDto
 import com.ssafy.jangan_mobile.service.dto.FireNotificationDto
-import com.ssafy.jangan_mobile.store.FireNotificationStore
 import org.altbeacon.beacon.Beacon
 import org.altbeacon.beacon.BeaconManager
 import org.altbeacon.beacon.BeaconParser
@@ -37,24 +35,16 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
         message.data["payload"]?.let { jsonString ->
             Log.d(TAG, "payload: $jsonString")
 
-//            try {
-//                sendCustomNotification(jsonString)
-//            } catch (e: Exception) {
-//                Log.e(TAG, "JSON 파싱 오류: ${e.message}")
-//            }
-
-//            val intent = Intent(this, BeaconService::class.java).apply{
-//                putExtra("jsonString", jsonString)
-//            }
-//            ContextCompat.startForegroundService(this, intent)
             val fireNotificationDto = Gson().fromJson(jsonString, FireNotificationDto::class.java)
             val stationId = fireNotificationDto.stationId
 
             val beaconManager = BeaconManager.getInstanceForApplication(this)
-            beaconManager.beaconParsers.clear()
-            beaconManager.beaconParsers.add(
-                BeaconParser().setBeaconLayout("m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24")
-            )
+
+            if(beaconManager.beaconParsers.isEmpty()) {
+                beaconManager.beaconParsers.add(
+                    BeaconParser().setBeaconLayout("m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24")
+                )
+            }
             region = Region("fcm-triggered-scan", null, Identifier.fromInt(stationId), null)
 
             var nearestBeaconCode = -1
@@ -86,9 +76,11 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
 
             beaconManager.startRangingBeacons(region)
 
-            // 3초 후 스캔 종료
+            // 2초 후 스캔 종료
             Handler(Looper.getMainLooper()).postDelayed({
-                beaconManager.stopRangingBeacons(region)
+                if(!isAppInForeground(this)) {
+                    beaconManager.stopRangingBeacons(region)
+                }
                 beaconManager.getRegionViewModel(region).rangedBeacons.removeObserver(observer)
                 stopSelf()
                 if(nearestBeaconCode != -1) {
@@ -106,7 +98,7 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
         Log.d(TAG, "beacons: ${fireNotificationDto.beaconNotificationDtos}")
 
         val intent = Intent(this, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
         intent.putExtra("fromNotification", true)
         intent.putExtra("jsonString", jsonString)
@@ -138,6 +130,11 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
         }
     }
 
+    fun isAppInForeground(context: Context): Boolean {
+        val appProcessInfo = ActivityManager.RunningAppProcessInfo()
+        ActivityManager.getMyMemoryState(appProcessInfo)
+        return appProcessInfo.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND
+    }
 
     override fun onNewToken(token: String) {
         super.onNewToken(token)
