@@ -4,6 +4,7 @@ import com.ssafy.jangan_backend.beacon.dto.BeaconDto;
 import com.ssafy.jangan_backend.beacon.dto.request.RequestDeleteBeaconDto;
 import com.ssafy.jangan_backend.beacon.dto.request.RequestRegisterBeaconDto;
 import com.ssafy.jangan_backend.beacon.dto.response.ResponseBeaconIdDto;
+import com.ssafy.jangan_backend.beacon.dto.response.ResponseCctvInfoDto;
 import com.ssafy.jangan_backend.beacon.entity.Beacon;
 import com.ssafy.jangan_backend.beacon.repository.BeaconQueryRepository;
 import com.ssafy.jangan_backend.beacon.repository.BeaconRepository;
@@ -15,7 +16,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -43,5 +46,28 @@ public class BeaconService {
         Beacon deletedBeacon = beaconRepository.findById(beaconId)
                 .orElseThrow(() -> new CustomIllegalArgumentException(BaseResponseStatus.BEACON_NOT_FOUND_EXCEPTION));
         beaconRepository.deleteById(deletedBeacon.getId());
+    }
+
+    public List<ResponseCctvInfoDto> getCctvBeacon(Integer stationId) {
+        List<Map> mapList = mapRepository.findByStationId(stationId);
+        if (mapList.isEmpty()) {
+            throw new CustomIllegalArgumentException(BaseResponseStatus.MAP_NOT_FOUND_EXCEPTION);
+        }
+        List<Integer> mapIdList = mapList.stream()
+                .map(Map::getId)
+                .toList();
+
+        List<Beacon> beaconList = beaconRepository.findAllByMapIdIn(mapIdList);
+        System.out.println(beaconList);
+        if (beaconList.isEmpty()) {
+            throw new CustomIllegalArgumentException(BaseResponseStatus.BEACON_NOT_FOUND_EXCEPTION);
+        }
+        return beaconList.stream()
+                .filter(Beacon::getIsCctv)
+                .map(beacon -> ResponseCctvInfoDto.builder()
+                        .beaconCode(beacon.getBeaconCode())
+                        .rtspUrl("rtsp://" + beacon.getCctvIp() + ":554/cctv")
+                        .build())
+                .toList();
     }
 }

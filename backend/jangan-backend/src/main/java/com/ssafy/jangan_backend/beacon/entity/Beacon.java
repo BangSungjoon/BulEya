@@ -36,7 +36,7 @@ public class Beacon {
     private Integer coordY;
 
     private Boolean isExit;
-
+    
     private Boolean isCctv;
 
     private String cctvIp;
