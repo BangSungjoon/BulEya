@@ -1,12 +1,13 @@
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect, useState } from 'react'
 import mapboxgl from 'mapbox-gl'
 import 'mapbox-gl/dist/mapbox-gl.css'
 import ReactDOM from 'react-dom/client'
 
-// 아이콘 경로
+// 아이콘
 import Beacon from '@/assets/icons/Beacon.svg?react'
 import CCTV from '@/assets/icons/CCTV.svg?react'
 import Exit from '@/assets/icons/Exit.svg?react'
+import Delete from '@/assets/icons/Delete.svg?react'
 
 // MapBox access 토큰
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN
@@ -18,6 +19,8 @@ const MapBoxMap = ({
   edgeList = [],
   selectedIcon,
   onMapClick,
+  onMarkerClick,
+  onDeleteEdge,
   tempMarker,
 }) => {
   // 지도 컨테이너 요소를 참조할 ref
@@ -26,6 +29,10 @@ const MapBoxMap = ({
   const mapRef = useRef(null)
   // 기존 마커들을 지우기 위해 따로 저장
   const markerRefList = useRef([])
+
+  // ===========================================
+  // 지도 좌표계 설정
+  // ===========================================
 
   // 이미지 사이즈 (픽셀)
   const imageWidth = 5000
@@ -43,6 +50,7 @@ const MapBoxMap = ({
   const bottom = -coordinateHeight / 2 // -30
   const left = -coordinateWidth / 2 // -19.25
   const right = coordinateWidth / 2 // +19.25
+  // ===========================================
 
   // 간선 레이어 ID 고정
   const lineLayerId = 'beacon-edges'
@@ -53,6 +61,62 @@ const MapBoxMap = ({
     const lat = top - (y / height) * (top - bottom) // Y축은 반대로 내려가므로 빼줌
     return [lng, lat]
   }
+
+  // 최신 props 유지
+  const modeRef = useRef(mode)
+  const onMarkerClickRef = useRef(onMarkerClick)
+
+  useEffect(() => {
+    modeRef.current = mode
+  }, [mode])
+
+  useEffect(() => {
+    onMarkerClickRef.current = onMarkerClick
+  }, [onMarkerClick])
+
+  // =============
+  // 간선 삭제
+  // =============
+
+  // 간선 선택 상태
+  const [selectedEdge, setSelectedEdge] = useState(null)
+  const [xButtonTick, setXButtonTick] = useState(0) // 간선 삭제 버튼 위치 리렌더링용 상태태
+
+  // 선 클릭 → selectedEdge 설정
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map) return
+
+    const handleClick = (e) => {
+      if (mode !== 'route') return
+
+      const edgeFeature = e.features?.[0]
+      if (edgeFeature?.properties?.edge_id) {
+        setSelectedEdge(edgeFeature)
+      }
+    }
+
+    map.on('click', lineLayerId, handleClick)
+
+    return () => {
+      map.off('click', lineLayerId, handleClick)
+    }
+  }, [mode])
+
+  // X 버튼 지도에 따라다니게
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map) return
+
+    const handleMove = () => {
+      if (selectedEdge) {
+        setXButtonTick((prev) => prev + 1) // 리렌더 트리거
+      }
+    }
+
+    map.on('move', handleMove)
+    return () => map.off('move', handleMove)
+  }, [selectedEdge])
 
   // 1. 최초 지도 객체 생성
   useEffect(() => {
@@ -153,6 +217,7 @@ const MapBoxMap = ({
     }
   }, [onMapClick])
 
+  // 마커 및 간선 그리기
   useEffect(() => {
     const map = mapRef.current
     if (!map) return
@@ -171,7 +236,6 @@ const MapBoxMap = ({
         const beaconMap = {}
 
         beaconList.forEach((beacon) => {
-          console.log('비콘:', beacon)
           const { coord_x, coord_y, isExit, isCctv, name, beacon_code } = beacon
 
           // const scaledX = (coord_x + 100) * xScale
@@ -191,7 +255,12 @@ const MapBoxMap = ({
 
           // 이벤트 여기다 넣어!!
           container.addEventListener('click', () => {
-            alert(`[마커 클릭] ${name}`)
+            if (modeRef.current === 'route') {
+              console.log('✅ 최신 모드 반영됨!')
+              onMarkerClickRef.current?.(beacon)
+            } else {
+              alert(`[마커 클릭] ${name}`)
+            }
           })
 
           const marker = new mapboxgl.Marker({ element: container })
@@ -217,7 +286,9 @@ const MapBoxMap = ({
                 type: 'LineString',
                 coordinates: [a, b],
               },
-              properties: {},
+              properties: {
+                edge_id: edge.edge_id, // 간선 삭제를 위해 추가
+              },
             }
           })
           .filter(Boolean)
@@ -238,7 +309,7 @@ const MapBoxMap = ({
           source: lineLayerId,
           paint: {
             'line-color': '#8aea52',
-            'line-width': 3,
+            'line-width': 6,
           },
         })
       } catch (error) {
@@ -250,7 +321,7 @@ const MapBoxMap = ({
     } else {
       map.once('styledata', drawAll)
     }
-  }, [beaconList, edgeList, mapImageUrl])
+  }, [beaconList, edgeList, mapImageUrl, mode])
 
   return (
     <div className="relative h-full w-full">
@@ -281,6 +352,38 @@ const MapBoxMap = ({
               }}
             >
               {Icon && <Icon className="text-primary h-6 w-6" />}
+            </div>
+          )
+        })()}
+
+      {/* X 버튼: hoveredEdge가 있을 때만 */}
+      {mode === 'route' &&
+        selectedEdge &&
+        (() => {
+          const [a, b] = selectedEdge.geometry.coordinates
+          const projectedA = mapRef.current.project(a)
+          const projectedB = mapRef.current.project(b)
+
+          return (
+            <div
+              key={xButtonTick} // 리렌더 유도
+              className="absolute z-50"
+              style={{
+                left: `${(projectedA.x + projectedB.x) / 2}px`,
+                top: `${(projectedA.y + projectedB.y) / 2}px`,
+                transform: 'translate(-50%, -50%)',
+              }}
+            >
+              <button
+                onClick={() => {
+                  const edgeId = selectedEdge.properties.edge_id
+                  if (edgeId) onDeleteEdge?.(edgeId)
+                  setSelectedEdge(null)
+                }}
+                className="rounded-sm bg-red-600 p-1 text-xs text-white shadow-md hover:bg-red-500"
+              >
+                <Delete className="h-6 w-6" />
+              </button>
             </div>
           )
         })()}
