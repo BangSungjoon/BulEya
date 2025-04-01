@@ -12,9 +12,10 @@ import com.ssafy.jangan_backend.escapeRoute.dto.RouteNodeDto;
 import com.ssafy.jangan_backend.escapeRoute.service.EscapeRouteService;
 
 import io.swagger.v3.oas.annotations.Hidden;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
-@Hidden
+@Tag(name = "탈출 경로 요청")
 @RestController
 @RequestMapping("/api/escape-route")
 @RequiredArgsConstructor
