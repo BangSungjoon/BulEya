@@ -30,3 +30,10 @@ export const createEdge = async (data) => {
 export const deleteEdge = async (data) => {
   return instance.delete('/api/edge', { data })
 }
+
+// 장비 정보 삭제하는 API
+export const deleteBeacon = async (beacon_id) => {
+  return instance.delete('/api/beacon', {
+    data: { beacon_id },
+  })
+}

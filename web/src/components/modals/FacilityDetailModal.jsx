@@ -1,20 +1,37 @@
 import Delete from '@/assets/icons/Delete.svg?react'
+import { deleteBeacon } from '@/api/axios.js'
 
-export default function FacilityDetailModal({ data, onClose }) {
-  const { name, beacon_code, cctv_ip, is_cctv = false, is_exit = false } = data || {}
+export default function FacilityDetailModal({ data, onClose, onDelete }) {
+  const { name, beacon_code, beacon_id, cctv_ip, is_cctv = false, is_exit = false } = data || {}
+
+  const handleDelete = async () => {
+    if (!data?.beacon_id) return alert('삭제할 비콘 ID가 없습니다.')
+
+    const confirmDelete = window.confirm('정말 삭제하시겠습니까?')
+    if (!confirmDelete) return
+
+    try {
+      await deleteBeacon(data.beacon_id)
+      alert('삭제가 완료되었습니다.')
+      onClose()
+      onDelete && onDelete(data.beacon_id) // 부모에게 삭제 알림!
+    } catch (error) {
+      console.error('비콘 삭제 실패:', error)
+      alert('삭제에 실패했습니다.')
+    }
+  }
 
   return (
-    <div className="flex h-full w-full flex-col overflow-hidden rounded-3xl bg-gray-500 text-white">
+    <div className="relative flex h-full w-full flex-col overflow-hidden rounded-3xl bg-gray-500 text-white">
+      {/* 닫기 버튼 - 영상 위 오른쪽 상단 */}
+      <button onClick={onClose} className="absolute top-3 right-3 z-10">
+        <Delete className="h-6 w-6 text-white" />
+      </button>
       {/* CCTV 모드일 경우 상단에 비디오 */}
       {is_cctv && (
-        <div className="relative aspect-video w-full bg-black">
+        <div className="aspect-video w-full bg-black">
           {/* RTSP 영상 스트리밍 (예시로 video 태그 사용) */}
           <video src={cctv_ip} controls autoPlay muted className="h-full w-full object-cover" />
-
-          {/* 닫기 버튼 - 영상 위 오른쪽 상단 */}
-          <button onClick={onClose} className="absolute top-3 right-3 z-10">
-            <Delete className="h-6 w-6 text-white" />
-          </button>
         </div>
       )}
 
@@ -69,7 +86,10 @@ export default function FacilityDetailModal({ data, onClose }) {
         <button className="bg-primary hover:bg-primary/80 text-h3 h-10 flex-1 rounded-lg text-gray-600 transition-all duration-200 hover:-translate-y-0.5">
           수정
         </button>
-        <button className="text-h3 h-10 flex-1 rounded-lg bg-red-500 text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-red-400">
+        <button
+          onClick={handleDelete}
+          className="text-h3 h-10 flex-1 rounded-lg bg-red-500 text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-red-400"
+        >
           삭제
         </button>
       </div>
