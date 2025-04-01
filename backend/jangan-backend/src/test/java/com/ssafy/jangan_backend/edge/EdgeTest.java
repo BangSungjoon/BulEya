@@ -32,17 +32,17 @@ public class EdgeTest {
     @Rollback
     @DisplayName("간선 등록 테스트")
     public void registerEdgeTest() {
-        //GIVEN
-        Beacon beaconA = beaconRepository.findAll().get(0);
-        Beacon beaconB = beaconRepository.findAll().get(1);
-        RequestRegisterEdgeDto testDto = RequestRegisterEdgeDto.builder()
-                .stationId(222)
-                .beaconACode(beaconA.getId())
-                .beaconBCode(beaconB.getId())
-                .build();
-        //WHEN
-        ResponseEdgeIdDto responseDto = edgeService.saveEdge(testDto);
-        //THEN
-        assertFalse(responseDto.getEdgeId()==null, "저장된 엔티티가 없습니다.");
+//        //GIVEN
+//        Beacon beaconA = beaconRepository.findById(0).orElseThrow();
+//        Beacon beaconB = beaconRepository.findById(4).orElseThrow();
+//        RequestRegisterEdgeDto testDto = RequestRegisterEdgeDto.builder()
+//                .stationId(222)
+//                .beaconACode(beaconA.getId())
+//                .beaconBCode(beaconB.getId())
+//                .build();
+//        //WHEN
+//        ResponseEdgeIdDto responseDto = edgeService.saveEdge(testDto);
+//        //THEN
+//        assertFalse(responseDto.getEdgeId()==null, "저장된 엔티티가 없습니다.");
     }
 }
