@@ -57,6 +57,17 @@ const MapBoxMap = ({
     return [lng, lat]
   }
 
+  const modeRef = useRef(mode)
+  const onMarkerClickRef = useRef(onMarkerClick)
+
+  useEffect(() => {
+    modeRef.current = mode
+  }, [mode])
+
+  useEffect(() => {
+    onMarkerClickRef.current = onMarkerClick
+  }, [onMarkerClick])
+
   // =============
   // 간선 삭제
   // =============
@@ -220,10 +231,9 @@ const MapBoxMap = ({
 
           // 이벤트 여기다 넣어!!
           container.addEventListener('click', () => {
-            if (mode === 'route') {
-              console.log('여기!!!!!!')
-
-              onMarkerClick?.(beacon) // ❗존재할 때만 호출
+            if (modeRef.current === 'route') {
+              console.log('✅ 최신 모드 반영됨!')
+              onMarkerClickRef.current?.(beacon)
             } else {
               alert(`[마커 클릭] ${name}`)
             }
@@ -287,7 +297,7 @@ const MapBoxMap = ({
     } else {
       map.once('styledata', drawAll)
     }
-  }, [beaconList, edgeList, mapImageUrl])
+  }, [beaconList, edgeList, mapImageUrl, mode])
 
   return (
     <div className="relative h-full w-full">
