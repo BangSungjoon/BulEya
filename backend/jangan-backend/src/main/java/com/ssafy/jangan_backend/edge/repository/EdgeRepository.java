@@ -2,12 +2,14 @@ package com.ssafy.jangan_backend.edge.repository;
 
 import com.ssafy.jangan_backend.edge.entity.Edge;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+@Repository
 public interface EdgeRepository extends JpaRepository<Edge, Integer> {
 	List<Edge> findByBeaconAIdIn(List<Integer> beaconIdList);
-//    Edge findByStationIdAndFloor(int stationId, int floor);
+    Boolean existsByBeaconAIdAndBeaconBId(int beaconAId, int BeaconBId);
 
-    List<Edge> findByBeaconAIdOrBeaconBId(int beaconAId, int beaconBId); //두개의 값을 비교해서 에러가 발생할 수 있음
+    void deleteByBeaconAIdOrBeaconBId(Integer beaconAId, Integer beaconBId);
 }

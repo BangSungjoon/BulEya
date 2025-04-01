@@ -27,4 +27,9 @@ public class GlobalExceptionHandler {
         log.error("customIllegalArgumentException has occurred. {} {} {}", exception.getMessage(), exception.getCause(), exception.getStackTrace()[0]);
         return BaseResponse.status(exception.getStatus());
     }
+    @ExceptionHandler(DuplicateDataException.class)
+    public BaseResponse<BaseResponseStatus> duplicateDataExceptionHandler(DuplicateDataException exception) {
+        log.error("DuplicateDataException has occurred. {} {} {}", exception.getMessage(), exception.getCause(), exception.getStackTrace()[0]);
+        return BaseResponse.status(exception.getStatus());
+    }
 }

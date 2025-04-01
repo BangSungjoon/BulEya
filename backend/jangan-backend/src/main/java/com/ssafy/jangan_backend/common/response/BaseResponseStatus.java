@@ -13,7 +13,9 @@ public enum BaseResponseStatus {
     MAP_NOT_FOUND_EXCEPTION(false, 4002, "평면도 정보를 찾을 수 없습니다."),
     BEACON_NOT_FOUND_EXCEPTION(false, 4003, "비콘 정보를 찾을 수 없습니다."),
     EDGE_NOT_FOUND_EXCEPTION(false, 4004, "간선 정보를 찾을 수 없습니다."),
-    FIRE_LOG_NOT_FOUND_EXCEPTION(false, 4005, "화재 기록 정보를 찾을 수 없습니다.")
+    FIRE_LOG_NOT_FOUND_EXCEPTION(false, 4005, "화재 기록 정보를 찾을 수 없습니다."),
+
+    EDGE_ALREADY_EXISTS_EXCEPTION(false, 6001, "이미 존재하는 간선입니다.")
     /*
         이후 자유롭게 에러 추가
      */

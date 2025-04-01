@@ -30,4 +30,13 @@ public class EdgeQueryRepository {
                 .fetch();
         return edgeDtoList;
     }
+
+    public void deleteEdge(Edge deletedEdge) {
+        QEdge edge = QEdge.edge;
+        queryFactory.delete(edge)
+                .where(edge.beaconA.id.eq(deletedEdge.getBeaconAId()).and(edge.beaconB.id.eq(deletedEdge.getBeaconBId()))
+                        .or(edge.beaconA.id.eq(deletedEdge.getBeaconBId()).and(edge.beaconB.id.eq(deletedEdge.getBeaconAId())))
+                )
+                .execute();
+    }
 }
