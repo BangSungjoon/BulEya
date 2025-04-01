@@ -19,6 +19,7 @@ const MapBoxMap = ({
   selectedIcon,
   onMapClick,
   tempMarker,
+  onMarkerClick, // [성준] 마커 클릭 시 호출되는 핸들러
 }) => {
   // 지도 컨테이너 요소를 참조할 ref
   const mapContainer = useRef(null)
@@ -172,7 +173,7 @@ const MapBoxMap = ({
 
         beaconList.forEach((beacon) => {
           console.log('비콘:', beacon)
-          const { coord_x, coord_y, isExit, isCctv, name, beacon_code } = beacon
+          const { coord_x, coord_y, is_exit, is_cctv, name, beacon_code } = beacon
 
           // const scaledX = (coord_x + 100) * xScale
           // const scaledY = coord_y * yScale
@@ -183,15 +184,22 @@ const MapBoxMap = ({
           beaconMap[beacon_code] = [lng, lat]
 
           let IconComponent = Beacon
-          if (isExit) IconComponent = Exit
-          else if (isCctv) IconComponent = CCTV
+          if (is_exit) IconComponent = Exit
+          else if (is_cctv) IconComponent = CCTV
 
           const container = document.createElement('div')
           ReactDOM.createRoot(container).render(<IconComponent className="text-primary h-8 w-8" />)
 
           // 이벤트 여기다 넣어!!
           container.addEventListener('click', () => {
-            alert(`[마커 클릭] ${name}`)
+            if (onMarkerClick) {
+              if (mode === 'map') {
+                console.log('비콘id', beacon.beacon_id)
+                onMarkerClick(beacon)
+              }
+            } else {
+              alert(`[마커 클릭] ${name}, ${mode}`)
+            }
           })
 
           const marker = new mapboxgl.Marker({ element: container })

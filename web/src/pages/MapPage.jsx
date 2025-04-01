@@ -119,8 +119,8 @@ export default function MapPage() {
   // ==================
   // 모달 관련
   // ==================
-  const isCctv = tempMarker?.iconId === 'cctv'
-  const isExit = tempMarker?.iconId === 'exit'
+  const is_cctv = tempMarker?.iconId === 'cctv'
+  const is_exit = tempMarker?.iconId === 'exit'
 
   const handleCloseModal = () => {
     setIsModalVisible(false) // 먼저 애니메이션 시작
@@ -173,6 +173,26 @@ export default function MapPage() {
     }
   }, [mode])
 
+  // [성준] 마커 클릭 핸들러 (자식 컴포넌트 MapBoxMap에서 호출됨)
+  const handleMarkerClick = (facilityData) => {
+    setSelectedFacility(facilityData)
+  }
+
+  // [성준] 마커 삭제 핸들러 (자식 컴포넌트 MapBoxMap에서 호출됨)
+  const handleDeleteFacility = (beacon_id) => {
+    const updatedList = floorDataList.map((floor) => {
+      if (floor.floor !== selectedFloor) return floor
+
+      return {
+        ...floor,
+        beacon_list: floor.beacon_list.filter((b) => b.beacon_id !== beacon_id),
+      }
+    })
+
+    setFloorDataList(updatedList)
+    setSelectedFacility(null)
+  }
+
   // -------------------
   // 안내문 관련
   // -------------------
@@ -195,6 +215,7 @@ export default function MapPage() {
           selectedIcon={selectedIcon}
           onMapClick={mode === 'add' ? handleMapClick : undefined}
           tempMarker={tempMarker}
+          onMarkerClick={handleMarkerClick} // [성준] 마커 클릭 시 호출되는 핸들러
         />
       )}
 
@@ -247,8 +268,8 @@ export default function MapPage() {
                 floor: selectedFloor,
                 coord_x: tempMarker.coord_x,
                 coord_y: tempMarker.coord_y,
-                is_cctv: isCctv,
-                is_exit: isExit,
+                is_cctv: is_cctv,
+                is_exit: is_exit,
               }}
               onClose={handleCloseModal}
             />
@@ -258,11 +279,15 @@ export default function MapPage() {
 
       {/* 장비 상세 모달 */}
       {selectedFacility && (
-        <div className="pointer-events-none absolute inset-0 z-20 mx-5 mt-5 mb-5 grid grid-cols-12">
+        <div className="pointer-events-none absolute inset-0 z-20 mx-5 mt-15 mb-5 grid grid-cols-12">
           <div
             className={`pointer-events-auto col-span-5 transform transition-all duration-300 md:col-span-3 ${isDetailVisible ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0'} `}
           >
-            <FacilityDetailModal data={selectedFacility} onClose={handleCloseDetailModal} />
+            <FacilityDetailModal
+              data={selectedFacility}
+              onClose={handleCloseDetailModal}
+              onDelete={handleDeleteFacility}
+            />
           </div>
         </div>
       )}
