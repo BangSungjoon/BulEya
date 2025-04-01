@@ -18,10 +18,10 @@ interface MapService {
         @Query("station_id") stationId: String
     ): Response<MapImageResponse>
 
-    @GET("/api/escape/route")
+    @GET("/api/escape-route")
     suspend fun getEscapeRoute(
-        @Query("stationId") stationId: Int,
-        @Query("beaconCode") beaconCode: Int
-    ): EscapeRouteResponse
+        @Query("station_id") stationId: Int,
+        @Query("beacon_code") beaconCode: Int
+    ): Response<EscapeRouteResponse>
 
 }

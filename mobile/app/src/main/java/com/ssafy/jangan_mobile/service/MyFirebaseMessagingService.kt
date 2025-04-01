@@ -17,6 +17,7 @@ import com.google.gson.Gson
 import com.ssafy.jangan_mobile.MainActivity
 import com.ssafy.jangan_mobile.R
 import com.ssafy.jangan_mobile.service.dto.FireNotificationDto
+import com.ssafy.jangan_mobile.store.FireNotificationStore
 import org.altbeacon.beacon.Beacon
 import org.altbeacon.beacon.BeaconManager
 import org.altbeacon.beacon.BeaconParser
@@ -80,6 +81,8 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
             Handler(Looper.getMainLooper()).postDelayed({
                 if(!isAppInForeground(this)) {
                     beaconManager.stopRangingBeacons(region)
+                }else{
+                    FireNotificationStore.setNotification(fireNotificationDto)
                 }
                 beaconManager.getRegionViewModel(region).rangedBeacons.removeObserver(observer)
                 stopSelf()

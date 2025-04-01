@@ -1,6 +1,7 @@
 package com.ssafy.jangan_mobile.ui.screen
 
 import android.graphics.BitmapFactory
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -11,6 +12,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraBoundsOptions
@@ -24,11 +26,15 @@ import com.mapbox.maps.extension.style.sources.generated.imageSource
 import com.mapbox.maps.extension.style.style
 import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
 import com.mapbox.maps.plugin.annotation.annotations
+import com.mapbox.maps.plugin.annotation.generated.PointAnnotationManager
+import com.mapbox.maps.plugin.annotation.generated.PolylineAnnotationManager
 import com.mapbox.maps.plugin.annotation.generated.createPointAnnotationManager
 import com.mapbox.maps.plugin.annotation.generated.createPolylineAnnotationManager
 import com.mapbox.maps.plugin.annotation.generated.PolylineAnnotationOptions
 import com.mapbox.maps.plugin.gestures.gestures
 import com.ssafy.jangan_mobile.R
+import com.ssafy.jangan_mobile.service.dto.BeaconNotificationDto
+import com.ssafy.jangan_mobile.service.dto.FireNotificationDto
 import com.ssafy.jangan_mobile.store.FireNotificationStore
 import com.ssafy.jangan_mobile.ui.viewmodel.MapViewModel
 import com.ssafy.jangan_mobile.viewmodel.EscapeRouteViewModel
@@ -36,18 +42,21 @@ import com.ssafy.jangan_mobile.viewmodel.EscapeRouteViewModel
 @Composable
 fun EscapeRouteMapScreen(
     navController: NavController,
-    viewModel: EscapeRouteViewModel = hiltViewModel(),
+    viewModel: EscapeRouteViewModel = viewModel(),
     mapViewModel: MapViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
     val mapView = remember { MapView(context) }
 
-    val fireNotificationDto by FireNotificationStore.fireNotificationDto.observeAsState()
+    val fireNotificationDto: FireNotificationDto? by FireNotificationStore.fireNotificationDto.observeAsState()
     val currentLocationCode by FireNotificationStore.currentLocationBeaconCode.observeAsState()
     val routePoints by viewModel.route.observeAsState(emptyList())
     val imageUrl by mapViewModel.mapImageUrl.collectAsState()
 
     val showRoute = remember { mutableStateOf(false) }
+
+    val pointAnnotationManager = remember { mutableStateOf<PointAnnotationManager?>(null) }
+    val polylineManager = remember { mutableStateOf<PolylineAnnotationManager?>(null) }
 
     val imageWidth = 5000
     val imageHeight = 7800
@@ -59,6 +68,7 @@ fun EscapeRouteMapScreen(
     val left = -coordinateWidth / 2
     val right = coordinateWidth / 2
 
+
     fun convertPixelToLngLat(x: Int, y: Int): List<Double> {
         val lng = left + (x.toDouble() / imageWidth) * (right - left)
         val lat = top - (y.toDouble() / imageHeight) * (top - bottom)
@@ -67,10 +77,13 @@ fun EscapeRouteMapScreen(
 
 
     LaunchedEffect(Unit) {
+        Log.d("EscapeRouteScreen", "✅ EscapeRouteMapScreen 진입")
         mapViewModel.fetchMapImage("222")
     }
 
-    LaunchedEffect(imageUrl) {
+
+    LaunchedEffect(imageUrl, fireNotificationDto, currentLocationCode, routePoints) {
+        Log.d("EscapeRouteScreen", "✅ 지도 갱신 조건 발생")
         if (imageUrl != null) {
             mapView.getMapboxMap().loadStyle(
                 style {
@@ -118,18 +131,30 @@ fun EscapeRouteMapScreen(
                 mapView.gestures.rotateEnabled = true
                 mapView.gestures.doubleTapToZoomInEnabled = true
 
+                // 기존 마커 및 선 삭제
+                pointAnnotationManager.value?.deleteAll()
+                polylineManager.value?.deleteAll()
+
 
                 val annotationApi = mapView.annotations
-                val pointAnnotationManager = annotationApi.createPointAnnotationManager()
+                pointAnnotationManager.value = annotationApi.createPointAnnotationManager()
+                polylineManager.value = annotationApi.createPolylineAnnotationManager()
 
 
                 // 🔥 화재 위치
+                Log.d("EscapeRouteScreen", "🔥 fireNotificationDto = $fireNotificationDto $fireNotificationDto?.stationId $fireNotificationDto?.stationName")
+                fireNotificationDto?.beaconNotificationDtos?.forEach {
+                    Log.d("EscapeRouteScreen", "🔥 beacon = $it")
+                }
+                Log.d("EscapeRouteScreen", "📍 currentLocationCode = $currentLocationCode")
+
+
                 fireNotificationDto?.beaconNotificationDtos?.forEach { beacon ->
                     val pos = convertPixelToLngLat(beacon.coordX, beacon.coordY)
                     val fireMarker = PointAnnotationOptions()
                         .withPoint(Point.fromLngLat(pos[0], pos[1]))
                         .withIconImage("fire-icon")
-                    pointAnnotationManager.create(fireMarker)
+                    pointAnnotationManager.value?.create(fireMarker)
                 }
 
                 // 🧍 내 위치
@@ -140,11 +165,12 @@ fun EscapeRouteMapScreen(
                         val myMarker = PointAnnotationOptions()
                             .withPoint(Point.fromLngLat(pos[0], pos[1]))
                             .withIconImage("marker-icon")
-                        pointAnnotationManager.create(myMarker)
+                        pointAnnotationManager.value?.create(myMarker)
                     }
 
                 // 경로 연결
                 if (showRoute.value && routePoints.isNotEmpty()) {
+                    Log.d("EscapeRouteScreen", "✅ 경로 표시: ${routePoints.size}개 지점")
                     val polylineManager = annotationApi.createPolylineAnnotationManager()
                     val polyline = PolylineAnnotationOptions()
                         .withPoints(routePoints.map {
@@ -167,7 +193,7 @@ fun EscapeRouteMapScreen(
                 Text("\uD83D\uDD25 화재 발생!", color = Color.Red)
                 Spacer(modifier = Modifier.height(8.dp))
                 Button(onClick = {
-                    viewModel.loadMockRoute()
+//                    viewModel.loadMockRoute()
                     showRoute.value = true
                 }) {
                     Text("대피경로 테스트")
