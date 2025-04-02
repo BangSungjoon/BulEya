@@ -17,6 +17,7 @@ import com.google.gson.Gson
 import com.ssafy.jangan_mobile.MainActivity
 import com.ssafy.jangan_mobile.R
 import com.ssafy.jangan_mobile.service.dto.FireNotificationDto
+import com.ssafy.jangan_mobile.store.FireNotificationStore
 import org.altbeacon.beacon.Beacon
 import org.altbeacon.beacon.BeaconManager
 import org.altbeacon.beacon.BeaconParser
@@ -39,18 +40,15 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
             val stationId = fireNotificationDto.stationId
 
             val beaconManager = BeaconManager.getInstanceForApplication(this)
-
             if(beaconManager.beaconParsers.isEmpty()) {
                 beaconManager.beaconParsers.add(
                     BeaconParser().setBeaconLayout("m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24")
                 )
             }
             region = Region("fcm-triggered-scan", null, Identifier.fromInt(stationId), null)
-
             var nearestBeaconCode = -1
             var nearestBeaconDistance = Double.MAX_VALUE
             val observer = Observer<Collection<Beacon>> { beacons ->
-
                 val found = beacons.any {
                     it.id1.toString().startsWith("AAAAA204", true) && it.id2.toInt() == stationId
                 }
@@ -65,27 +63,28 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
                             }
                         }
                     }
-
                 }
             }
 
-            Handler(Looper.getMainLooper()).post {
-                beaconManager.getRegionViewModel(region)
-                    .rangedBeacons.observeForever(observer)
+            if(!isAppInForeground(this)) {
+                Handler(Looper.getMainLooper()).post {
+                    beaconManager.getRegionViewModel(region)
+                        .rangedBeacons.observeForever(observer)
+                }
+                beaconManager.startRangingBeacons(region)
             }
-
-            beaconManager.startRangingBeacons(region)
-
             // 2초 후 스캔 종료
             Handler(Looper.getMainLooper()).postDelayed({
                 if(!isAppInForeground(this)) {
                     beaconManager.stopRangingBeacons(region)
+                    beaconManager.getRegionViewModel(region).rangedBeacons.removeObserver(observer)
+                    if(nearestBeaconCode != -1)
+                        sendAlertNotification(fireNotificationDto, jsonString, nearestBeaconCode)
+                }else{
+                    if(nearestBeaconCode != -1)
+                        FireNotificationStore.setNotification(fireNotificationDto)
                 }
-                beaconManager.getRegionViewModel(region).rangedBeacons.removeObserver(observer)
                 stopSelf()
-                if(nearestBeaconCode != -1) {
-                    sendAlertNotification(fireNotificationDto, jsonString, nearestBeaconCode)
-                }
             }, 2_000)
         }
     }
@@ -100,7 +99,6 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
         val intent = Intent(this, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
-        intent.putExtra("fromNotification", true)
         intent.putExtra("jsonString", jsonString)
 
 
