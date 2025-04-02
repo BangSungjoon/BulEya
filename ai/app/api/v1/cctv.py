@@ -42,10 +42,10 @@ async def receive_cctv_data(
             remove_station(station_id)
             await report_fire(station_id, fire_images, cctv_data)
 
-    # return { 
-    #     "fire_beacons": fire_beacons,
-    #     # "fire_images": fire_images,
-    # }
+    return { 
+        "cctv_list": cctv_list,
+        # "fire_images": fire_images,
+    }
 
 @router.get("/test", tags=["test"])
 async def test():

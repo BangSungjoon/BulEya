@@ -1,7 +1,7 @@
 import requests
+# import httpx
 import json
 from typing import Dict, List
-# from fastapi import UploadFile
 import os
 
 # SPRING_ENDPOINT = "http://localhost:8080/api/fire-report"
@@ -20,12 +20,12 @@ async def report_fire(
         fire_images: 화재로 감지된 이미지 파일
         cctv_list: 전체 CCTV 목록
     """
+    if not SPRING_ENDPOINT:
+        raise RuntimeError("환경변수 SPRING_BOOT_ENDPOINT가 설정되어 있지 않습니다.")
+    
     files = []
     beacon_list = []
-
-    for beacon_code, value in fire_images.items():
-        print(f"[디버깅] beacon_code: {beacon_code}, 타입: {type(value)}")
-
+    # fire_codes = set(fire_images.keys())  # Set으로 빠르게 확인
 
     for beacon in cctv_list:
         beacon_code = beacon["beacon_code"]
@@ -78,3 +78,45 @@ async def report_fire(
             print("Spring 응답 오류:", response.text)
     except Exception as e:
         print("전송 중 오류:", e)
+    # # 파일 추가
+    # for beacon_code in fire_codes:
+    #     file_info = fire_images[beacon_code]
+    #     files.append((
+    #         "files",
+    #         (file_info["filename"], file_info["data"], file_info["content_type"])
+    #     ))
+
+    # # 비콘 리스트 구성
+    # for beacon in cctv_list:
+    #     beacon_code = beacon["beacon_code"]
+    #     is_fire = 1 if beacon_code in fire_codes else 0
+    #     beacon_list.append({
+    #         "beacon_code": int(beacon_code),
+    #         "is_active_fire": is_fire
+    #     })
+
+    # # JSON DTO 추가
+    # payload = {
+    #     "station_id": station_id,
+    #     "beacon_list": beacon_list
+    # }
+
+    # files.append((
+    #     "fireReportDto",
+    #     ("fireReportDto", json.dumps(payload), "application/json")
+    # ))
+
+    # try:
+    #     async with httpx.AsyncClient() as client:
+    #         response = await client.post(SPRING_ENDPOINT, files=files)
+
+    #     print("[전송 JSON]", json.dumps(payload, indent=2))
+    #     print("[전송 파일 목록]", [f[1][0] for f in files])
+    #     print(f"Spring 전송 완료: {response.status_code}")
+    #     print(f"Spring 응답: {response.text}")
+
+    #     if response.status_code != 200:
+    #         print("Spring 응답 오류:", response.text)
+
+    # except Exception as e:
+    #     print("전송 중 오류:", e)
