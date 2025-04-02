@@ -1,5 +1,7 @@
 package com.ssafy.jangan_mobile.store
 
+import android.app.ActivityManager
+import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.ssafy.jangan_mobile.service.dto.FireNotificationDto
@@ -19,16 +21,41 @@ object FireNotificationStore {
     private val _currentLocationBeaconCode = MutableLiveData<Int?>()
     val currentLocationBeaconCode = _currentLocationBeaconCode
 
-    fun setNotification(dto: FireNotificationDto?){
-        _fireNotificationDto.value = dto
+    fun setNotification(dto: FireNotificationDto?, context: Context) {
+        if (isAppInForeground(context)) {
+            _fireNotificationDto.value = dto
+        } else {
+            _fireNotificationDto.postValue(dto)
+        }
     }
-    fun setCurrentNotificationBeaconCode(beaconCode: Int?){
-        _currentNotificationBeaconCode.value = beaconCode
+
+    fun setCurrentNotificationBeaconCode(beaconCode: Int?, context: Context) {
+        if (isAppInForeground(context)) {
+            _currentNotificationBeaconCode.value = beaconCode
+        } else {
+            _currentNotificationBeaconCode.postValue(beaconCode)
+        }
     }
-    fun setCurrentLocationStationId(stationId: Int?){
-        _currentLocationStationId.value = stationId
+
+    fun setCurrentLocationStationId(stationId: Int?, context: Context) {
+        if (isAppInForeground(context)) {
+            _currentLocationStationId.value = stationId
+        } else {
+            _currentLocationStationId.postValue(stationId)
+        }
     }
-    fun setCurrentLocationBeaconCode(beaconCode: Int?){
-        _currentLocationBeaconCode.value = beaconCode
+
+    fun setCurrentLocationBeaconCode(beaconCode: Int?, context: Context) {
+        if (isAppInForeground(context)) {
+            _currentLocationBeaconCode.value = beaconCode
+        } else {
+            _currentLocationBeaconCode.postValue(beaconCode)
+        }
+    }
+
+    private fun isAppInForeground(context: Context): Boolean {
+        val appProcessInfo = ActivityManager.RunningAppProcessInfo()
+        ActivityManager.getMyMemoryState(appProcessInfo)
+        return appProcessInfo.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND
     }
 }

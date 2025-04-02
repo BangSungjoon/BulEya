@@ -73,8 +73,9 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
                         .rangedBeacons.observeForever(observer)
                 }
                 beaconManager.startRangingBeacons(region)
-            }else if(FireNotificationStore.currentLocationStationId.value == fireNotificationDto.stationId){
-                FireNotificationStore.setNotification(fireNotificationDto)
+            }
+            Handler(Looper.getMainLooper()).post {
+                FireNotificationStore.setNotification(fireNotificationDto, this) // 여기선 setValue() 가능
             }
             // 2초 후 스캔 종료
             Handler(Looper.getMainLooper()).postDelayed({
