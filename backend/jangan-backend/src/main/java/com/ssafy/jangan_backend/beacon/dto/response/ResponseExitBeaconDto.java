@@ -17,8 +17,8 @@ public class ResponseExitBeaconDto {
     private Integer mapId;
     private Integer beaconCode;
     private String name;
-    private Integer coordX;
-    private Integer coordY;
+    private Double coordX;
+    private Double coordY;
     private String cctvIp;
     @JsonProperty("is_cctv")
     private Boolean isCctv;
