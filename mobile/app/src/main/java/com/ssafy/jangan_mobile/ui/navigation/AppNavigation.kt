@@ -11,14 +11,9 @@ import com.ssafy.jangan_mobile.ui.screen.EscapeRouteMapScreen
 
 
 @Composable
-fun AppNavigation(startFromNotification: Boolean){
+fun AppNavigation(){
     val navController = rememberNavController()
 
-    LaunchedEffect(startFromNotification){
-        if(startFromNotification){
-            navController.navigate("fire_notification")
-        }
-    }
     NavHost(navController = navController, startDestination = "map_screen"){
         composable("home") { HomeScreen(navController) }
         composable("fire_notification") { FireNotificationScreen(navController) }

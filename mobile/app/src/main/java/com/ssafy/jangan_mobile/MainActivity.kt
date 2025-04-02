@@ -162,7 +162,6 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         Log.d("lifecycle:", "onCreate called")
         enableEdgeToEdge()
-        val fromNotification = intent?.getBooleanExtra("fromNotification", false) == true
         val jsonString = intent?.getStringExtra("jsonString")
         val fireNotificationDto = Gson().fromJson(jsonString, FireNotificationDto::class.java)
         val notificationBeaconCode = intent?.getIntExtra("notificationBeaconCode", -1)
@@ -170,7 +169,7 @@ class MainActivity : ComponentActivity() {
             FireNotificationStore.setNotification(fireNotificationDto)
         FireNotificationStore.setCurrentNotificationBeaconCode(notificationBeaconCode)
         setContent {
-            AppNavigation(startFromNotification = fromNotification)
+            AppNavigation()
         }
 
         // firebase topic 구독

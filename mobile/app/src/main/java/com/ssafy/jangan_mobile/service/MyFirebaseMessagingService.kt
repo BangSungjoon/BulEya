@@ -103,7 +103,6 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
         val intent = Intent(this, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
-        intent.putExtra("fromNotification", true)
         intent.putExtra("jsonString", jsonString)
 
 
