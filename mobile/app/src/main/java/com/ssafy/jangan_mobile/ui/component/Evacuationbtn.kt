@@ -23,14 +23,18 @@ import com.ssafy.jangan_mobile.ui.theme.primaryColor
 
 
 @Composable
-fun EvacuationButton() {
+fun EvacuationButton(
+    modifier: Modifier = Modifier,onClick: () -> Unit) {
     var isGuiding by remember { mutableStateOf(false) } // ✅ 상태 기억 (안내 중인지 여부)
 
     Box(
         modifier = Modifier
             .width(380.dp)
             .background(color = Color.Black, shape = RoundedCornerShape(20.dp))
-            .clickable { isGuiding = !isGuiding } // ✅ 클릭 시 상태 변경
+            .clickable {
+                isGuiding = !isGuiding
+                onClick()
+            } // ✅ 클릭 시 상태 변경
             .padding(24.dp), // 내부 패딩으로 버튼 높이 조절
         contentAlignment = Alignment.Center
     ) {

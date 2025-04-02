@@ -35,6 +35,7 @@ import com.ssafy.jangan_mobile.ui.theme.primaryColor
 
 @Composable
 fun FloorSelector(
+    modifier: Modifier = Modifier,
     floors: List<String> = listOf("B1", "B2", "B3"),
     selectedFloor: String = "B2",
     onFloorSelected: (String) -> Unit
@@ -65,7 +66,7 @@ fun FloorSelector(
                     Text(
                         text = floor,
                         style = Subtitle1,
-                        color = if (floor == selectedFloor) Color.Black else gray100
+                        color = if (floor == selectedFloor) Color.Black else gray400
                     )
                 }
             }
