@@ -236,7 +236,6 @@ const MapBoxMap = ({
         const beaconMap = {}
 
         beaconList.forEach((beacon) => {
-          console.log('비콘:', beacon)
           const { coord_x, coord_y, is_exit, is_cctv, name, beacon_code } = beacon
 
           // const scaledX = (coord_x + 100) * xScale
