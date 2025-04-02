@@ -35,6 +35,8 @@ import com.ssafy.jangan_mobile.service.dto.FireNotificationDto
 import com.ssafy.jangan_mobile.store.FireNotificationStore
 import com.ssafy.jangan_mobile.ui.navigation.AppNavigation
 import com.ssafy.jangan_mobile.ui.theme.JanganmobileTheme
+import dagger.hilt.android.AndroidEntryPoint
+import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -45,6 +47,7 @@ import org.altbeacon.beacon.BeaconManager
 import org.altbeacon.beacon.BeaconParser
 import org.altbeacon.beacon.Region
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private lateinit var region: Region
     private val scope = CoroutineScope(Dispatchers.Main + Job())
@@ -102,8 +105,13 @@ class MainActivity : ComponentActivity() {
         val closest = filtered?.minByOrNull { it.distance }
         closest?.let {
             Log.d("BeaconScan", "가장 가까운 비콘: ${it.id3}, 거리: ${it.distance}")
-            FireNotificationStore.setCurrentLocationStationId(it.id2.toInt())
-            FireNotificationStore.setCurrentLocationBeaconCode(it.id3.toInt())
+            if(FireNotificationStore.currentLocationStationId.value != it.id2.toInt()){
+                FireNotificationStore.setCurrentLocationStationId(it.id2.toInt())
+            }
+            if(FireNotificationStore.currentLocationBeaconCode.value != it.id3.toInt()){
+                FireNotificationStore.setCurrentLocationBeaconCode(it.id3.toInt())
+            }
+
         }
     }
 
@@ -140,6 +148,7 @@ class MainActivity : ComponentActivity() {
                 while (true) {
                     val beacons = beaconManager?.getRegionViewModel(region)?.rangedBeacons
                     processBeacons(beacons)
+                    Log.d("EscapeRoute", "MainActivity dto : ${FireNotificationStore.fireNotificationDto.value}")
                     delay(2000)
                 }
             }
@@ -157,8 +166,8 @@ class MainActivity : ComponentActivity() {
         val jsonString = intent?.getStringExtra("jsonString")
         val fireNotificationDto = Gson().fromJson(jsonString, FireNotificationDto::class.java)
         val notificationBeaconCode = intent?.getIntExtra("notificationBeaconCode", -1)
-
-        FireNotificationStore.setNotification(fireNotificationDto)
+        if(fireNotificationDto != null)
+            FireNotificationStore.setNotification(fireNotificationDto)
         FireNotificationStore.setCurrentNotificationBeaconCode(notificationBeaconCode)
         setContent {
             AppNavigation(startFromNotification = fromNotification)

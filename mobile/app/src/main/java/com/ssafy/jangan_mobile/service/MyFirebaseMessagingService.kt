@@ -63,6 +63,7 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
                             }
                         }
                     }
+
                 }
             }
 
@@ -80,9 +81,8 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
                     beaconManager.getRegionViewModel(region).rangedBeacons.removeObserver(observer)
                     if(nearestBeaconCode != -1)
                         sendAlertNotification(fireNotificationDto, jsonString, nearestBeaconCode)
-                }else{
-                    if(nearestBeaconCode != -1)
-                        FireNotificationStore.setNotification(fireNotificationDto)
+                }else if(nearestBeaconCode != -1){
+                    FireNotificationStore.setNotification(fireNotificationDto)
                 }
                 stopSelf()
             }, 2_000)

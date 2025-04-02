@@ -4,7 +4,7 @@ data class BeaconNotificationDto(
     val beaconName: String,
     val beaconCode: Int,
     val coordX: Int,
-    val CoordY: Int,
+    val coordY: Int,
     val floor: Int,
     val imageUrl: String,
     val isNewFire: Int
