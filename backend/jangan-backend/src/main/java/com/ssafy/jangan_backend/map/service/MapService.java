@@ -31,7 +31,6 @@ public class MapService {
     private final StationService stationService;
     private final LocationService locationService;
     private final MinioUtil minioUtil;
-    private final EdgeRepository edgeRepository;
     private final BeaconRepository beaconRepository;
 
     public List<ResponseMobileMapDto> getMapsForMobile(Integer stationId) {

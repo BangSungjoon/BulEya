@@ -1,9 +1,13 @@
 package com.ssafy.jangan_backend.beacon.repository;
 
 import com.querydsl.core.types.Projections;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.ssafy.jangan_backend.beacon.dto.BeaconDto;
+import com.ssafy.jangan_backend.beacon.dto.response.ResponseExitBeaconDto;
 import com.ssafy.jangan_backend.beacon.entity.QBeacon;
+import com.ssafy.jangan_backend.map.entity.QMap;
+import com.ssafy.jangan_backend.station.entity.QStation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -54,5 +58,37 @@ public class BeaconQueryRepository {
                 .where(beacon.map.id.in(mapIds))
                 .fetch();
         return beaconDtoList;
+    }
+
+    public List<ResponseExitBeaconDto> findByIsExitAndMapIds(Integer stationId) {
+        QBeacon beacon = QBeacon.beacon;
+        QMap map = QMap.map;
+        QStation station = QStation.station;
+        List<ResponseExitBeaconDto> exitBeaconDtoList = queryFactory.select(Projections.bean(
+                ResponseExitBeaconDto.class,
+                map.floor.as("floor"),
+                beacon.id.as("beaconId"),
+                beacon.map.id.as("mapId"),
+                beacon.beaconCode.as("beaconCode"),
+                beacon.name.as("name"),
+                beacon.coordX.as("coordX"),
+                beacon.coordY.as("coordY"),
+                beacon.cctvIp.as("cctvIp"),
+                beacon.isCctv.as("isCctv"),
+                beacon.isExit.as("isExit")
+                ))
+                .from(beacon)
+                .leftJoin(map)
+                .on(beacon.map.id.eq(map.id))
+                .where(beacon.isExit.isTrue()
+                        .and(beacon.mapId.in(
+                                JPAExpressions
+                                .select(map.id)
+                                .from(map)
+                                .where(map.station.id.eq(stationId))
+                        ))
+                )
+                .fetch();
+        return exitBeaconDtoList;
     }
 }
