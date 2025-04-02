@@ -17,6 +17,7 @@ public class FireLog {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @Column(name = "image_name")
     private String imageName;
 
     @Column(nullable = false)
