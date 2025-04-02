@@ -76,8 +76,10 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
 
             // 2초 후 스캔 종료
             Handler(Looper.getMainLooper()).postDelayed({
-                beaconManager.stopRangingBeacons(region)
-                beaconManager.getRegionViewModel(region).rangedBeacons.removeObserver(observer)
+                if(!isAppInForeground(applicationContext)) {
+                    beaconManager.stopRangingBeacons(region)
+                    beaconManager.getRegionViewModel(region).rangedBeacons.removeObserver(observer)
+                }
                 if(nearestBeaconCode != -1) {
                     sendAlertNotification(fireNotificationDto, jsonString, nearestBeaconCode)
                     FireNotificationStore.setNotification(fireNotificationDto, this) // 여기선 setValue() 가능
