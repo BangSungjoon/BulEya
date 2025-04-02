@@ -1,5 +1,6 @@
 package com.ssafy.jangan_backend.beacon.service;
 
+import com.ssafy.jangan_backend.beacon.dto.BeaconDto;
 import com.ssafy.jangan_backend.beacon.dto.request.RequestDeleteBeaconDto;
 import com.ssafy.jangan_backend.beacon.dto.request.RequestRegisterBeaconDto;
 import com.ssafy.jangan_backend.beacon.dto.response.ResponseBeaconIdDto;
@@ -19,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -81,5 +83,12 @@ public class BeaconService {
     public List<ResponseExitBeaconDto> getExitBeaconList(Integer stationId) {
         List<ResponseExitBeaconDto> allExitBeacon = beaconQueryRepository.findByIsExitAndMapIds(stationId);
         return allExitBeacon;
+    }
+
+    public BeaconDto getBeaconInfo(Integer stationId, Integer beaconCode){
+        List<Integer> mapIds = mapRepository.findByStationId(stationId).stream().map(Map::getId).toList();
+        Beacon beacon = beaconRepository.findByMapIdInAndBeaconCode(mapIds, beaconCode).orElseThrow(
+            () -> new CustomIllegalArgumentException(BaseResponseStatus.MAP_NOT_FOUND_EXCEPTION));
+        return BeaconDto.fromEntity(beacon);
     }
 }
