@@ -95,7 +95,10 @@ class MainActivity : ComponentActivity() {
     }
 
     fun processBeacons(beacons: MutableLiveData<Collection<Beacon>>?) {
-
+        val isRanging = beaconManager?.rangedRegions!!.contains(region)
+        if(!isRanging){
+            beaconManager?.startRangingBeacons(region)
+        }
         val filtered = beacons?.value?.filter { it.id1.toString().startsWith("AAAAA204", ignoreCase = true) }
         filtered?.forEach { beacon ->
             run {
