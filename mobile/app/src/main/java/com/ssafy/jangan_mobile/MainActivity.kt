@@ -106,10 +106,10 @@ class MainActivity : ComponentActivity() {
         closest?.let {
             Log.d("BeaconScan", "가장 가까운 비콘: ${it.id3}, 거리: ${it.distance}")
             if(FireNotificationStore.currentLocationStationId.value != it.id2.toInt()){
-                FireNotificationStore.setCurrentLocationStationId(it.id2.toInt())
+                FireNotificationStore.setCurrentLocationStationId(it.id2.toInt(), this)
             }
             if(FireNotificationStore.currentLocationBeaconCode.value != it.id3.toInt()){
-                FireNotificationStore.setCurrentLocationBeaconCode(it.id3.toInt())
+                FireNotificationStore.setCurrentLocationBeaconCode(it.id3.toInt(), this)
             }
 
         }
@@ -166,8 +166,8 @@ class MainActivity : ComponentActivity() {
         val fireNotificationDto = Gson().fromJson(jsonString, FireNotificationDto::class.java)
         val notificationBeaconCode = intent?.getIntExtra("notificationBeaconCode", -1)
         if(fireNotificationDto != null)
-            FireNotificationStore.setNotification(fireNotificationDto)
-        FireNotificationStore.setCurrentNotificationBeaconCode(notificationBeaconCode)
+            FireNotificationStore.setNotification(fireNotificationDto, this)
+        FireNotificationStore.setCurrentNotificationBeaconCode(notificationBeaconCode, this)
         setContent {
             AppNavigation()
         }
