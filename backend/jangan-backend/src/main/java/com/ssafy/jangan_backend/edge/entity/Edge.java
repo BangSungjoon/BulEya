@@ -41,4 +41,14 @@ public class Edge {
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
     }
+
+    public Edge reverseEdge() {
+        return Edge.builder()
+                .beaconA(this.beaconB)
+                .beaconAId(this.beaconBId)
+                .beaconB(this.beaconA)
+                .beaconBId(this.beaconAId)
+                .distance(this.distance)
+                .build();
+    }
 }

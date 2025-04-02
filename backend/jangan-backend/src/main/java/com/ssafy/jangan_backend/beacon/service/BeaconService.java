@@ -1,6 +1,5 @@
 package com.ssafy.jangan_backend.beacon.service;
 
-import com.ssafy.jangan_backend.beacon.dto.BeaconDto;
 import com.ssafy.jangan_backend.beacon.dto.request.RequestDeleteBeaconDto;
 import com.ssafy.jangan_backend.beacon.dto.request.RequestRegisterBeaconDto;
 import com.ssafy.jangan_backend.beacon.dto.response.ResponseBeaconIdDto;
@@ -10,15 +9,16 @@ import com.ssafy.jangan_backend.beacon.repository.BeaconQueryRepository;
 import com.ssafy.jangan_backend.beacon.repository.BeaconRepository;
 import com.ssafy.jangan_backend.common.exception.CustomIllegalArgumentException;
 import com.ssafy.jangan_backend.common.response.BaseResponseStatus;
+import com.ssafy.jangan_backend.edge.entity.Edge;
+import com.ssafy.jangan_backend.edge.repository.EdgeQueryRepository;
+import com.ssafy.jangan_backend.edge.repository.EdgeRepository;
 import com.ssafy.jangan_backend.map.entity.Map;
 import com.ssafy.jangan_backend.map.repository.MapRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -26,7 +26,10 @@ public class BeaconService {
     private final BeaconRepository beaconRepository;
     private final BeaconQueryRepository beaconQueryRepository;
     private final MapRepository mapRepository;
+    private final EdgeQueryRepository edgeQueryRepository;
+    private final EdgeRepository edgeRepository;
 
+    @Transactional
     public ResponseBeaconIdDto saveBeacon(RequestRegisterBeaconDto dto) {
         // staionId와 floor로 mapId 찾기
         Map map = mapRepository.findByStationIdAndFloor(dto.getStationId(), dto.getFloor())
@@ -41,10 +44,14 @@ public class BeaconService {
         return responseBeaconIdDto;
     }
 
+    @Transactional
     public void deleteBeacon(RequestDeleteBeaconDto dto) {
         Integer beaconId = dto.getBeaconId();
         Beacon deletedBeacon = beaconRepository.findById(beaconId)
                 .orElseThrow(() -> new CustomIllegalArgumentException(BaseResponseStatus.BEACON_NOT_FOUND_EXCEPTION));
+        //연관 간선 삭제
+        edgeRepository.deleteByBeaconAIdOrBeaconBId(deletedBeacon.getId(), deletedBeacon.getId());
+        //비콘 삭제
         beaconRepository.deleteById(deletedBeacon.getId());
     }
 
