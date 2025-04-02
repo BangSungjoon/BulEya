@@ -4,12 +4,12 @@ import com.ssafy.jangan_backend.beacon.dto.request.RequestDeleteBeaconDto;
 import com.ssafy.jangan_backend.beacon.dto.request.RequestRegisterBeaconDto;
 import com.ssafy.jangan_backend.beacon.dto.response.ResponseBeaconIdDto;
 import com.ssafy.jangan_backend.beacon.dto.response.ResponseCctvInfoDto;
+import com.ssafy.jangan_backend.beacon.dto.response.ResponseExitBeaconDto;
 import com.ssafy.jangan_backend.beacon.entity.Beacon;
 import com.ssafy.jangan_backend.beacon.repository.BeaconQueryRepository;
 import com.ssafy.jangan_backend.beacon.repository.BeaconRepository;
 import com.ssafy.jangan_backend.common.exception.CustomIllegalArgumentException;
 import com.ssafy.jangan_backend.common.response.BaseResponseStatus;
-import com.ssafy.jangan_backend.edge.entity.Edge;
 import com.ssafy.jangan_backend.edge.repository.EdgeQueryRepository;
 import com.ssafy.jangan_backend.edge.repository.EdgeRepository;
 import com.ssafy.jangan_backend.map.entity.Map;
@@ -76,5 +76,10 @@ public class BeaconService {
                         .rtspUrl("rtsp://" + beacon.getCctvIp() + ":554/cctv")
                         .build())
                 .toList();
+    }
+
+    public List<ResponseExitBeaconDto> getExitBeaconList(Integer stationId) {
+        List<ResponseExitBeaconDto> allExitBeacon = beaconQueryRepository.findByIsExitAndMapIds(stationId);
+        return allExitBeacon;
     }
 }
