@@ -100,8 +100,8 @@ export default function MapPage() {
     if (!selectedIcon) return
 
     setTempMarker({
-      coord_x: Math.round(coord_x),
-      coord_y: Math.round(coord_y),
+      coord_x: Number(coord_x.toFixed(6)),
+      coord_y: Number(coord_y.toFixed(6)),
       iconId: selectedIcon,
       floor: selectedFloor,
     })
@@ -177,40 +177,33 @@ export default function MapPage() {
   // ==================
   // 간선 등록 관련
   // ==================
+  // 상태
   const [selectedNodes, setSelectedNodes] = useState([])
 
-  // 간선 모드일 때 비콘 클릭 핸들러
+  // 감지해서 간선 등록
+  useEffect(() => {
+    if (selectedNodes.length === 2) {
+      const [a, b] = selectedNodes
+      const distance = calcDistance(a, b)
+
+      registerEdge({
+        station_id: stationId,
+        floor: selectedFloor,
+        beacon_a_code: a.beacon_code,
+        beacon_b_code: b.beacon_code,
+        distance,
+      })
+
+      setSelectedNodes([]) // 초기화는 여기서!
+    }
+  }, [selectedNodes]) // ← selectedNodes가 바뀔 때만 실행됨
+
+  // 클릭 시에는 상태만 바꿈
   const handleMarkerClick = (beacon) => {
-    if (mode !== 'route') return // route 모드가 아니면 무시
-
-    // 상태 업데이트 함수에 콜백 패턴 사용
     setSelectedNodes((prev) => {
-      // 이미 선택된 비콘이면 중복 클릭 방지
-      const alreadySelected = prev.some((b) => b.beacon_code === beacon.beacon_code)
-      if (alreadySelected) {
-        console.log('⚠️ 이미 선택된 비콘입니다:')
-        return prev
-      }
-
-      const updated = [...prev, beacon] // 새로 선택된 비콘 추가
-      console.log('🟢 선택된 비콘 목록:', updated)
-      // 두 개 선택된 경우: 간선 등록 수행
-      if (updated.length === 2) {
-        const [a, b] = updated
-        const distance = calcDistance(a, b)
-
-        registerEdge({
-          station_id: stationId,
-          floor: selectedFloor,
-          beacon_a_code: a.beacon_code,
-          beacon_b_code: b.beacon_code,
-          distance: distance,
-        })
-
-        return [] // 등록 후 상태 초기화
-      }
-
-      return updated // 아직 1개만 선택된 경우는 저장
+      const already = prev.some((b) => b.beacon_code === beacon.beacon_code)
+      if (already) return prev
+      return [...prev, beacon]
     })
   }
 
