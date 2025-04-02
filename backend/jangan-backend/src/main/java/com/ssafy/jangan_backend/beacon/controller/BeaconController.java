@@ -50,7 +50,10 @@ public class BeaconController {
         List<ResponseCctvInfoDto> cctvList = beaconService.getCctvBeacon(stationId);
         return BaseResponse.ok(cctvList);
     }
-
+    @Operation(
+            summary = "탈출구 비콘 조회",
+            description = "탈출구에 해당하는 비콘을 조회합니다."
+    )
     @GetMapping("/exit-beacon")
     public BaseResponse getExitBeacon(@RequestParam("station_id") Integer stationId) {
         List<ResponseExitBeaconDto> allExitBeacon = beaconService.getExitBeaconList(stationId);

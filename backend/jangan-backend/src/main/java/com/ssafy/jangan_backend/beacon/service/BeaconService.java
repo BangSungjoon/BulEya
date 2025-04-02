@@ -10,7 +10,6 @@ import com.ssafy.jangan_backend.beacon.repository.BeaconQueryRepository;
 import com.ssafy.jangan_backend.beacon.repository.BeaconRepository;
 import com.ssafy.jangan_backend.common.exception.CustomIllegalArgumentException;
 import com.ssafy.jangan_backend.common.response.BaseResponseStatus;
-import com.ssafy.jangan_backend.edge.entity.Edge;
 import com.ssafy.jangan_backend.edge.repository.EdgeQueryRepository;
 import com.ssafy.jangan_backend.edge.repository.EdgeRepository;
 import com.ssafy.jangan_backend.map.entity.Map;
