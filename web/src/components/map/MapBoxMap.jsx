@@ -82,26 +82,36 @@ const MapBoxMap = ({
   const [selectedEdge, setSelectedEdge] = useState(null)
   const [xButtonTick, setXButtonTick] = useState(0) // 간선 삭제 버튼 위치 리렌더링용 상태
 
-  // 선 클릭 → selectedEdge 설정
+  // 간선 클릭 이벤트
   useEffect(() => {
     const map = mapRef.current
     if (!map) return
 
     const handleClick = (e) => {
-      if (mode !== 'route') return
+      if (modeRef.current !== 'route') return
 
-      const edgeFeature = e.features?.[0]
-      if (edgeFeature?.properties?.edge_id) {
-        setSelectedEdge(edgeFeature)
+      // 현재 클릭한 위치에 있는 features 중에서 간선 레이어만 필터링
+      const features = map.queryRenderedFeatures(e.point, {
+        layers: [lineLayerId],
+      })
+
+      if (features.length > 0) {
+        const edge = features[0]
+        if (edge?.properties?.edge_id) {
+          console.log('✅ 간선 클릭됨!', edge)
+          setSelectedEdge(edge)
+        }
+      } else {
+        // 간선이 없는 곳이면 선택 해제
+        if (selectedEdge) {
+          setSelectedEdge(null)
+        }
       }
     }
 
-    map.on('click', lineLayerId, handleClick)
-
-    return () => {
-      map.off('click', lineLayerId, handleClick)
-    }
-  }, [mode])
+    map.on('click', handleClick)
+    return () => map.off('click', handleClick)
+  }, [selectedEdge])
 
   // X 버튼 지도에 따라다니게
   useEffect(() => {
@@ -205,17 +215,21 @@ const MapBoxMap = ({
     const map = mapRef.current
     if (!map || !onMapClick) return
 
-    const handleClick = (event) => {
+    const handleGlobalClick = (event) => {
       const { lng, lat } = event.lngLat
+
+      // 간선이 선택된 상태인데 이번 클릭이 간선이 아니면 해제
+      const clickedEdgeLayer = event.features?.some((f) => f.layer?.id === lineLayerId)
+      if (selectedEdge && !clickedEdgeLayer) {
+        setSelectedEdge(null)
+      }
+
       onMapClick({ coord_x: lng, coord_y: lat })
     }
 
-    map.on('click', handleClick)
-
-    return () => {
-      map.off('click', handleClick)
-    }
-  }, [onMapClick])
+    map.on('click', handleGlobalClick)
+    return () => map.off('click', handleGlobalClick)
+  }, [onMapClick, selectedEdge])
 
   // 마커 및 간선 그리기
   useEffect(() => {
@@ -309,6 +323,8 @@ const MapBoxMap = ({
             'line-width': 6,
           },
         })
+
+        console.log('✅ 레이어 확인:', map.getLayer(lineLayerId))
       } catch (error) {
         console.error('지도 그리기 실패:', error)
       }
@@ -353,7 +369,7 @@ const MapBoxMap = ({
           )
         })()}
 
-      {/* X 버튼: hoveredEdge가 있을 때만 */}
+      {/* X 버튼: selectedEdge가 있을 때만 */}
       {mode === 'route' &&
         selectedEdge &&
         (() => {
