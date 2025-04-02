@@ -67,23 +67,20 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
                 }
             }
 
-            if(!isAppInForeground(this)) {
-                Handler(Looper.getMainLooper()).post {
-                    beaconManager.getRegionViewModel(region)
-                        .rangedBeacons.observeForever(observer)
-                }
-                beaconManager.startRangingBeacons(region)
-            }
+
             Handler(Looper.getMainLooper()).post {
-                FireNotificationStore.setNotification(fireNotificationDto, this) // 여기선 setValue() 가능
+                beaconManager.getRegionViewModel(region)
+                    .rangedBeacons.observeForever(observer)
             }
+            beaconManager.startRangingBeacons(region)
+
             // 2초 후 스캔 종료
             Handler(Looper.getMainLooper()).postDelayed({
-                if(!isAppInForeground(this)) {
-                    beaconManager.stopRangingBeacons(region)
-                    beaconManager.getRegionViewModel(region).rangedBeacons.removeObserver(observer)
-                    if(nearestBeaconCode != -1)
-                        sendAlertNotification(fireNotificationDto, jsonString, nearestBeaconCode)
+                beaconManager.stopRangingBeacons(region)
+                beaconManager.getRegionViewModel(region).rangedBeacons.removeObserver(observer)
+                if(nearestBeaconCode != -1) {
+                    sendAlertNotification(fireNotificationDto, jsonString, nearestBeaconCode)
+                    FireNotificationStore.setNotification(fireNotificationDto, this) // 여기선 setValue() 가능
                 }
                 stopSelf()
             }, 2_000)

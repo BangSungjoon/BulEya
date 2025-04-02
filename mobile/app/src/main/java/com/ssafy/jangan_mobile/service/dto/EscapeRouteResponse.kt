@@ -10,6 +10,6 @@ data class EscapeRouteResponse(
 data class RouteNodeDto(
     @SerializedName("beacon_code") val beaconcode: Int,
     @SerializedName("floor") val floor: Int,
-    @SerializedName("coord_x") val coordX: Int,
-    @SerializedName("coord_y") val coordY: Int
+    @SerializedName("coord_x") val coordX: Double,
+    @SerializedName("coord_y") val coordY: Double
 )
