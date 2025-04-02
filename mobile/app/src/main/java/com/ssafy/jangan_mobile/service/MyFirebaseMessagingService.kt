@@ -73,6 +73,8 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
                         .rangedBeacons.observeForever(observer)
                 }
                 beaconManager.startRangingBeacons(region)
+            }else if(FireNotificationStore.currentLocationStationId.value == fireNotificationDto.stationId){
+                FireNotificationStore.setNotification(fireNotificationDto)
             }
             // 2초 후 스캔 종료
             Handler(Looper.getMainLooper()).postDelayed({
@@ -81,8 +83,6 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
                     beaconManager.getRegionViewModel(region).rangedBeacons.removeObserver(observer)
                     if(nearestBeaconCode != -1)
                         sendAlertNotification(fireNotificationDto, jsonString, nearestBeaconCode)
-                }else if(nearestBeaconCode != -1){
-                    FireNotificationStore.setNotification(fireNotificationDto)
                 }
                 stopSelf()
             }, 2_000)
