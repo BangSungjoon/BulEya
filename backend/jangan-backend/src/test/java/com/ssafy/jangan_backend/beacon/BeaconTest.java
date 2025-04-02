@@ -34,8 +34,8 @@ public class BeaconTest {
                 .floor(1001)
                 .beaconCode(1010)
                 .name("만남의 광장10")
-                .coordX(100)
-                .coordY(100)
+                .coordX((double)100)
+                .coordY((double)100)
                 .isExit(true)
                 .isCctv(false)
                 .build();

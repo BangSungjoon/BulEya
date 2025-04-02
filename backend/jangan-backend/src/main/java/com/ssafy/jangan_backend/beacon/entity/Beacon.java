@@ -30,10 +30,10 @@ public class Beacon {
     private String name;
 
     @Column(name = "coord_x" , nullable = false)
-    private Integer coordX;
+    private Double coordX;
 
     @Column(name = "coord_y", nullable = false)
-    private Integer coordY;
+    private Double coordY;
 
     private Boolean isExit;
     

@@ -19,7 +19,7 @@ public class RouteNodeDto {
 	@JsonProperty("floor")
 	private int floor;
 	@JsonProperty("coord_x")
-	private int coordX;
+	private double coordX;
 	@JsonProperty("coord_y")
-	private int coordY;
+	private double coordY;
 }

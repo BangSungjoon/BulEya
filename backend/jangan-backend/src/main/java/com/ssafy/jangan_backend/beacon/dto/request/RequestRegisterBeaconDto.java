@@ -19,10 +19,10 @@ public class RequestRegisterBeaconDto {
     private String name;
 
     @JsonProperty("coord_x")
-    private Integer coordX;
+    private Double coordX;
 
     @JsonProperty("coord_y")
-    private Integer coordY;
+    private Double coordY;
 
     private Boolean isExit;
     private Boolean isCctv;
