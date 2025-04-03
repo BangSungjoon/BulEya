@@ -1,4 +1,8 @@
 import React from 'react'
+import { useNavigate } from 'react-router-dom'
+
+import LogOut from '@/assets/icons/LogOut.svg?react'
+import { logOut } from '@/api/axios'
 
 // NavBar
 // props:
@@ -6,6 +10,18 @@ import React from 'react'
 // - activeItem: 현재 선택된 메뉴의 id
 // - onSelect: 메뉴 클릭 시 실행할 콜백 함수
 export default function NavBar({ items, activeItem, onSelect }) {
+  const navigate = useNavigate()
+
+  const handleLogout = async () => {
+    try {
+      const response = await logOut()
+      alert('로그아웃 성공')
+      navigate('/login') // 성공 시 login 페이지로 이동
+    } catch (error) {
+      console.log('로그아웃 요청 실패: ', error)
+    }
+  }
+
   return (
     <nav aria-label="Navigation Bar" className="h-screen w-20 bg-gray-600">
       <div className="flex h-full w-full flex-col gap-4">
@@ -19,7 +35,7 @@ export default function NavBar({ items, activeItem, onSelect }) {
         </div>
 
         {/* 메뉴 리스트 */}
-        <ul>
+        <ul className="flex-1">
           {items.map((item) => {
             // 현재 항목이 선택된 상태인지 확인
             const isActive = activeItem === item.id
@@ -43,6 +59,15 @@ export default function NavBar({ items, activeItem, onSelect }) {
             )
           })}
         </ul>
+
+        {/* 로그아웃 버튼 */}
+        <div
+          id="logout"
+          className="flex h-20 w-full items-center justify-center text-gray-100"
+          onClick={handleLogout}
+        >
+          <LogOut className="h-6 w-6 text-gray-100" />
+        </div>
       </div>
     </nav>
   )
