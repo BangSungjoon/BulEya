@@ -42,4 +42,10 @@ public class FireLogController {
 		FireImageDto fireImageDto = firelogService.getFireImageDto(stationId, beaconCode);
 		return BaseResponse.ok(fireImageDto);
 	}
+
+	@GetMapping("/count-fire")
+	public BaseResponse getFireCount() {
+		Integer fireCount = firelogService.getFireCount();
+		return BaseResponse.ok(fireCount);
+	}
 }
