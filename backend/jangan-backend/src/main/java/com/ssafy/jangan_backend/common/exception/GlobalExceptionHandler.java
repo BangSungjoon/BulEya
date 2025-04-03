@@ -3,6 +3,8 @@ package com.ssafy.jangan_backend.common.exception;
 import com.ssafy.jangan_backend.common.response.BaseResponse;
 import com.ssafy.jangan_backend.common.response.BaseResponseStatus;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -33,9 +35,8 @@ public class GlobalExceptionHandler {
         return BaseResponse.status(exception.getStatus());
     }
     @ExceptionHandler(UnauthorizedAccessException.class)
-    public BaseResponse<BaseResponseStatus> unauthorizedAccessExceptionHandler(UnauthorizedAccessException exception) {
+    public ResponseEntity unauthorizedAccessExceptionHandler(UnauthorizedAccessException exception) {
         log.error("UnauthorizedAccessException has occurred. {} {} {}", exception.getMessage(), exception.getCause(), exception.getStackTrace()[0]);
-        return BaseResponse.status(exception.getStatus());
+        return new ResponseEntity(HttpStatus.UNAUTHORIZED);
     }
-
 }
