@@ -5,6 +5,8 @@ from app.services.fire_report import report_fire
 from app.core.redis import has_station, add_station, remove_station
 import json
 
+import torch
+
 router = APIRouter()
 
 @router.post("/cctv-frame", tags=["cctv"])
@@ -43,7 +45,9 @@ async def receive_cctv_data(
             await report_fire(station_id, fire_images, cctv_data)
 
     return { 
-        "cctv_list": cctv_list,
+        # "cctv_list": cctv_list,
+        "fire_beacons": fire_beacons,
+        "gpu": torch.cuda.is_available(),
         # "fire_images": fire_images,
     }
 
