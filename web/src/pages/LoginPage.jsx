@@ -1,4 +1,8 @@
 import { useState, useRef, useEffect } from 'react'
+import { logIn } from '@/api/axios'
+import { useNavigate } from 'react-router-dom'
+
+import Logo from '@/assets/icons/Logo.svg?react'
 
 function CustomDropdown({ selected, onSelect }) {
   const [isOpen, setIsOpen] = useState(false)
@@ -72,15 +76,40 @@ function CustomDropdown({ selected, onSelect }) {
 
 export default function LoginPage() {
   const [selectedStation, setSelectedStation] = useState('')
+  const [accessKey, setAccessKey] = useState('')
+
+  const navigate = useNavigate()
+
+  const handleLogin = async () => {
+    try {
+      console.log('보내는 정보', selectedStation, accessKey)
+
+      const response = await logIn(selectedStation, accessKey)
+
+      console.log(response.data)
+
+      // 로그인 성공 여부 확인
+      if (response.data?.is_success === true) {
+        console.log('로그인 성공')
+
+        navigate('/map') // 성공 시 map 페이지로 이동
+      } else {
+        alert('❌ 로그인 실패: 비밀번호 또는 역사 정보를 확인하세요.')
+      }
+    } catch (error) {
+      console.error('로그인 요청 실패:', error)
+      alert('❌ 서버 오류: 로그인 실패')
+    }
+  }
 
   return (
     <div className="flex h-screen w-full items-center justify-center bg-gray-600">
       <div className="w-full flex-col p-20 text-gray-100 lg:w-[50%]">
         <div className="mb-20 flex w-full items-center text-4xl font-bold">
           {/* 로고/서비스 명 */}
-          <div id="logo">
-            {/* 로고 svg 넣기 */}
-            <p>서비스명</p>
+          <div id="logo" className="flex flex-row items-center gap-3">
+            <Logo />
+            <p>불이야</p>
           </div>
         </div>
 
@@ -93,10 +122,12 @@ export default function LoginPage() {
 
           {/* 비밀번호 입력 */}
           <div className="flex flex-col gap-1">
-            <p className="text-sm text-gray-300">비밀번호</p>
+            <p className="text-sm text-gray-300">Access Key</p>
             <input
               type="text"
-              placeholder="비밀번호"
+              placeholder="Access Key"
+              value={accessKey}
+              onChange={(e) => setAccessKey(e.target.value)}
               className="rounded-lg bg-gray-500 p-3 text-white placeholder:text-gray-400"
             />
           </div>
@@ -104,7 +135,8 @@ export default function LoginPage() {
           {/* 로그인 버튼 */}
           <button
             className="bg-primary text-h3 hover:bg-primary/80 h-12 w-full rounded-xl text-gray-600 transition-all duration-200 hover:-translate-y-0.5"
-            disabled={!selectedStation}
+            disabled={!selectedStation || !accessKey}
+            onClick={handleLogin}
           >
             로그인
           </button>

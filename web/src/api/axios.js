@@ -2,6 +2,7 @@ import axios from 'axios'
 
 const instance = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -36,4 +37,17 @@ export const deleteBeacon = async (beacon_id) => {
   return instance.delete('/api/beacon', {
     data: { beacon_id },
   })
+}
+
+// 로그인 API
+export const logIn = async (stationId, accessKey) => {
+  return instance.post('api/station/admin-login', {
+    station_id: stationId,
+    access_key: accessKey,
+  })
+}
+
+// 로그아웃 API
+export const logOut = async () => {
+  return instance.get('api/station/admin-logout')
 }
