@@ -23,6 +23,7 @@ public enum BaseResponseStatus {
 
     //중복 관련 에러 6000번대
     EDGE_ALREADY_EXISTS_EXCEPTION(false, 6001, "이미 존재하는 간선입니다."),
+    BEACON_CODE_ALREADY_EXISTS_EXCEPTION(false, 6002, "이미 존재하는 비콘코드 입니다."),
 
     //권한 관련 에러 7000번대
     AUTHENTICATION_FAILED_EXCEPTION(false, 7001, "관리자 권한이 없습니다."),
