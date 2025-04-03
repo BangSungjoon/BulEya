@@ -28,7 +28,7 @@ public class FireLogController {
 	)
 	@PostMapping("/fire-report")
 	public BaseResponse reportFire(@RequestPart("json") FireReportDto fireReportDto,
-								   @RequestPart("files") MultipartFile[] files){
+								   @RequestPart(name = "files", required = false) MultipartFile[] files){
 		firelogService.reportFire(fireReportDto, files);
 		return BaseResponse.ok();
 	}
