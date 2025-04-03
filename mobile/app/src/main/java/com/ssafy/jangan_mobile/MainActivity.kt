@@ -20,11 +20,13 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.content.ContextCompat
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.MutableLiveData
 import com.google.firebase.Firebase
 import com.google.firebase.FirebaseApp
@@ -35,6 +37,7 @@ import com.ssafy.jangan_mobile.service.dto.FireNotificationDto
 import com.ssafy.jangan_mobile.store.FireNotificationStore
 import com.ssafy.jangan_mobile.ui.navigation.AppNavigation
 import com.ssafy.jangan_mobile.ui.theme.JanganmobileTheme
+import com.ssafy.jangan_mobile.viewmodel.SplashViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.CoroutineScope
@@ -161,10 +164,18 @@ class MainActivity : ComponentActivity() {
     }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
+    private val viewModel: SplashViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
+        val splashScreen = installSplashScreen()
+        splashScreen.setKeepOnScreenCondition{
+            viewModel.isLoading.value
+        }
         super.onCreate(savedInstanceState)
         Log.d("lifecycle:", "onCreate called")
         enableEdgeToEdge()
+
+
+
         val jsonString = intent?.getStringExtra("jsonString")
         val fireNotificationDto = Gson().fromJson(jsonString, FireNotificationDto::class.java)
         val notificationBeaconCode = intent?.getIntExtra("notificationBeaconCode", -1)

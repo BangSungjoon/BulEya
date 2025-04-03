@@ -112,7 +112,7 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
             val notificationBuilder = NotificationCompat.Builder(this, channelId)
-                .setSmallIcon(R.mipmap.ic_launcher)
+                .setSmallIcon(R.drawable.ic_launcher_foreground)
                 .setContentTitle("${fireNotificationDto.stationName}역에서 화재 발생!")
                 .setContentText("${beaconNotificationDto.beaconName}에서 화재가 발생했습니다. 신속히 대피바랍니다.")
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
