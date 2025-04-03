@@ -12,6 +12,4 @@ public class BeaconFireInfoDto {
 	private int beaconCode;
 	@JsonProperty("is_active_fire")
 	private int isActiveFire;
-	@JsonProperty("image_name")
-	private String imageName;
 }
