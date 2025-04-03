@@ -8,6 +8,19 @@ const instance = axios.create({
   },
 })
 
+// 공통 에러 처리 인터셉터
+instance.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    // 401 에러일 때 로그인 페이지로 이동
+    if (error.response && error.response.status === 401) {
+      window.location.href = '/login' // 리다이렉트
+    }
+
+    return Promise.reject(error) // 그 외 에러는 그대로 던지기
+  },
+)
+
 // 지도 이미지 URL 받아오는 API
 export const fetchMapImage = async (stationId) => {
   return instance.get('/api/map/admin', {
