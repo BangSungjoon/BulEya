@@ -14,7 +14,6 @@ import java.util.List;
 public class ResponseExitBeaconDto {
     private Integer floor;
     private Integer beaconId;
-    private Integer mapId;
     private Integer beaconCode;
     private String name;
     private Double coordX;

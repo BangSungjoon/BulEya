@@ -20,8 +20,12 @@ public class Station {
     @Column(nullable = false, length = 50)
     private String name;
 
-    @Column(nullable = false, length = 255)
-    private String allowedIp;
+
+//    @Column(nullable = false, length = 255)
+//    private String allowedIp;
+
+    @Column(name = "access_key",nullable = false, length = 255)
+    private String accessKey;
 
     @Column(updatable = false)
     private LocalDateTime createdAt;
