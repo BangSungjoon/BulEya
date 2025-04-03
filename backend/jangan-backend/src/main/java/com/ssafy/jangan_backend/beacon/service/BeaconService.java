@@ -10,6 +10,7 @@ import com.ssafy.jangan_backend.beacon.entity.Beacon;
 import com.ssafy.jangan_backend.beacon.repository.BeaconQueryRepository;
 import com.ssafy.jangan_backend.beacon.repository.BeaconRepository;
 import com.ssafy.jangan_backend.common.exception.CustomIllegalArgumentException;
+import com.ssafy.jangan_backend.common.exception.DuplicateDataException;
 import com.ssafy.jangan_backend.common.response.BaseResponseStatus;
 import com.ssafy.jangan_backend.edge.repository.EdgeQueryRepository;
 import com.ssafy.jangan_backend.edge.repository.EdgeRepository;
@@ -36,7 +37,10 @@ public class BeaconService {
         // staionId와 floor로 mapId 찾기
         Map map = mapRepository.findByStationIdAndFloor(dto.getStationId(), dto.getFloor())
                 .orElseThrow(() -> new CustomIllegalArgumentException(BaseResponseStatus.MAP_NOT_FOUND_EXCEPTION));
-
+        //이미 존재하는 비콘코드인지 확인
+        if(beaconRepository.existsByMapIdAndBeaconCode(map.getId(),dto.getBeaconCode())) {
+            throw new DuplicateDataException(BaseResponseStatus.BEACON_CODE_ALREADY_EXISTS_EXCEPTION);
+        }
         // Beacon 엔티티로 변환, 저장
         Beacon newBeacon = dto.toEntity(map);
         beaconRepository.save(newBeacon);
