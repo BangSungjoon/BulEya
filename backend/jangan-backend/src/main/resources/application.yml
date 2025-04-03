@@ -11,6 +11,10 @@ spring:
       port: 6379
       username: ${REDIS_USERNAME}
       password: ${REDIS_PASSWORD}
+  servlet:
+    multipart:
+      maxFileSize: 50MB
+      maxRequestSize: 1000MB
 
   datasource:
     url: ${MYSQL_URL}
