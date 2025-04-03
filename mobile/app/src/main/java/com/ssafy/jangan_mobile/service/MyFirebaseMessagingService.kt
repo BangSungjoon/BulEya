@@ -6,6 +6,8 @@ import android.app.PendingIntent
 import android.content.ContentValues.TAG
 import android.content.Context
 import android.content.Intent
+import android.media.AudioAttributes
+import android.media.MediaPlayer
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
@@ -96,7 +98,10 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
         Log.d(TAG, "stationName: ${fireNotificationDto.stationName}")
         Log.d(TAG, "beacons: ${fireNotificationDto.beaconNotificationDtos}")
 
+        var isNewFire = false
         for(beaconNotificationDto in fireNotificationDto.beaconNotificationDtos) {
+            if(beaconNotificationDto.isNewFire == 1)
+                isNewFire = true
             val intent = Intent(this, MainActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
             }
@@ -112,7 +117,7 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
             val notificationBuilder = NotificationCompat.Builder(this, channelId)
-                .setSmallIcon(R.drawable.ic_launcher_foreground)
+                .setSmallIcon(R.drawable.icon_big)
                 .setContentTitle("${fireNotificationDto.stationName}역에서 화재 발생!")
                 .setContentText("${beaconNotificationDto.beaconName}에서 화재가 발생했습니다. 신속히 대피바랍니다.")
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
@@ -123,6 +128,16 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
             val notificationManager =
                 getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.notify(notificationId, notificationBuilder.build())
+        }
+        if(isNewFire){
+            val mediaPlayer = MediaPlayer.create(this, R.raw.siren)
+            mediaPlayer.setAudioAttributes(
+                AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_ALARM) // 핵심 포인트!
+                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                    .build()
+            )
+            mediaPlayer.start()
         }
     }
 
