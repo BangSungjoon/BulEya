@@ -2,6 +2,7 @@ package com.ssafy.jangan_backend.escapeRoute.controller;
 
 import java.util.List;
 
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -21,6 +22,11 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class EscapeRouteController {
     private final EscapeRouteService escapeRouteService;
+
+    @Operation(
+            summary = "탈출 경로 조회",
+            description = "현재 위치 기준 최단 탈출경로를 조회."
+    )
     @GetMapping()
     public BaseResponse getEscaepRoute(@RequestParam("station_id") Integer stationId,
                                        @RequestParam("beacon_code")Integer beaconCode) {

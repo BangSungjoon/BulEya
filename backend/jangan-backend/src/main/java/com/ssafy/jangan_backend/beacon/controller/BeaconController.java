@@ -18,10 +18,14 @@ import com.ssafy.jangan_backend.beacon.dto.response.ResponseCctvInfoDto;
 import com.ssafy.jangan_backend.beacon.dto.response.ResponseExitBeaconDto;
 import com.ssafy.jangan_backend.beacon.entity.Beacon;
 import com.ssafy.jangan_backend.beacon.service.BeaconService;
+import com.ssafy.jangan_backend.common.exception.UnauthorizedAccessException;
 import com.ssafy.jangan_backend.common.response.BaseResponse;
 
+import com.ssafy.jangan_backend.common.response.BaseResponseStatus;
+import com.ssafy.jangan_backend.common.util.AuthUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 
 @Tag(name = "비콘")
@@ -37,7 +41,9 @@ public class BeaconController {
 //            security = @SecurityRequirement(name = "BearerAuth") // JWT 인증 적용
     )
     @PostMapping()
-    public BaseResponse saveBeacon(@RequestBody RequestRegisterBeaconDto dto) {
+    public BaseResponse saveBeacon(HttpSession session, @RequestBody RequestRegisterBeaconDto dto) {
+        AuthUtil.authCheck(session);
+
         ResponseBeaconIdDto responseBeaconIdDto = beaconService.saveBeacon(dto);
         return BaseResponse.ok(responseBeaconIdDto);
     }
@@ -48,7 +54,9 @@ public class BeaconController {
 //            security = @SecurityRequirement(name = "BearerAuth") // JWT 인증 적용
     )
     @DeleteMapping()
-    public BaseResponse deleteBeacon(@RequestBody RequestDeleteBeaconDto dto) {
+    public BaseResponse deleteBeacon(HttpSession session, @RequestBody RequestDeleteBeaconDto dto) {
+        AuthUtil.authCheck(session);
+
         beaconService.deleteBeacon(dto);
         return BaseResponse.ok();
     }

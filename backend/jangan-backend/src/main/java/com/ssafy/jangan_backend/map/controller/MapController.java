@@ -1,12 +1,14 @@
 package com.ssafy.jangan_backend.map.controller;
 
 import com.ssafy.jangan_backend.common.response.BaseResponse;
+import com.ssafy.jangan_backend.common.util.AuthUtil;
 import com.ssafy.jangan_backend.map.dto.ResponseMobileMapDto;
 import com.ssafy.jangan_backend.map.dto.ResponseWebAdminMapDto;
 import com.ssafy.jangan_backend.map.service.MapService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -37,7 +39,9 @@ public class MapController {
 //            security = @SecurityRequirement(name = "BearerAuth") //JWT 적용
     )
     @GetMapping("/admin")
-    public BaseResponse getMapsForWebAdmin(@RequestParam("station_id") int stationId) {
+    public BaseResponse getMapsForWebAdmin(HttpSession session, @RequestParam("station_id") int stationId) {
+        AuthUtil.authCheck(session);
+        
         List<ResponseWebAdminMapDto> list = mapService.getMapsForWebAdmin(stationId);
         return BaseResponse.ok(list);
     }

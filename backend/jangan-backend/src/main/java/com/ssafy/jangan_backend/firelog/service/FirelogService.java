@@ -156,4 +156,9 @@ public class FirelogService {
 		}
 		return new FireImageDto(imageName);
 	}
+
+	public Integer getFireCount() {
+//		Integer fireCount = firelogRepository.count
+		return 0;
+	}
 }

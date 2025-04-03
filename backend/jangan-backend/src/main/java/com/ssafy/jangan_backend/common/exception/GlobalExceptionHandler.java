@@ -32,4 +32,10 @@ public class GlobalExceptionHandler {
         log.error("DuplicateDataException has occurred. {} {} {}", exception.getMessage(), exception.getCause(), exception.getStackTrace()[0]);
         return BaseResponse.status(exception.getStatus());
     }
+    @ExceptionHandler(UnauthorizedAccessException.class)
+    public BaseResponse<BaseResponseStatus> unauthorizedAccessExceptionHandler(UnauthorizedAccessException exception) {
+        log.error("UnauthorizedAccessException has occurred. {} {} {}", exception.getMessage(), exception.getCause(), exception.getStackTrace()[0]);
+        return BaseResponse.status(exception.getStatus());
+    }
+
 }
