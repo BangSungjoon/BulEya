@@ -3,6 +3,7 @@ package com.ssafy.jangan_backend.escapeRoute.service;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.TreeSet;
 
@@ -36,14 +37,16 @@ public class EscapeRouteService {
 
         // //역에 맞는 탈출 경로 조회 후, 비콘코드에 맞는 탈출 경로 조회
         EscapeRoute escapeRoute = redisTemplate.opsForValue().get("escapeRoute:" + stationId);
-        List<RouteNodeDto> routeNodeList = escapeRoute.getRoutes().get(beaconCode);
+
+        Map<Integer, List<RouteNodeDto>> stationRouteMap = escapeRoute.getRoutes();
 
         //TODO: 탈출 경로가 없는 경우 처리할 것
         //불이난 위치에 있는 사람, 불에 둘러싸인 사람 ??
-        if(routeNodeList==null) {
-
+        if(!stationRouteMap.containsKey(beaconCode)){
+            return new ArrayList<>();
         }
-        return routeNodeList;
+
+		return stationRouteMap.get(beaconCode);
     }
 
     private static class Route implements Comparable<Route>{
