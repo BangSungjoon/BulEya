@@ -96,13 +96,11 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
         Log.d(TAG, "stationName: ${fireNotificationDto.stationName}")
         Log.d(TAG, "beacons: ${fireNotificationDto.beaconNotificationDtos}")
 
-        val intent = Intent(this, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
-        }
-        intent.putExtra("jsonString", jsonString)
-
-
         for(beaconNotificationDto in fireNotificationDto.beaconNotificationDtos) {
+            val intent = Intent(this, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            }
+            intent.putExtra("jsonString", jsonString)
             if(beaconNotificationDto.isNewFire == 0)
                 continue
             val notificationId = System.currentTimeMillis().toInt()
