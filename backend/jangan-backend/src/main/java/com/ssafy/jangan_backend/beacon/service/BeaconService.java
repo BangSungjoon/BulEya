@@ -89,6 +89,8 @@ public class BeaconService {
         List<Integer> mapIds = mapRepository.findByStationId(stationId).stream().map(Map::getId).toList();
         Beacon beacon = beaconRepository.findByMapIdInAndBeaconCode(mapIds, beaconCode).orElseThrow(
             () -> new CustomIllegalArgumentException(BaseResponseStatus.MAP_NOT_FOUND_EXCEPTION));
-        return BeaconDto.fromEntity(beacon);
+        Optional<Map> mapOptional = mapRepository.findById(beacon.getMapId());
+        Map map = mapOptional.get();
+        return BeaconDto.fromEntity(beacon, map.getFloor());
     }
 }

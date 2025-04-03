@@ -15,6 +15,7 @@ import lombok.*;
 public class BeaconDto {
     private Integer beaconId;
     private Integer mapId;
+    private Integer floor;
     private Integer beaconCode;
     private String name;
     private Double coordX;
@@ -39,10 +40,11 @@ public class BeaconDto {
                 .build();
     }
 
-    public static BeaconDto fromEntity(Beacon beacon) {
+    public static BeaconDto fromEntity(Beacon beacon, Integer floor) {
         return BeaconDto.builder()
                 .beaconId(beacon.getId())
                 .mapId(beacon.getMap().getId())
+                .floor(floor)
                 .beaconCode(beacon.getBeaconCode())
                 .name(beacon.getName())
                 .coordX(beacon.getCoordX())
