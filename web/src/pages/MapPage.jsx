@@ -295,6 +295,21 @@ export default function MapPage() {
         ? '장비를 클릭하여 경로를 등록해주세요.'
         : null // map일 경우는 null
 
+  const [displayGuide, setDisplayGuide] = useState(false)
+  const [visibleGuide, setVisibleGuide] = useState(false)
+
+  useEffect(() => {
+    setDisplayGuide(true) // 컴포넌트 자체를 보여줌
+    setTimeout(() => setVisibleGuide(true), 10) // 약간 딜레이 후 진짜 트랜지션 시작
+
+    const timer = setTimeout(() => {
+      setVisibleGuide(false) // 트랜지션 out
+      setTimeout(() => setDisplayGuide(false), 300) // DOM 제거 (300ms 후)
+    }, 2000)
+
+    return () => clearTimeout(timer)
+  }, [mode])
+
   return (
     <div className="h-full w-full">
       {/* 지도 렌더링 */}
@@ -314,9 +329,14 @@ export default function MapPage() {
       )}
 
       {/* 모드 안내 문구 */}
-      {modeGuideText && (
-        <div className="text-primary text-caption absolute top-4 left-1/2 z-40 h-fit w-fit -translate-x-1/2 rounded-full bg-gray-600 px-4 py-2 text-sm whitespace-nowrap shadow-md">
-          {modeGuideText}
+      {displayGuide && (
+        <div
+          className={`absolute top-4 left-1/2 z-40 w-fit -translate-x-1/2 transform overflow-hidden rounded-full bg-gray-600 py-2 text-sm shadow-md transition-all duration-300 ${visibleGuide ? 'translate-y-0 opacity-100' : '-translate-y-10 opacity-0'} `}
+        >
+          <div className="text-primary text-caption px-4 whitespace-nowrap">{modeGuideText}</div>
+          <div className="mt-1 h-[2px] w-full overflow-hidden rounded-full bg-gray-400">
+            <div className="bg-primary animate-guide-bar h-full" />
+          </div>
         </div>
       )}
 
