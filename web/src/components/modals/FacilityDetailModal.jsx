@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react'
 
 export default function FacilityDetailModal({ data, onClose, onDelete }) {
   const { name, beacon_code, beacon_id, cctv_ip, is_cctv = false, is_exit = false } = data || {}
-  const stationId = 222
+  const stationId = Number(sessionStorage.getItem('stationId'))
   const canvasRef = useRef(null)
   const wsRef = useRef(null)
   const playerRef = useRef(null)
@@ -48,15 +48,13 @@ export default function FacilityDetailModal({ data, onClose, onDelete }) {
     // 컴포넌트 언마운트 시 자원 정리
     return () => {
       if (playerRef.current) {
-        playerRef.current.destroy()
         playerRef.current = null
       }
       if (wsRef.current) {
-        wsRef.current.close()
         wsRef.current = null
       }
     }
-  }, [])
+  }, [is_cctv, beacon_code])
   
   const handleDelete = async () => {
     if (!data?.beacon_id) return alert('삭제할 비콘 ID가 없습니다.')
