@@ -19,7 +19,7 @@ import { fetchMapImage, createEdge, deleteEdge } from '@/api/axios'
 export default function MapPage() {
   const location = useLocation()
   const mode = location.pathname.replace('/', '') || 'map'
-  const stationId = 222 // 역사 번호 입력 페이지 구현 후 변경 필요
+  const stationId = Number(sessionStorage.getItem('stationId'))
 
   const [floorDataList, setFloorDataList] = useState([]) // 전체 응답 저장
   const [selectedFloor, setSelectedFloor] = useState(null) // 선택된 층 번호
