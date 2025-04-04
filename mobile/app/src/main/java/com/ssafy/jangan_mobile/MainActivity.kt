@@ -104,7 +104,7 @@ class MainActivity : ComponentActivity() {
         val filtered = beacons?.value?.filter { it.id1.toString().startsWith("AAAAA204", ignoreCase = true) }
         filtered?.forEach { beacon ->
             run {
-                Log.d("Beacon scanned. : ", "id2: ${beacon.id2}  id3: ${beacon.id3}")
+                Log.d("BluetoothAdapter", "id2: ${beacon.id2}  id3: ${beacon.id3}")
             }
         }
         val closest = filtered?.minByOrNull { it.distance }
@@ -138,15 +138,7 @@ class MainActivity : ComponentActivity() {
     override fun onPostResume() {
         Log.d("cycle", "onPostResume() called.")
         // 실시간 현재 위치 추적을 위한 비콘 스캔
-        region = Region("current-location-scan", null, null, null)
-        beaconManager = BeaconManager.getInstanceForApplication(this)
-        beaconManager?.foregroundScanPeriod = 2500L
-        beaconManager?.foregroundBetweenScanPeriod = 0L
-        beaconManager?.updateScanPeriods()
-        beaconManager?.beaconParsers?.clear()
-        beaconManager?.beaconParsers?.add(
-            BeaconParser().setBeaconLayout("m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24")
-        )
+
         beaconManager?.startRangingBeacons(region)
         if(checkBeaconsJob?.isActive != true) {
             checkBeaconsJob = scope.launch {
@@ -172,7 +164,27 @@ class MainActivity : ComponentActivity() {
         Log.d("lifecycle:", "onCreate called")
         enableEdgeToEdge()
 
+        region = Region("current-location-scan", null, null, null)
+        beaconManager = BeaconManager.getInstanceForApplication(this)
+        beaconManager?.foregroundScanPeriod = 1800L
+        beaconManager?.foregroundBetweenScanPeriod = 0L
+        beaconManager?.updateScanPeriods()
+        beaconManager?.beaconParsers?.clear()
+        beaconManager?.beaconParsers?.add(
+            BeaconParser().setBeaconLayout("m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24")
+        )
 
+        if(checkBeaconsJob?.isActive != true) {
+            checkBeaconsJob = scope.launch {
+                while (true) {
+                    val beacons = beaconManager?.getRegionViewModel(region)?.rangedBeacons
+                    processBeacons(beacons)
+                    Log.d("EscapeRoute", "MainActivity dto : ${FireNotificationStore.fireNotificationDto.value}")
+                    delay(2200)
+                }
+            }
+            checkBeaconsJob?.start()
+        }
 
         val jsonString = intent?.getStringExtra("jsonString")
         val fireNotificationDto = Gson().fromJson(jsonString, FireNotificationDto::class.java)
