@@ -1,9 +1,61 @@
 import Delete from '@/assets/icons/Delete.svg?react'
-import { deleteBeacon } from '@/api/axios.js'
+import { deleteBeacon, fetchCctvWebSocket } from '@/api/axios.js'
+import { useEffect, useRef } from 'react'
 
 export default function FacilityDetailModal({ data, onClose, onDelete }) {
   const { name, beacon_code, beacon_id, cctv_ip, is_cctv = false, is_exit = false } = data || {}
+  const stationId = Number(sessionStorage.getItem('stationId'))
+  const canvasRef = useRef(null)
+  const wsRef = useRef(null)
+  const playerRef = useRef(null)
 
+  useEffect(() => {
+    if (!is_cctv) return
+    
+    const cctvStream = async () => {
+      try {
+        const response = await fetchCctvWebSocket(stationId, beacon_code)
+        const wsUrl = response.data.socket_url
+        const ws = new WebSocket(wsUrl)
+        wsRef.current = ws
+
+        ws.onopen = () => {
+          console.log('WebSocket 연결 성공!');
+          if (!canvasRef.current) return
+          
+        }
+        ws.onerror = (error) => {
+          console.error('WebSocket 에러:', error);
+        }
+
+        const player = new window.jsmpeg(ws, {
+          canvas: canvasRef.current,
+          autoplay: true,
+          loop: false,
+          onLoad: () => {
+            console.log('스트리밍 시작!');
+          }
+        });
+        playerRef.current = player;
+
+      } catch (error) {
+        console.error('CCTV WebSocket 연결 실패:', error)
+        alert('CCTV 스트리밍을 가져오는 데 실패했습니다.')
+      }
+      }
+      cctvStream()
+
+    // 컴포넌트 언마운트 시 자원 정리
+    return () => {
+      if (playerRef.current) {
+        playerRef.current = null
+      }
+      if (wsRef.current) {
+        wsRef.current = null
+      }
+    }
+  }, [is_cctv, beacon_code])
+  
   const handleDelete = async () => {
     if (!data?.beacon_id) return alert('삭제할 비콘 ID가 없습니다.')
 
@@ -21,6 +73,8 @@ export default function FacilityDetailModal({ data, onClose, onDelete }) {
     }
   }
 
+  
+
   return (
     <div className="relative flex h-full w-full flex-col overflow-hidden rounded-3xl bg-gray-500 text-white">
       {/* 닫기 버튼 - 영상 위 오른쪽 상단 */}
@@ -30,8 +84,11 @@ export default function FacilityDetailModal({ data, onClose, onDelete }) {
       {/* CCTV 모드일 경우 상단에 비디오 */}
       {is_cctv && (
         <div className="aspect-video w-full bg-black">
-          {/* RTSP 영상 스트리밍 (예시로 video 태그 사용) */}
-          <video src={cctv_ip} controls autoPlay muted className="h-full w-full object-cover" />
+          {/* RTSP 영상 스트리밍 */}
+          <canvas
+            ref={canvasRef}
+            className="h-full w-full object-cover"
+          ></canvas>
         </div>
       )}
 

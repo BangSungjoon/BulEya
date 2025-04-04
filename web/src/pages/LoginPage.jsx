@@ -9,12 +9,12 @@ function CustomDropdown({ selected, onSelect }) {
   const dropdownRef = useRef(null) // 드롭다운 외부 클릭 감지용
 
   const StationList = [
-    { code: 222, name: '강남역' },
-    { code: 2, name: '서울역' },
-    { code: 3, name: '잠실역' },
+    { id: 222, name: '강남역' },
+    { id: 2, name: '서울역' },
+    { id: 3, name: '잠실역' },
   ]
 
-  const selectedLabel = StationList.find((s) => s.code === selected)?.name || '역을 선택해주세요'
+  const selectedLabel = StationList.find((s) => s.id === selected)?.name || '역을 선택해주세요'
 
   // 외부 클릭 시 드롭다운 닫기
   useEffect(() => {
@@ -60,10 +60,10 @@ function CustomDropdown({ selected, onSelect }) {
       >
         {StationList.map((station) => (
           <li
-            key={station.code}
+            key={station.id}
             onClick={(e) => {
               e.preventDefault()
-              onSelect(station.code)
+              onSelect(station.id)
               setIsOpen(false)
             }}
             className="hover:bg-primary cursor-pointer px-4 py-2 text-gray-800 hover:text-white"
@@ -91,6 +91,7 @@ export default function LoginPage() {
       const response = await logIn(selectedStation, accessKey)
 
       if (response.data?.is_success === true) {
+        sessionStorage.setItem('stationId', selectedStation)
         navigate('/map')
       } else {
         // 서버는 200 OK를 주고 내부적으로 실패 응답을 보내는 경우
