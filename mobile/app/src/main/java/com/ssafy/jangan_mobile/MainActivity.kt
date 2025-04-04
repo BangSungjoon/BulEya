@@ -15,16 +15,17 @@ import android.os.Bundle
 import android.os.PowerManager
 import android.provider.Settings
 import android.util.Log
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.content.ContextCompat
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.MutableLiveData
 import com.google.firebase.Firebase
 import com.google.firebase.FirebaseApp
@@ -35,6 +36,7 @@ import com.ssafy.jangan_mobile.service.dto.FireNotificationDto
 import com.ssafy.jangan_mobile.store.FireNotificationStore
 import com.ssafy.jangan_mobile.ui.navigation.AppNavigation
 import com.ssafy.jangan_mobile.ui.theme.JanganmobileTheme
+import com.ssafy.jangan_mobile.viewmodel.SplashViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.CoroutineScope
@@ -95,7 +97,10 @@ class MainActivity : ComponentActivity() {
     }
 
     fun processBeacons(beacons: MutableLiveData<Collection<Beacon>>?) {
-
+        val isRanging = beaconManager?.rangedRegions!!.contains(region)
+        if(!isRanging){
+            beaconManager?.startRangingBeacons(region)
+        }
         val filtered = beacons?.value?.filter { it.id1.toString().startsWith("AAAAA204", ignoreCase = true) }
         filtered?.forEach { beacon ->
             run {
@@ -157,11 +162,18 @@ class MainActivity : ComponentActivity() {
         super.onPostResume()
     }
 
-
+    private val viewModel: SplashViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
+        val splashScreen = installSplashScreen()
+        splashScreen.setKeepOnScreenCondition{
+            viewModel.isLoading.value
+        }
         super.onCreate(savedInstanceState)
         Log.d("lifecycle:", "onCreate called")
         enableEdgeToEdge()
+
+
+
         val jsonString = intent?.getStringExtra("jsonString")
         val fireNotificationDto = Gson().fromJson(jsonString, FireNotificationDto::class.java)
         val notificationBeaconCode = intent?.getIntExtra("notificationBeaconCode", -1)
@@ -181,7 +193,6 @@ class MainActivity : ComponentActivity() {
                     msg = "Subscribe failed"
                 }
                 Log.d(TAG, msg)
-                Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
             }
         // 알람 채널 생성
         createNotificationChannel()

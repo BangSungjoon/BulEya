@@ -94,8 +94,9 @@ fun EscapeRouteMapScreen(
     val hasArrived = remember { mutableStateOf(false) }
     val showArrivalCard = remember { mutableStateOf(false) }
 
+    // 마커들
+    val myLocationAnnotation = remember { mutableStateOf<PointAnnotation?>(null) }
     val goalMarker = remember { mutableStateOf<PointAnnotation?>(null) }
-
     val fireMarkers = remember { mutableStateListOf<PointAnnotation>() }
 
     // 이미지 로드
@@ -196,7 +197,10 @@ fun EscapeRouteMapScreen(
 
     // 🔁 내 위치 마커만 따로 관리
     LaunchedEffect(myLocation, selectedFloor.value) {
-        pointAnnotationManager.value?.deleteAll()
+        myLocationAnnotation.value?.let {
+            pointAnnotationManager.value?.delete(it)
+            myLocationAnnotation.value = null
+        }
         val selectedFloorCode = floorStringToCode(selectedFloor.value)
         myLocation?.let { beacon ->
             if (beacon.floor == selectedFloorCode) {
@@ -204,14 +208,14 @@ fun EscapeRouteMapScreen(
                     .withPoint(Point.fromLngLat(beacon.coordX, beacon.coordY))
                     .withIconImage("marker-icon")
                     .withIconSize(0.5)
-                pointAnnotationManager.value?.create(marker)
+                myLocationAnnotation.value = pointAnnotationManager.value?.create(marker)
             }
         }
     }
 
     // 화재 위치만 따로 관리
     LaunchedEffect(fireNotificationDto, selectedFloor.value, showArrivalCard.value) {
-        if (showArrivalCard.value) {
+        if (showArrivalCard.value == false) {
             Log.d("FireMarker", "✅ 도착 후 화재 마커 표시 생략")
             return@LaunchedEffect
         }
@@ -219,8 +223,6 @@ fun EscapeRouteMapScreen(
         val selectedFloorCode = floorStringToCode(selectedFloor.value)
         Log.d("FireMarker", "🔥 LaunchedEffect 호출됨. 현재 층: $selectedFloorCode")
         pointAnnotationManager.value?.let { manager ->
-            manager.deleteAll()
-
             val fireBeacons = fireNotificationDto?.beaconNotificationDtos
                 ?.filter { it.floor == selectedFloorCode } ?: run {
                 Log.w("FireMarker", "⚠️ fireNotificationDto가 null이거나 해당 층의 화재 없음")
@@ -262,6 +264,8 @@ fun EscapeRouteMapScreen(
         }
         // 라인만 지우기 (routePoints가 1개인 경우)
         if (!showRoute.value || routePoints.size == 1) {
+
+            polylineManager.value?.deleteAll()
             // ✅ 무조건 routePoints[0]에 목적지 마커 표시
             val destination = routePoints.first()
             Log.d("EscapeRouteMap", "📍 목적지 마커 추가: (${destination.x}, ${destination.y})")
