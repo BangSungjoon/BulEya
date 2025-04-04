@@ -1,99 +1,109 @@
-package com.ssafy.jangan_mobile.ui.viewmodel
+package com.ssafy.jangan_mobile.ui.component
 
-import android.util.Log
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.ssafy.jangan_mobile.model.LatLngData
-import com.ssafy.jangan_mobile.service.RetrofitInstance
-import com.mapbox.geojson.Point
-import com.mapbox.maps.MapView
-import com.mapbox.maps.plugin.annotation.AnnotationPlugin
-import com.mapbox.maps.plugin.annotation.annotations
-import com.mapbox.maps.plugin.annotation.generated.PointAnnotationManager
-import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
-import com.mapbox.maps.plugin.annotation.generated.createPointAnnotationManager
-import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
-import javax.inject.Inject
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Text
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.ssafy.jangan_mobile.ui.theme.Body1
+import com.ssafy.jangan_mobile.ui.theme.Headline
+import kotlinx.coroutines.delay
 
-@HiltViewModel
-class MapViewModel @Inject constructor() : ViewModel() {
-    private val _coordinates = MutableStateFlow<List<LatLngData>>(emptyList())
-    val coordinates: StateFlow<List<LatLngData>> = _coordinates
+@Composable
+fun ArrivalCard(
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var secondsLeft by remember { mutableStateOf(3) }
 
-    private val _mapImageUrl = MutableStateFlow<String?>(null)
-    val mapImageUrl: StateFlow<String?> = _mapImageUrl
+    // ⏳ 3초 후 자동 닫힘
+    LaunchedEffect(Unit) {
+        while (secondsLeft > 0) {
+            delay(1000L)
+            secondsLeft--
+        }
+        onDismiss()
+    }
 
-    fun fetchMapImage(stationId: String, floorCode: String) {
-        Log.d("✅MapViewModel", "💥 함수 진입 확인됨!")
-        viewModelScope.launch {
-            try {
-                Log.d("✅MapViewModel", "fetchMapImage 호출됨! stationId=$stationId, floorCode=$floorCode")
-                val response = RetrofitInstance.api.getMapImage(stationId)
-                Log.d("✅MapViewModel", "API 응답 받음")
+    Box(
+        modifier = Modifier
+            .width(380.dp)
+            .height(183.dp)
+            .background(color = Color(0xFF1B1B1D), shape = RoundedCornerShape(40.dp))
+            .padding(start = 10.dp, top = 12.dp, end = 10.dp, bottom = 12.dp)
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text = "경로 안내가 완료되었습니다.",
+                    style = Headline.copy(
+                        color = Color.White,
+                        textAlign = TextAlign.Center)
+                    )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "안전한 화재 대피를 기원합니다.",
+                    style = Body1.copy(
+                        color = Color.White,
+                        textAlign = TextAlign.Center)
+                    )
+            }
 
-                if (response.isSuccessful) {
-                    Log.d("✅MapViewModel", "API 응답 성공")
+            // ✅ 확인 버튼 (초 포함)
+            Box(
+                modifier = Modifier
+                    .width(360.dp)
+                    .height(72.dp)
+                    .background(color = Color(0xFF8AEA52), shape = RoundedCornerShape(60.dp))
+                    .padding(start = 32.dp, top = 22.dp, end = 32.dp, bottom = 22.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = "확인",
+                        style = Headline.copy(
+                            color = Color.Black,
+                            textAlign = TextAlign.Center)
+                    )
 
-                    val floorImages = response.body()?.result
-                    Log.d("✅MapViewModel", "전체 층 이미지 응답: $floorImages")
-
-                    // floorCode는 문자열이므로 정수로 변환 후 비교
-                    val targetFloor = floorImages?.find { it.floor.toString() == floorCode }
-                    Log.d("✅MapViewModel", "선택된 층: $targetFloor")
-
-                    _mapImageUrl.value = targetFloor?.imageUrl
-                    Log.d("✅MapViewModel", "이미지 URL 저장됨: ${_mapImageUrl.value}")
-                } else {
-                    Log.e("❌MapViewModel", "API 응답 실패: ${response.code()}")
+                    // 🕒 타이머 숫자
+                    Box(
+                        modifier = Modifier
+                            .size(28.dp)
+                            .background(Color.Black, shape = CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = secondsLeft.toString(),
+                            color = Color.White,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
-            } catch (e: Exception) {
-                Log.e("❌MapViewModel", "예외 발생: ${e.message}")
-                e.printStackTrace()
             }
         }
     }
-
-//    fun fetchMapImage(stationId: String) {
-//        Log.d("✅MapViewModel", "💥 함수 진입 확인됨!")
-//        viewModelScope.launch {
-//            try {
-//                Log.d("✅MapViewModel", "fetchMapImage 호출됨! stationId=$stationId")
-//                val response = RetrofitInstance.api.getMapImage(stationId)
-//                Log.d("✅MapViewModel", "fetchMapImage2 호출됨! stationId=$stationId")
-//                if (response.isSuccessful) {
-//                    Log.d("✅MapViewModel", "API 응답 성공")
-//
-//                    val floorImages = response.body()?.result
-//                    Log.d("✅MapViewModel", "전체 층 이미지 응답: $floorImages")
-//                    val targetFloor = floorImages?.find { it.floor == 1001 } // 1층만 일단 사용
-//                    Log.d("✅MapViewModel", "선택된 층: $targetFloor")
-//
-//                    _mapImageUrl.value = targetFloor?.imageUrl
-//                    Log.d("✅MapViewModel", "이미지 URL 저장됨: ${_mapImageUrl.value}")
-//                } else {
-//                    Log.e("❌MapViewModel", "API 응답 실패: ${response.code()}")
-//                }
-//            } catch (e: Exception) {
-//                Log.e("❌MapViewModel", "예외 발생: ${e.message}")
-//                e.printStackTrace()
-//            }
-//        }
-//    }
 }
-
-fun addMarkers(mapView: MapView, coordinates: List<LatLngData>) {
-    val pointAnnotationManager = mapView.annotations.createPointAnnotationManager()
-    coordinates.forEach { coord ->
-        val marker = PointAnnotationOptions()
-            .withPoint(Point.fromLngLat(coord.coord_x, coord.coord_y))
-            .withIconImage("marker_icon")
-        pointAnnotationManager.create(marker)
-    }
-}
-
 
 
 //@Composable
@@ -136,8 +146,8 @@ fun addMarkers(mapView: MapView, coordinates: List<LatLngData>) {
 //        return listOf(lng, lat)
 //    }
 //
-//    val isCardVisible = remember { mutableStateOf(true) }
-//    val focusManager = LocalFocusManager.current
+//
+//    val focusMval isCardVisible = remember { mutableStateOf(true) }anager = LocalFocusManager.current
 //    val myLocation by viewModel.myLocation.observeAsState()
 //
 //
@@ -371,3 +381,5 @@ fun addMarkers(mapView: MapView, coordinates: List<LatLngData>) {
 //        }
 //    }
 //}
+
+

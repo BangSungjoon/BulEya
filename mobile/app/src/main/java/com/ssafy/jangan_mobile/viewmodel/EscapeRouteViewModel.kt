@@ -5,8 +5,12 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.mapbox.maps.plugin.annotation.generated.PointAnnotation
 import com.ssafy.jangan_mobile.model.PixelLatLng
 import com.ssafy.jangan_mobile.service.RetrofitInstance
+import com.ssafy.jangan_mobile.service.dto.CurrentLocationDto
+import com.ssafy.jangan_mobile.service.dto.CurrentLocationResponse
 import com.ssafy.jangan_mobile.store.FireNotificationStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -17,9 +21,16 @@ class EscapeRouteViewModel : ViewModel() {
     private val _route = MutableLiveData<List<PixelLatLng>>()
     val route: LiveData<List<PixelLatLng>> = _route
 
+//    private var hasFetchedRoute = false // ✅ 경로 요청 여부 저장
+
+    private val _myLocation = MutableLiveData<CurrentLocationDto?>()
+    val myLocation: LiveData<CurrentLocationDto?> = _myLocation
+
     // 내 위치 변수
     private val stationIdLiveData = FireNotificationStore.currentLocationStationId
     private val beaconCodeLiveData = FireNotificationStore.currentLocationBeaconCode
+
+    private var goalMarker: PointAnnotation? = null
 
     // stationIdLiveData와 beaconCodeLiveData 감시. 둘 다 값이 있을 때 routeTrigger에 (stationId, beaconCode)를 넣는 역할
     //두 값이 모두 null이 아닐 때만 fetchEscapeRoute()가 동작
@@ -46,8 +57,7 @@ class EscapeRouteViewModel : ViewModel() {
                 routeTrigger.value = stationId to beaconCode
             }
         }
-
-        // routeTrigger가 값 가질 때마다 fetch 실행
+        // routeTrigger 바뀔 때마다 경로 요청
         routeTrigger.observeForever { (stationId, beaconCode) ->
             fetchEscapeRoute(stationId, beaconCode)
         }
@@ -74,6 +84,7 @@ class EscapeRouteViewModel : ViewModel() {
                     PixelLatLng(point.coordX, point.coordY, point.floor)
                 }
                 Log.d("EscapeRoute", "✅ 경로 변환 완료: ${convertedRoute.size}개 좌표")
+                Log.d("EscapeRoute", "✅ 경로 변환 완료: ${convertedRoute.size}개 좌표")
                 _route.postValue(convertedRoute)
 
                 _route.postValue(convertedRoute)
@@ -82,78 +93,21 @@ class EscapeRouteViewModel : ViewModel() {
             }
         }
     }
+
+    fun fetchMyLocation(stationId: Int, beaconCode: Int) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val response = RetrofitInstance.api.getBeaconLocation(stationId, beaconCode)
+                if (response.isSuccessful) {
+                    val location = response.body()?.result
+                    Log.d("EscapeRoute", "📍 내 위치 응답: $location")
+                    _myLocation.postValue(location)
+                } else {
+                    Log.w("EscapeRoute", "❗ 응답 실패: ${response.code()}")
+                }
+            } catch (e: Exception) {
+                Log.e("EscapeRoute", "❌ 위치 요청 실패: ${e.message}")
+            }
+        }
+    }
 }
-
-
-
-
-
-// HiltViewmodel
-
-//import android.util.Log
-//import androidx.lifecycle.LiveData
-//import androidx.lifecycle.MutableLiveData
-//import androidx.lifecycle.ViewModel
-//import androidx.lifecycle.viewModelScope
-//import com.google.android.gms.maps.model.LatLng
-//import com.ssafy.jangan_mobile.model.PixelLatLng
-//import dagger.hilt.android.lifecycle.HiltViewModel
-//import kotlinx.coroutines.launch
-//import javax.inject.Inject
-//import com.ssafy.jangan_mobile.model.CoordPoint
-//import com.ssafy.jangan_mobile.util.convertPixelToLngLat
-//import com.ssafy.jangan_mobile.service.dto.EscapeRouteResponse
-//import com.ssafy.jangan_mobile.service.dto.EscapeRoutePoint
-
-
-//@HiltViewModel
-//class EscapeRouteViewModel @Inject constructor(
-//    private val repository: EscapeRouteRepository
-//) : ViewModel() {
-//
-//    private val _route = MutableLiveData<List<PixelLatLng>>()  // ✅ 변경
-//    val route: LiveData<List<PixelLatLng>> = _route
-//
-//    fun fetchEscapeRoute(stationId: Int, beaconCode: Int) {
-//        viewModelScope.launch {
-//            try {
-//                val response = repository.getEscapeRoute(stationId, beaconCode)
-//                val convertedRoute = response.route.map { point ->
-//                    PixelLatLng(point.coord_x, point.coord_y) // ✅ LatLng → PixelLatLng 변경
-//                }
-//                _route.value = convertedRoute
-//            } catch (e: Exception) {
-//                Log.e("EscapeRoute", "에러: ${e.message}")
-//            }
-//        }
-//    }
-//
-//    fun loadMockRoute() {
-//        _route.value = listOf(
-//            PixelLatLng(2500, 3900),
-//            PixelLatLng(2700, 4100),
-//            PixelLatLng(2900, 4300),
-//            PixelLatLng(3100, 4400),
-//            PixelLatLng(3300, 4600),
-//        )
-//    }
-//}
-//
-//    fun convertPixelToLngLat(x: Int, y: Int): LatLng {
-//        val imageWidth = 5000
-//        val imageHeight = 7800
-//        val coordinateHeight = 60.0
-//        val aspectRatio = imageWidth / imageHeight.toDouble()
-//        val coordinateWidth = coordinateHeight * aspectRatio
-//
-//        val top = coordinateHeight / 2
-//        val bottom = -coordinateHeight / 2
-//        val left = -coordinateWidth / 2
-//        val right = coordinateWidth / 2
-//
-//        val lng = left + (x.toDouble() / imageWidth) * (right - left)
-//        val lat = top - (y.toDouble() / imageHeight) * (top - bottom)
-//
-//        return LatLng(lat, lng)
-//    }
-

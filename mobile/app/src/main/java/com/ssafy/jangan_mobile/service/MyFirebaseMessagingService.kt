@@ -28,7 +28,7 @@ import org.altbeacon.beacon.Region
 class MyFirebaseMessagingService: FirebaseMessagingService() {
     private lateinit var region: Region
 
-
+    // 데이터푸시가 오는 순간 호출
     override fun onMessageReceived(message: RemoteMessage) {
         super.onMessageReceived(message)
         Log.d(TAG, "onMessageReceived called.")
@@ -81,7 +81,7 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
                     beaconManager.getRegionViewModel(region).rangedBeacons.removeObserver(observer)
                 }
                 if(nearestBeaconCode != -1) {
-                    sendAlertNotification(fireNotificationDto, jsonString, nearestBeaconCode)
+                    sendAlertNotification(fireNotificationDto, jsonString, nearestBeaconCode) //알림표시
                     FireNotificationStore.setNotification(fireNotificationDto, this) // 여기선 setValue() 가능
                 }
                 stopSelf()

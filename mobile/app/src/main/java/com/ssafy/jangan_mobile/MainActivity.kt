@@ -135,7 +135,7 @@ class MainActivity : ComponentActivity() {
         // 실시간 현재 위치 추적을 위한 비콘 스캔
         region = Region("current-location-scan", null, null, null)
         beaconManager = BeaconManager.getInstanceForApplication(this)
-        beaconManager?.foregroundScanPeriod = 4000L
+        beaconManager?.foregroundScanPeriod = 2500L
         beaconManager?.foregroundBetweenScanPeriod = 0L
         beaconManager?.updateScanPeriods()
         beaconManager?.beaconParsers?.clear()
@@ -149,15 +149,15 @@ class MainActivity : ComponentActivity() {
                     val beacons = beaconManager?.getRegionViewModel(region)?.rangedBeacons
                     processBeacons(beacons)
                     Log.d("EscapeRoute", "MainActivity dto : ${FireNotificationStore.fireNotificationDto.value}")
-                    delay(4000)
+                    delay(2500)
                 }
             }
             checkBeaconsJob?.start()
         }
         super.onPostResume()
     }
-/////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d("lifecycle:", "onCreate called")

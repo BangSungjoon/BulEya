@@ -2,6 +2,7 @@ package com.ssafy.jangan_mobile.service
 
 import com.ssafy.jangan_mobile.model.CoordinateResponse
 import com.ssafy.jangan_mobile.model.MapImageResponse
+import com.ssafy.jangan_mobile.service.dto.CurrentLocationResponse
 import com.ssafy.jangan_mobile.service.dto.EscapeRouteResponse
 import retrofit2.Response
 import retrofit2.http.GET
@@ -23,5 +24,13 @@ interface MapService {
         @Query("station_id") stationId: Int,
         @Query("beacon_code") beaconCode: Int
     ): Response<EscapeRouteResponse>
+
+    // 내 위치 API
+    @GET("/api/beacon")
+    suspend fun getBeaconLocation(
+        @Query("station_id") stationId: Int,
+        @Query("beacon_code") beaconCode: Int
+    ): Response<CurrentLocationResponse>
+
 
 }
