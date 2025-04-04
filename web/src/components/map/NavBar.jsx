@@ -15,6 +15,7 @@ export default function NavBar({ items, activeItem, onSelect }) {
   const handleLogout = async () => {
     try {
       const response = await logOut()
+      sessionStorage.removeItem('stationId')
       alert('로그아웃 성공')
       navigate('/login') // 성공 시 login 페이지로 이동
     } catch (error) {
