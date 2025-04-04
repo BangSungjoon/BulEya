@@ -64,3 +64,10 @@ export const logIn = async (stationId, accessKey) => {
 export const logOut = async () => {
   return instance.get('api/station/admin-logout')
 }
+
+// cctv 웹 소캣 주소 API
+export const fetchCctvWebSocket = async (stationId, beaconCode) => {
+  // const NODE_API_URL = import.meta.env.VITE_NODE_API_BASE_URL
+  const NODE_API_URL = "http://70.12.247.93:3000"
+  return axios.get(`${NODE_API_URL}/api/socket-info?station_id=${stationId}&beacon_code=${beaconCode}`)
+}
