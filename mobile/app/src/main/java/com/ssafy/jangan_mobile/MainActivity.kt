@@ -15,7 +15,6 @@ import android.os.Bundle
 import android.os.PowerManager
 import android.provider.Settings
 import android.util.Log
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -195,7 +194,6 @@ class MainActivity : ComponentActivity() {
                     msg = "Subscribe failed"
                 }
                 Log.d(TAG, msg)
-                Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
             }
         // 알람 채널 생성
         createNotificationChannel()
