@@ -137,7 +137,7 @@ export default function MapPage() {
   // 마커 선택 관련
   // =================
   const [selectedFacility, setSelectedFacility] = useState(null)
-
+  const [displayedFacility, setDisplayedFacility] = useState(null) // 모달에 실제로 보여줄 facility
   const [isDetailVisible, setIsDetailVisible] = useState(false)
 
   useEffect(() => {
@@ -145,6 +145,21 @@ export default function MapPage() {
       setIsDetailVisible(true)
     }
   }, [selectedFacility])
+
+  const handleMarkerDetailClick = (facilityData) => {
+    // 1. 현재 모달 보이고 있다면 → exit 먼저
+    if (displayedFacility) {
+      setIsDetailVisible(false) // 사라지게
+      setTimeout(() => {
+        setDisplayedFacility(facilityData) // 데이터 교체
+        setIsDetailVisible(true) // 다시 나타나게
+      }, 300)
+    } else {
+      // 처음 클릭이라면 바로 보여줌
+      setDisplayedFacility(facilityData)
+      setIsDetailVisible(true)
+    }
+  }
 
   const handleCloseDetailModal = () => {
     setIsDetailVisible(false) // 애니메이션 먼저
@@ -245,11 +260,6 @@ export default function MapPage() {
       console.error('삭제 실패:', err)
       alert('❌ 간선 삭제 실패')
     }
-  }
-
-  // [성준] 마커 클릭 핸들러 (자식 컴포넌트 MapBoxMap에서 호출됨)
-  const handleMarkerDetailClick = (facilityData) => {
-    setSelectedFacility(facilityData)
   }
 
   // [성준] 마커 삭제 핸들러 (자식 컴포넌트 MapBoxMap에서 호출됨)
@@ -355,13 +365,15 @@ export default function MapPage() {
       )}
 
       {/* 장비 상세 모달 */}
-      {selectedFacility && (
+      {displayedFacility && (
         <div className="pointer-events-none absolute inset-0 z-20 mx-5 mt-15 mb-5 grid grid-cols-12">
           <div
-            className={`pointer-events-auto col-span-5 transform transition-all duration-300 md:col-span-3 ${isDetailVisible ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0'} `}
+            className={`pointer-events-auto col-span-5 transform transition-all duration-300 md:col-span-3 ${
+              isDetailVisible ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0'
+            }`}
           >
             <FacilityDetailModal
-              data={selectedFacility}
+              data={displayedFacility}
               onClose={handleCloseDetailModal}
               onDelete={handleDeleteFacility}
             />
