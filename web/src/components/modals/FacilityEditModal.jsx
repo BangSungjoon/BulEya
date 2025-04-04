@@ -23,6 +23,8 @@ export default function FacilityEditModal({ initialData, onClose, onSuccess }) {
         is_cctv: formData.is_cctv ? 1 : 0,
       }
 
+      console.log('📦 POST 보낼 데이터:', payload)
+
       // 빈 문자열일 경우 cctv_ip 제거
       if (!formData.cctv_ip) {
         delete payload.cctv_ip
