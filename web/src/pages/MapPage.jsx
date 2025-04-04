@@ -19,7 +19,15 @@ import { fetchMapImage, createEdge, deleteEdge } from '@/api/axios'
 export default function MapPage() {
   const location = useLocation()
   const mode = location.pathname.replace('/', '') || 'map'
-  const stationId = Number(sessionStorage.getItem('stationId'))
+  const stationId = Number(localStorage.getItem('stationId'))
+
+  if (stationId) {
+    // stationId가 존재하면 이 아래 로직 실행
+    console.log('선택된 역 ID:', stationId)
+  } else {
+    // 없으면 로그인 페이지로 이동
+    window.location.href = '/login' // 로그인 페이지 URL로 변경
+  }
 
   const [floorDataList, setFloorDataList] = useState([]) // 전체 응답 저장
   const [selectedFloor, setSelectedFloor] = useState(null) // 선택된 층 번호
