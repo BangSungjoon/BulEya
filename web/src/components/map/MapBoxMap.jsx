@@ -83,6 +83,7 @@ const MapBoxMap = ({
   const [xButtonTick, setXButtonTick] = useState(0) // 간선 삭제 버튼 위치 리렌더링용 상태
 
   // 간선 클릭 이벤트
+  // 간선 클릭 이벤트
   useEffect(() => {
     const map = mapRef.current
     if (!map) return
@@ -99,7 +100,6 @@ const MapBoxMap = ({
 
       console.log('✅ route 모드, 간선 탐색 시작')
 
-      // 현재 클릭한 위치에 있는 features 중에서 간선 레이어만 필터링
       const features = map.queryRenderedFeatures(e.point, {
         layers: [lineLayerId],
       })
@@ -121,15 +121,21 @@ const MapBoxMap = ({
       }
     }
 
-    // 레이어 존재 여부 확인
-    if (map.getLayer(lineLayerId)) {
-      console.log(`🧩 레이어 ${lineLayerId} 존재함`)
+    // 👇 수정 포인트: 클릭 이벤트를 'load' 이후에 등록
+    if (!map.isStyleLoaded()) {
+      console.log('⏳ 스타일 로드 전 → load 후 클릭 이벤트 등록 예정')
+      map.once('load', () => {
+        console.log('📦 load 완료 → 클릭 이벤트 등록')
+        map.on('click', handleClick)
+      })
     } else {
-      console.warn(`❌ 레이어 ${lineLayerId} 없음!`)
+      console.log('✅ 스타일 이미 로드됨 → 클릭 이벤트 즉시 등록')
+      map.on('click', handleClick)
     }
 
-    map.on('click', handleClick)
-    return () => map.off('click', handleClick)
+    return () => {
+      map.off('click', handleClick)
+    }
   }, [selectedEdge])
 
   // X 버튼 지도에 따라다니게
