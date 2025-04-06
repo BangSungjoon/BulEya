@@ -82,62 +82,6 @@ const MapBoxMap = ({
   const [selectedEdge, setSelectedEdge] = useState(null)
   const [xButtonTick, setXButtonTick] = useState(0) // 간선 삭제 버튼 위치 리렌더링용 상태
 
-  // 간선 클릭 이벤트
-  // 간선 클릭 이벤트
-  useEffect(() => {
-    const map = mapRef.current
-    if (!map) return
-
-    console.log('🧭 map 객체 준비됨')
-
-    const handleClick = (e) => {
-      console.log('🖱 클릭 발생!', e.point)
-
-      if (modeRef.current !== 'route') {
-        console.log('🚫 현재 모드 route 아님:', modeRef.current)
-        return
-      }
-
-      console.log('✅ route 모드, 간선 탐색 시작')
-
-      const features = map.queryRenderedFeatures(e.point, {
-        layers: [lineLayerId],
-      })
-
-      console.log('🎯 queryRenderedFeatures 결과:', features)
-
-      if (features.length > 0) {
-        const edge = features[0]
-        console.log('🔥 간선 클릭됨! edge:', edge)
-
-        if (edge?.properties?.edge_id) {
-          setSelectedEdge(edge)
-        }
-      } else {
-        console.log('😶 간선 없음, 선택 해제')
-        if (selectedEdge) {
-          setSelectedEdge(null)
-        }
-      }
-    }
-
-    // 👇 수정 포인트: 클릭 이벤트를 'load' 이후에 등록
-    if (!map.isStyleLoaded()) {
-      console.log('⏳ 스타일 로드 전 → load 후 클릭 이벤트 등록 예정')
-      map.once('load', () => {
-        console.log('📦 load 완료 → 클릭 이벤트 등록')
-        map.on('click', handleClick)
-      })
-    } else {
-      console.log('✅ 스타일 이미 로드됨 → 클릭 이벤트 즉시 등록')
-      map.on('click', handleClick)
-    }
-
-    return () => {
-      map.off('click', handleClick)
-    }
-  }, [selectedEdge])
-
   // X 버튼 지도에 따라다니게
   useEffect(() => {
     const map = mapRef.current
@@ -350,6 +294,18 @@ const MapBoxMap = ({
         })
 
         console.log('✅ 레이어 확인:', map.getLayer(lineLayerId))
+
+        // 간선 클릭 이벤트 등록 (레이어 클릭용)
+        if (map.getLayer(lineLayerId)) {
+          map.on('click', lineLayerId, (e) => {
+            console.log('🔥 간선 클릭됨:', e.features)
+            const edge = e.features?.[0]
+            if (modeRef.current !== 'route') return
+            if (edge?.properties?.edge_id) {
+              setSelectedEdge(edge)
+            }
+          })
+        }
       } catch (error) {
         console.error('지도 그리기 실패:', error)
       }
