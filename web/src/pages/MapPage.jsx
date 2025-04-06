@@ -92,7 +92,7 @@ export default function MapPage() {
     }
 
     return () => {
-      window.removeEventListener('movemove', handleMouseMove)
+      window.removeEventListener('mousemove', handleMouseMove)
     }
   }, [selectedIcon])
 
