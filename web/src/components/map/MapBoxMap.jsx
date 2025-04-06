@@ -87,26 +87,45 @@ const MapBoxMap = ({
     const map = mapRef.current
     if (!map) return
 
+    console.log('🧭 map 객체 준비됨')
+
     const handleClick = (e) => {
-      if (modeRef.current !== 'route') return
+      console.log('🖱 클릭 발생!', e.point)
+
+      if (modeRef.current !== 'route') {
+        console.log('🚫 현재 모드 route 아님:', modeRef.current)
+        return
+      }
+
+      console.log('✅ route 모드, 간선 탐색 시작')
 
       // 현재 클릭한 위치에 있는 features 중에서 간선 레이어만 필터링
       const features = map.queryRenderedFeatures(e.point, {
         layers: [lineLayerId],
       })
 
+      console.log('🎯 queryRenderedFeatures 결과:', features)
+
       if (features.length > 0) {
         const edge = features[0]
+        console.log('🔥 간선 클릭됨! edge:', edge)
+
         if (edge?.properties?.edge_id) {
-          console.log('✅ 간선 클릭됨!', edge)
           setSelectedEdge(edge)
         }
       } else {
-        // 간선이 없는 곳이면 선택 해제
+        console.log('😶 간선 없음, 선택 해제')
         if (selectedEdge) {
           setSelectedEdge(null)
         }
       }
+    }
+
+    // 레이어 존재 여부 확인
+    if (map.getLayer(lineLayerId)) {
+      console.log(`🧩 레이어 ${lineLayerId} 존재함`)
+    } else {
+      console.warn(`❌ 레이어 ${lineLayerId} 없음!`)
     }
 
     map.on('click', handleClick)

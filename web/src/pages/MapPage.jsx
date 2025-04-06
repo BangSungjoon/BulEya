@@ -83,16 +83,16 @@ export default function MapPage() {
   const Icon = iconComponent
 
   useEffect(() => {
-    const handelMouseMove = (event) => {
+    const handleMouseMove = (event) => {
       setMousePosition({ x: event.clientX, y: event.clientY })
     }
 
     if (selectedIcon) {
-      window.addEventListener('mousemove', handelMouseMove)
+      window.addEventListener('mousemove', handleMouseMove)
     }
 
     return () => {
-      window.removeEventListener('movemove', handelMouseMove)
+      window.removeEventListener('movemove', handleMouseMove)
     }
   }, [selectedIcon])
 
