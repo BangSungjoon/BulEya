@@ -329,7 +329,7 @@ export default function MapPage() {
       )}
 
       {/* 모드 안내 문구 */}
-      {displayGuide && (
+      {displayGuide && modeGuideText && (
         <div
           className={`absolute top-4 left-1/2 z-40 w-fit -translate-x-1/2 transform overflow-hidden rounded-full bg-gray-600 py-2 text-sm shadow-md transition-all duration-300 ${visibleGuide ? 'translate-y-0 opacity-100' : '-translate-y-10 opacity-0'} `}
         >
