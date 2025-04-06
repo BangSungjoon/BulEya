@@ -1,5 +1,5 @@
-@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css");
-@import "tailwindcss";
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+@import 'tailwindcss';
 
 @theme {
   --font-family-default: Pretendard, sans-serif;
@@ -94,4 +94,17 @@
     line-height: var(--line-height-overline);
     font-weight: var(--font-weight-overline);
   }
+}
+
+@keyframes guide-bar {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+.animate-guide-bar {
+  animation: guide-bar 2s linear forwards;
 }

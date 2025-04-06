@@ -91,7 +91,7 @@ export default function LoginPage() {
       const response = await logIn(selectedStation, accessKey)
 
       if (response.data?.is_success === true) {
-        sessionStorage.setItem('stationId', selectedStation)
+        localStorage.setItem('stationId', selectedStation)
         navigate('/map')
       } else {
         // 서버는 200 OK를 주고 내부적으로 실패 응답을 보내는 경우
