@@ -25,6 +25,9 @@ export default function MapPage() {
   const [selectedFloor, setSelectedFloor] = useState(null) // 선택된 층 번호
   const [selectedIcon, setSelectedIcon] = useState(null) // IconBox 관련
 
+  // [성준] 마커 선택 상태를 외부에서 제어 가능하게
+  const [selectedMarkerId, setSelectedMarkerId] = useState(null)
+
   // 지도 이미지 불러오는 API 호출
   useEffect(() => {
     const loadFloorData = async () => {
@@ -127,6 +130,16 @@ export default function MapPage() {
   // 모달 애니메이션
   const [isModalVisible, setIsModalVisible] = useState(false)
 
+  // 모드 변경 시 detail 모달 닫기
+  useEffect(() => {
+    if (mode !== 'map') {
+      setIsDetailVisible(false)
+      setDisplayedFacility(null)
+      setSelectedFacility(null)
+      setSelectedMarkerId(null)
+    }
+  }, [mode])
+
   useEffect(() => {
     if (tempMarker) {
       setIsModalVisible(true)
@@ -166,6 +179,7 @@ export default function MapPage() {
 
     setTimeout(() => {
       setSelectedFacility(null) // 모달 실제 제거
+      setSelectedMarkerId(null) // [성준]
     }, 300) // transition duration과 맞춰주기 (ms 단위)
   }
 
@@ -214,12 +228,64 @@ export default function MapPage() {
   }, [selectedNodes]) // ← selectedNodes가 바뀔 때만 실행됨
 
   // 클릭 시에는 상태만 바꿈
+  // const handleMarkerClick = (beacon) => {
+  //   setSelectedNodes((prev) => {
+  //     const already = prev.some((b) => b.beacon_code === beacon.beacon_code)
+  //     if (already) return prev
+  //     return [...prev, beacon]
+  //   })
+  // }
+  // [성준] 클릭 시에는 상태만 바꿈
+  // selectedMarkerId가 null일 때 모달 상태도 닫기
+  useEffect(() => {
+    if (selectedMarkerId === null) {
+      setIsDetailVisible(false)
+      setDisplayedFacility(null)
+      setSelectedFacility(null)
+    }
+  }, [selectedMarkerId])
+
   const handleMarkerClick = (beacon) => {
-    setSelectedNodes((prev) => {
-      const already = prev.some((b) => b.beacon_code === beacon.beacon_code)
-      if (already) return prev
-      return [...prev, beacon]
-    })
+    if (mode === 'map') {
+      if (!beacon) {
+        setIsDetailVisible(false)
+        setTimeout(() => {
+          setDisplayedFacility(null)
+          setSelectedFacility(null)
+          setSelectedMarkerId(null)
+        }, 300)
+        return
+      }
+
+      if (selectedMarkerId === beacon.beacon_code) {
+        // 닫을 때
+        setIsDetailVisible(false)
+        setTimeout(() => {
+          setDisplayedFacility(null)
+          setSelectedFacility(null)
+          setSelectedMarkerId(null)
+        }, 300)
+      } else {
+        // 열 때는 반드시 순서대로 해줘야 애니메이션 발생
+        setDisplayedFacility(beacon) // DOM에 추가 (모달 off 상태로 렌더링)
+        setSelectedFacility(beacon)
+
+        // 여기가 중요: 아주 짧은 타임아웃 뒤에 true로 변경
+        setIsDetailVisible(false) // 모달 off로 초기화
+        setTimeout(() => {
+          setIsDetailVisible(true) // 모달 on (애니메이션 효과 시작)
+          setSelectedMarkerId(beacon.beacon_code) // 모달 열기
+        }, 10)
+      }
+    }
+
+    if (mode === 'route') {
+      setSelectedNodes((prev) => {
+        const already = prev.some((b) => b.beacon_code === beacon.beacon_code)
+        if (already) return prev
+        return [...prev, beacon]
+      })
+    }
   }
 
   // 거리 계산 함수
@@ -298,10 +364,13 @@ export default function MapPage() {
           edgeList={selectedData.edge_list}
           selectedIcon={selectedIcon}
           onMapClick={mode === 'add' ? handleMapClick : undefined}
-          onMarkerClick={mode === 'route' ? handleMarkerClick : handleMarkerDetailClick}
+          // onMarkerClick={mode === 'route' ? handleMarkerClick : handleMarkerDetailClick}
+          onMarkerClick={handleMarkerClick} // [성준] 클릭 시 모달 열기
           onDeleteEdge={handleDeleteEdge}
           tempMarker={tempMarker}
           selectedNodes={selectedNodes} // 간선 추가 시 선택된 노트 하이라이트
+          selectedMarkerId={selectedMarkerId}
+          setSelectedMarkerId={setSelectedMarkerId}
         />
       )}
 
@@ -365,8 +434,25 @@ export default function MapPage() {
       )}
 
       {/* 장비 상세 모달 */}
-      {displayedFacility && (
+      {/* {displayedFacility && (
         <div className="pointer-events-none absolute inset-0 z-20 mx-5 mt-15 mb-5 grid grid-cols-12">
+          <div
+            className={`pointer-events-auto col-span-5 transform transition-all duration-300 md:col-span-3 ${
+              isDetailVisible ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0'
+            }`}
+          >
+            <FacilityDetailModal
+              data={displayedFacility}
+              onClose={handleCloseDetailModal}
+              onDelete={handleDeleteFacility}
+            />
+          </div>
+        </div>
+      )} */}
+      {(isDetailVisible || displayedFacility) && (
+        <div
+          className={`pointer-events-none absolute inset-0 z-20 mx-5 mt-15 mb-5 grid grid-cols-12`}
+        >
           <div
             className={`pointer-events-auto col-span-5 transform transition-all duration-300 md:col-span-3 ${
               isDetailVisible ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0'
