@@ -11,6 +11,8 @@ import android.media.MediaPlayer
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.Observer
 import com.google.firebase.messaging.FirebaseMessagingService
@@ -120,10 +122,13 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
                 .setSmallIcon(R.drawable.icon_big)
                 .setContentTitle("${fireNotificationDto.stationName}역에서 화재 발생!")
                 .setContentText("${beaconNotificationDto.beaconName}에서 화재가 발생했습니다. 신속히 대피바랍니다.")
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setPriority(NotificationCompat.PRIORITY_MAX)
                 .setChannelId(channelId)
                 .setContentIntent(pendingIntent)
                 .setAutoCancel(true)
+                .setColor(Color.Red.toArgb())
+                .setColorized(true)
+
 
             val notificationManager =
                 getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager

@@ -26,6 +26,13 @@ class EscapeRouteViewModel : ViewModel() {
     private val _myLocation = MutableLiveData<CurrentLocationDto?>()
     val myLocation: LiveData<CurrentLocationDto?> = _myLocation
 
+    private val _isTracking = MutableLiveData<Boolean?>()
+    val isTracking: LiveData<Boolean?> = _isTracking
+
+    fun setIsTracking(flag: Boolean){
+        _isTracking.value = flag
+    }
+
     // 내 위치 변수
     private val stationIdLiveData = FireNotificationStore.currentLocationStationId
     private val beaconCodeLiveData = FireNotificationStore.currentLocationBeaconCode

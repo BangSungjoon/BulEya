@@ -51,6 +51,9 @@ import com.ssafy.jangan_mobile.viewmodel.EscapeRouteViewModel
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
+import com.mapbox.common.toValue
+import com.mapbox.maps.plugin.animation.MapAnimationOptions.Companion.mapAnimationOptions
+import com.mapbox.maps.plugin.animation.flyTo
 
 @Composable
 fun EscapeRouteMapScreen(
@@ -66,6 +69,7 @@ fun EscapeRouteMapScreen(
     val routePoints by viewModel.route.observeAsState(emptyList())
     val imageUrl by mapViewModel.mapImageUrl.collectAsState()
     val myLocation by viewModel.myLocation.observeAsState()
+    val isTracking by viewModel.isTracking.observeAsState()
 
     val showRoute = remember { mutableStateOf(false) }
     val selectedFloor = remember { mutableStateOf("B1") }
@@ -170,11 +174,19 @@ fun EscapeRouteMapScreen(
                     }
                 }
             ) {
-                val center = convertPixelToLngLat(imageWidth / 2, imageHeight / 2)
+                var center = convertPixelToLngLat(imageWidth / 2, imageHeight / 2)
+                // 화재알람 존재 시 지도 처음 위치를 화재 위치로
+                if( !(fireNotificationDto?.beaconNotificationDtos?.isEmpty() ?: true)){
+                    fireNotificationDto!!.beaconNotificationDtos.forEach { dto ->
+                        if(dto.isNewFire == 1){
+                            center = listOf(dto.coordX, dto.coordY)
+                        }
+                    }
+                }
                 mapView.mapboxMap.setCamera(
                     CameraOptions.Builder()
                         .center(Point.fromLngLat(center[0], center[1]))
-                        .zoom(3.0)
+                        .zoom(5.0)
                         .build()
                 )
                 mapView.mapboxMap.setBounds(
@@ -196,7 +208,7 @@ fun EscapeRouteMapScreen(
     }
 
     // 🔁 내 위치 마커만 따로 관리
-    LaunchedEffect(myLocation, selectedFloor.value) {
+    LaunchedEffect(myLocation, selectedFloor.value, isTracking) {
         myLocationAnnotation.value?.let {
             pointAnnotationManager.value?.delete(it)
             myLocationAnnotation.value = null
@@ -210,6 +222,18 @@ fun EscapeRouteMapScreen(
                     .withIconSize(0.5)
                 myLocationAnnotation.value = pointAnnotationManager.value?.create(marker)
             }
+        }
+        // 현재 위치 카메라 추적
+        if(isTracking?: false && myLocation != null){
+            mapView.mapboxMap.flyTo(
+                CameraOptions.Builder()
+                    .center(Point.fromLngLat(myLocation!!.coordX, myLocation!!.coordY))
+                    .zoom(5.0)
+                    .build(),
+                mapAnimationOptions {
+                    duration(1500L)
+                }
+            )
         }
     }
 
@@ -445,6 +469,7 @@ fun EscapeRouteMapScreen(
                             currentLocationCode?.let { code ->
                                 viewModel.fetchEscapeRoute(222, code)
                                 showRoute.value = true
+                                viewModel.setIsTracking(true)
                             }
                         }
                     )
