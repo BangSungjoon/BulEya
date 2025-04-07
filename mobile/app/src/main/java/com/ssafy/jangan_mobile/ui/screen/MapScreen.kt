@@ -12,6 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -53,6 +54,10 @@ import com.ssafy.jangan_mobile.service.dto.BeaconNotificationDto
 import com.ssafy.jangan_mobile.ui.component.FireNotificationCard
 import com.ssafy.jangan_mobile.ui.component.FireStation
 
+import androidx.compose.ui.res.painterResource
+import com.mapbox.common.toValue
+import com.mapbox.maps.plugin.animation.MapAnimationOptions.Companion.mapAnimationOptions
+import com.mapbox.maps.plugin.animation.flyTo
 
 @Composable
 fun EscapeRouteMapScreen(
@@ -68,6 +73,7 @@ fun EscapeRouteMapScreen(
     val routePoints by viewModel.route.observeAsState(emptyList())
     val imageUrl by mapViewModel.mapImageUrl.collectAsState()
     val myLocation by viewModel.myLocation.observeAsState()
+    val isTracking by viewModel.isTracking.observeAsState()
 
     val showRoute = remember { mutableStateOf(false) }
     val selectedFloor = remember { mutableStateOf("B1") }
@@ -182,7 +188,15 @@ fun EscapeRouteMapScreen(
                     }
                 }
             ) {
-                val center = convertPixelToLngLat(imageWidth / 2, imageHeight / 2)
+                var center = convertPixelToLngLat(imageWidth / 2, imageHeight / 2)
+                // 화재알람 존재 시 지도 처음 위치를 화재 위치로
+                if( !(fireNotificationDto?.beaconNotificationDtos?.isEmpty() ?: true)){
+                    fireNotificationDto!!.beaconNotificationDtos.forEach { dto ->
+                        if(dto.isNewFire == 1){
+                            center = listOf(dto.coordX, dto.coordY)
+                        }
+                    }
+                }
                 mapView.mapboxMap.setCamera(
                     CameraOptions.Builder()
                         .center(Point.fromLngLat(center[0], center[1]))
@@ -208,7 +222,7 @@ fun EscapeRouteMapScreen(
     }
 
     // 🔁 내 위치 마커만 따로 관리
-    LaunchedEffect(myLocation, selectedFloor.value) {
+    LaunchedEffect(myLocation, selectedFloor.value, isTracking) {
         myLocationAnnotation.value?.let {
             pointAnnotationManager.value?.delete(it)
             myLocationAnnotation.value = null
@@ -222,6 +236,18 @@ fun EscapeRouteMapScreen(
                     .withIconSize(0.15)
                 myLocationAnnotation.value = pointAnnotationManager.value?.create(marker)
             }
+        }
+        // 현재 위치 카메라 추적
+        if(isTracking?: false && myLocation != null){
+            mapView.mapboxMap.flyTo(
+                CameraOptions.Builder()
+                    .center(Point.fromLngLat(myLocation!!.coordX, myLocation!!.coordY))
+                    .zoom(5.0)
+                    .build(),
+                mapAnimationOptions {
+                    duration(1500L)
+                }
+            )
         }
     }
 
@@ -373,19 +399,6 @@ fun EscapeRouteMapScreen(
             }
             // ✅ 내 위치 마커 (routePoints.last())
             val currentPosition = routePoints.last()
-//            if (currentPosition.floor == selectedFloorCode) {
-//                Log.d("EscapeRouteMap", "📍 내위치 마커 추가: (${currentPosition.x}, ${currentPosition.y})")
-//                val myLocationMarker = PointAnnotationOptions()
-//                    .withPoint(Point.fromLngLat(currentPosition.x, currentPosition.y))
-//                    .withIconImage("marker-icon") // 내 위치 아이콘
-//                    .withIconSize(0.5)
-//                pointAnnotationManager.value?.create(myLocationMarker)
-//            } else {
-//                Log.d(
-//                    "EscapeRouteMap",
-//                    "⚠️ 목적지 층(${destination.floor})이 현재 선택된 층($selectedFloorCode)과 다름"
-//                )
-//            }
 
             // ✅ 도착 여부: 객체 값 일치로만 판단
             if (destination.floor == currentPosition.floor &&
@@ -546,12 +559,14 @@ Box(
                                 polylineManager.value?.deleteAll()
                                 goalMarker.value?.let { pointAnnotationManager.value?.delete(it) }
                                 myLocationAnnotation.value?.let { pointAnnotationManager.value?.delete(it) }
+                                viewModel.setIsTracking(false)
                             } else {
                                 // ✅ 안내 시작
                                 currentLocationCode?.let { code ->
                                     viewModel.fetchEscapeRoute(222, code)
                                     showRoute.value = true
                                     isGuiding.value = true
+                                    viewModel.setIsTracking(true)
                                 }
                             }
                         }

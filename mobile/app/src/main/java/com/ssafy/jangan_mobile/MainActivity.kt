@@ -27,6 +27,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
 import com.google.firebase.Firebase
 import com.google.firebase.FirebaseApp
 import com.google.firebase.messaging.messaging
@@ -96,29 +97,29 @@ class MainActivity : ComponentActivity() {
         multiplePermissionsLauncher.launch(permissions)
     }
 
-    fun processBeacons(beacons: MutableLiveData<Collection<Beacon>>?) {
-        val isRanging = beaconManager?.rangedRegions!!.contains(region)
-        if(!isRanging){
-            beaconManager?.startRangingBeacons(region)
-        }
-        val filtered = beacons?.value?.filter { it.id1.toString().startsWith("AAAAA204", ignoreCase = true) }
-        filtered?.forEach { beacon ->
-            run {
-                Log.d("BluetoothAdapter", "id2: ${beacon.id2}  id3: ${beacon.id3}")
-            }
-        }
-        val closest = filtered?.minByOrNull { it.distance }
-        closest?.let {
-            Log.d("BeaconScan", "가장 가까운 비콘: ${it.id3}, 거리: ${it.distance}")
-            if(FireNotificationStore.currentLocationStationId.value != it.id2.toInt()){
-                FireNotificationStore.setCurrentLocationStationId(it.id2.toInt(), this)
-            }
-            if(FireNotificationStore.currentLocationBeaconCode.value != it.id3.toInt()){
-                FireNotificationStore.setCurrentLocationBeaconCode(it.id3.toInt(), this)
-            }
-
-        }
-    }
+//    fun processBeacons(beacons: MutableLiveData<Collection<Beacon>>?) {
+//        val isRanging = beaconManager?.rangedRegions!!.contains(region)
+//        if(!isRanging){
+//            beaconManager?.startRangingBeacons(region)
+//        }
+//        val filtered = beacons?.value?.filter { it.id1.toString().startsWith("AAAAA204", ignoreCase = true) }
+//        filtered?.forEach { beacon ->
+//            run {
+//                Log.d("BluetoothAdapter", "id2: ${beacon.id2}  id3: ${beacon.id3}")
+//            }
+//        }
+//        val closest = filtered?.minByOrNull { it.distance }
+//        closest?.let {
+//            Log.d("BeaconScan", "가장 가까운 비콘: ${it.id3}, 거리: ${it.distance}")
+//            if(FireNotificationStore.currentLocationStationId.value != it.id2.toInt()){
+//                FireNotificationStore.setCurrentLocationStationId(it.id2.toInt(), this)
+//            }
+//            if(FireNotificationStore.currentLocationBeaconCode.value != it.id3.toInt()){
+//                FireNotificationStore.setCurrentLocationBeaconCode(it.id3.toInt(), this)
+//            }
+//
+//        }
+//    }
 
     // Notification 채널 생성
     private fun createNotificationChannel() {
@@ -138,23 +139,41 @@ class MainActivity : ComponentActivity() {
     override fun onPostResume() {
         Log.d("cycle", "onPostResume() called.")
         // 실시간 현재 위치 추적을 위한 비콘 스캔
-
-        beaconManager?.startRangingBeacons(region)
-        if(checkBeaconsJob?.isActive != true) {
-            checkBeaconsJob = scope.launch {
-                while (true) {
-                    val beacons = beaconManager?.getRegionViewModel(region)?.rangedBeacons
-                    processBeacons(beacons)
-                    Log.d("EscapeRoute", "MainActivity dto : ${FireNotificationStore.fireNotificationDto.value}")
-                    delay(2500)
-                }
-            }
-            checkBeaconsJob?.start()
-        }
+        // beaconManager?.startRangingBeacons(region)
         super.onPostResume()
     }
 
     private val viewModel: SplashViewModel by viewModels()
+    private var nearestBeaconCode = -1
+    private var nearestBeaconDistance = Double.MAX_VALUE
+    private var nearestStationId = -1
+    private val observer = Observer<Collection<Beacon>> { beacons ->
+        val found = beacons.any {
+            it.id1.toString().startsWith("AAAAA204", true)
+        }
+        if (found) {
+            nearestBeaconCode = -1
+            nearestBeaconDistance = Double.MAX_VALUE
+            nearestStationId = -1
+            beacons.forEach{
+                        bc -> run {
+                    val code = bc.id3.toInt()
+                    val distance = bc.distance
+                    val stationId = bc.id2.toInt()
+                    if(nearestBeaconDistance > distance){
+                        nearestBeaconCode = code
+                        nearestBeaconDistance = distance
+                        nearestStationId = stationId
+                    }
+                    Log.d("새로 스캔된 비콘 : ", "code:${code} distance:${distance}")
+                }
+            }
+            Log.d("새로 스캔된 비콘 : ", "목록 끝=======================")
+            FireNotificationStore.setCurrentLocationBeaconCode(nearestBeaconCode, this)
+            FireNotificationStore.setCurrentLocationStationId(nearestStationId, this)
+            Log.d("새로운 현재 위치 : ", "station: ${nearestStationId}  code:${nearestBeaconCode}  distance:${nearestBeaconDistance}")
+        }
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
         splashScreen.setKeepOnScreenCondition{
@@ -164,33 +183,53 @@ class MainActivity : ComponentActivity() {
         Log.d("lifecycle:", "onCreate called")
         enableEdgeToEdge()
 
+        // 블루투스 켜기 요청
+        val enableBluetoothLauncher = registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                Log.d("Bluetooth", "사용자가 블루투스를 켰습니다.")
+            } else {
+                Log.d("Bluetooth", "사용자가 블루투스를 켜지 않았습니다.")
+            }
+        }
+        if (bluetoothAdapter != null && !bluetoothAdapter.isEnabled) {
+            val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
+            enableBluetoothLauncher.launch(enableBtIntent)
+        }
+
         region = Region("current-location-scan", null, null, null)
         beaconManager = BeaconManager.getInstanceForApplication(this)
-        beaconManager?.foregroundScanPeriod = 1800L
-        beaconManager?.foregroundBetweenScanPeriod = 0L
+        beaconManager?.foregroundScanPeriod = 4000L
+        beaconManager?.foregroundBetweenScanPeriod = 1200L
         beaconManager?.updateScanPeriods()
         beaconManager?.beaconParsers?.clear()
         beaconManager?.beaconParsers?.add(
             BeaconParser().setBeaconLayout("m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24")
         )
+        beaconManager?.startRangingBeacons(region)
 
-        if(checkBeaconsJob?.isActive != true) {
-            checkBeaconsJob = scope.launch {
-                while (true) {
-                    val beacons = beaconManager?.getRegionViewModel(region)?.rangedBeacons
-                    processBeacons(beacons)
-                    Log.d("EscapeRoute", "MainActivity dto : ${FireNotificationStore.fireNotificationDto.value}")
-                    delay(2200)
-                }
-            }
-            checkBeaconsJob?.start()
-        }
+        beaconManager!!.getRegionViewModel(region)
+            .rangedBeacons.observeForever(observer)
+
+//        if(checkBeaconsJob?.isActive != true) {
+//            checkBeaconsJob = scope.launch {
+//                while (true) {
+//                    val beacons = beaconManager?.getRegionViewModel(region)?.rangedBeacons
+//                    processBeacons(beacons)
+//                    Log.d("EscapeRoute", "MainActivity dto : ${FireNotificationStore.fireNotificationDto.value}")
+//                    delay(2200)
+//                }
+//            }
+//            checkBeaconsJob?.start()
+//        }
 
         val jsonString = intent?.getStringExtra("jsonString")
         val fireNotificationDto = Gson().fromJson(jsonString, FireNotificationDto::class.java)
         val notificationBeaconCode = intent?.getIntExtra("notificationBeaconCode", -1)
-        if(fireNotificationDto != null)
+        if(fireNotificationDto != null) {
             FireNotificationStore.setNotification(fireNotificationDto, this)
+        }
         FireNotificationStore.setCurrentNotificationBeaconCode(notificationBeaconCode, this)
         setContent {
             AppNavigation()
@@ -227,25 +266,11 @@ class MainActivity : ComponentActivity() {
                 startActivity(intent)
             }
         }
-
-        // 블루투스 켜기 요청
-        val enableBluetoothLauncher = registerForActivityResult(
-            ActivityResultContracts.StartActivityForResult()
-        ) { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                Log.d("Bluetooth", "사용자가 블루투스를 켰습니다.")
-            } else {
-                Log.d("Bluetooth", "사용자가 블루투스를 켜지 않았습니다.")
-            }
-        }
-        if (bluetoothAdapter != null && !bluetoothAdapter.isEnabled) {
-            val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-            enableBluetoothLauncher.launch(enableBtIntent)
-        }
     }
 
     override fun onDestroy() {
-        checkBeaconsJob?.cancel()
+//        checkBeaconsJob?.cancel()
+        beaconManager!!.getRegionViewModel(region).rangedBeacons.removeObserver(observer)
         beaconManager?.stopRangingBeacons(region)
         Log.d("lifecycle:", "onDestroy() called.")
         super.onDestroy()
