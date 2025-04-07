@@ -67,7 +67,6 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
                             }
                         }
                     }
-
                 }
             }
 

@@ -24,7 +24,9 @@ import com.ssafy.jangan_mobile.ui.theme.primaryColor
 
 @Composable
 fun EvacuationButton(
-    modifier: Modifier = Modifier,onClick: () -> Unit) {
+    modifier: Modifier = Modifier,
+    isGuiding: Boolean,
+    onClick: () -> Unit) {
     var isGuiding by remember { mutableStateOf(false) } // ✅ 상태 기억 (안내 중인지 여부)
 
     Box(
@@ -46,11 +48,3 @@ fun EvacuationButton(
         )
     }
 }
-
-
-//@Preview(showBackground = true, name = "Evacuation Button")
-//@Composable
-//fun PreviewEvacuationButton() {
-//    EvacuationButton()
-//}
-//
