@@ -126,7 +126,7 @@ class MainActivity : ComponentActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channelId = "alert"
             val channelName = "My Custom Notifications"
-            val importance = NotificationManager.IMPORTANCE_DEFAULT
+            val importance = NotificationManager.IMPORTANCE_HIGH
 
             val channel = NotificationChannel(channelId, channelName, importance)
             channel.description = "This is my custom notification channel"

@@ -122,6 +122,7 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
                 .setContentTitle("${fireNotificationDto.stationName}역에서 화재 발생!")
                 .setContentText("${beaconNotificationDto.beaconName}에서 화재가 발생했습니다. 신속히 대피바랍니다.")
                 .setPriority(NotificationCompat.PRIORITY_MAX)
+                .setCategory(NotificationCompat.CATEGORY_ALARM)
                 .setChannelId(channelId)
                 .setContentIntent(pendingIntent)
                 .setAutoCancel(true)
