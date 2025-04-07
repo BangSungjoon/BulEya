@@ -2,6 +2,7 @@ package com.ssafy.jangan_mobile.service
 
 import com.ssafy.jangan_mobile.model.CoordinateResponse
 import com.ssafy.jangan_mobile.model.MapImageResponse
+import com.ssafy.jangan_mobile.service.dto.CctvImageResponse
 import com.ssafy.jangan_mobile.service.dto.CurrentLocationResponse
 import com.ssafy.jangan_mobile.service.dto.EscapeRouteResponse
 import retrofit2.Response
@@ -14,11 +15,13 @@ interface MapService {
         @Query("station_id") stationId: String
     ): Response<CoordinateResponse>
 
+    // 평면도 가져오기
     @GET("/api/map/mobile")
     suspend fun getMapImage(
         @Query("station_id") stationId: String
     ): Response<MapImageResponse>
 
+    // 경로 탐색하기
     @GET("/api/escape-route")
     suspend fun getEscapeRoute(
         @Query("station_id") stationId: Int,
@@ -32,5 +35,11 @@ interface MapService {
         @Query("beacon_code") beaconCode: Int
     ): Response<CurrentLocationResponse>
 
+    // cctv 화재 이미지 가져오기
+    @GET("/api/cctv-image")
+    suspend fun getCctvImage(
+        @Query("station_id") stationId: Int,
+        @Query("beacon_code") beaconCode: Int
+    ): Response<CctvImageResponse>
 
 }

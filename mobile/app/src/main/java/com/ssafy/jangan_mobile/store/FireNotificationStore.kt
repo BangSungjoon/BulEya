@@ -11,6 +11,7 @@ object FireNotificationStore {
     private val _fireNotificationDto = MutableLiveData<FireNotificationDto?>()
     val fireNotificationDto: LiveData<FireNotificationDto?> = _fireNotificationDto
 
+    // 마지막으로 화재가 발생한 비콘 코드 -> 조회한 화재코드도 포함 -> 사람의 손길이든, 알림이든 가장 최신화된 비콘코드
     private val _currentNotificationBeaconCode = MutableLiveData<Int?>()
     val currentNotificationBeaconCode = _currentNotificationBeaconCode
 
