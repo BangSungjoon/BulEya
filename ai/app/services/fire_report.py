@@ -129,8 +129,8 @@ async def report_fire(
     }
 
     files.append((
-        "fireReportDto",
-        ("fireReportDto", json.dumps(payload), "application/json")
+        "json",
+        ("json", json.dumps(payload), "application/json")
     ))
 
     try:
