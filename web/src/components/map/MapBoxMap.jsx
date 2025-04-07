@@ -2,12 +2,17 @@ import { useRef, useEffect, useState } from 'react'
 import mapboxgl from 'mapbox-gl'
 import 'mapbox-gl/dist/mapbox-gl.css'
 import ReactDOM from 'react-dom/client'
+import React from 'react'
 
 // 아이콘
 import Beacon from '@/assets/icons/Beacon.svg?react'
 import CCTV from '@/assets/icons/CCTV.svg?react'
 import Exit from '@/assets/icons/Exit.svg?react'
 import Delete from '@/assets/icons/Delete.svg?react'
+
+import BeaconSelected from '@/assets/icons/BeaconSelected.svg?react'
+import CCTVSelected from '@/assets/icons/CCTVSelected.svg?react'
+import ExitSelected from '@/assets/icons/ExitSelected.svg?react'
 
 // MapBox access 토큰
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN
@@ -22,6 +27,9 @@ const MapBoxMap = ({
   onMarkerClick,
   onDeleteEdge,
   tempMarker,
+  selectedMarkerId,
+  selectedNodes = [], // [성준] 선택된 노드들
+  setSelectedMarkerId,
 }) => {
   // 지도 컨테이너 요소를 참조할 ref
   const mapContainer = useRef(null)
@@ -73,6 +81,47 @@ const MapBoxMap = ({
   useEffect(() => {
     onMarkerClickRef.current = onMarkerClick
   }, [onMarkerClick])
+
+  // =============
+  // [성준] 마커 선택 이벤트
+  // const [selectedMarkerId, setSelectedMarkerId] = useState(null)
+  const markerMapRef = useRef({})
+  const prevSelectedMarkerRef = useRef(null)
+  const prevSelectedNodesRef = useRef([])
+
+  useEffect(() => {
+    const prevId = prevSelectedMarkerRef.current
+    const currId = selectedMarkerId
+
+    if (prevId === currId) return
+
+    const iconMap = {
+      default: { beacon: Beacon, cctv: CCTV, exit: Exit },
+      selected: { beacon: BeaconSelected, cctv: CCTVSelected, exit: ExitSelected },
+    }
+
+    // 이전 마커 → 기본 아이콘
+    if (prevId !== null && markerMapRef.current[prevId]) {
+      const { root, iconKey } = markerMapRef.current[prevId]
+      root.render(
+        React.createElement(iconMap.default[iconKey], {
+          className: 'text-primary h-8 w-8',
+        }),
+      )
+    }
+
+    // 새 마커 → 선택된 아이콘
+    if (currId !== null && markerMapRef.current[currId]) {
+      const { root, iconKey } = markerMapRef.current[currId]
+      root.render(
+        React.createElement(iconMap.selected[iconKey], {
+          className: 'text-primary h-8 w-8',
+        }),
+      )
+    }
+
+    prevSelectedMarkerRef.current = currId
+  }, [selectedMarkerId])
 
   // =============
   // 간선 삭제
@@ -200,6 +249,60 @@ const MapBoxMap = ({
     return () => map.off('click', handleGlobalClick)
   }, [onMapClick, selectedEdge])
 
+  useEffect(() => {
+    console.log('selectedMarkerId 바뀜:', selectedMarkerId)
+  }, [selectedMarkerId])
+
+  useEffect(() => {
+    if (modeRef.current !== 'route') return
+
+    const iconMap = {
+      default: { beacon: Beacon, cctv: CCTV, exit: Exit },
+      selected: { beacon: BeaconSelected, cctv: CCTVSelected, exit: ExitSelected },
+    }
+
+    const prev = prevSelectedNodesRef.current
+    const curr = selectedNodes
+
+    // 코드만 모아놓기
+    const getCodes = (arr) => arr.map((b) => b.beacon_code)
+    const prevCodes = getCodes(prev)
+    const currCodes = getCodes(curr)
+
+    // 추가된 코드들
+    const added = currCodes.filter((code) => !prevCodes.includes(code))
+    const removed = prevCodes.filter((code) => !currCodes.includes(code))
+
+    // 추가된 마커 → selected 아이콘으로
+    added.forEach((code) => {
+      const entry = markerMapRef.current[code]
+      if (entry) {
+        const { root, iconKey } = entry
+        root.render(
+          React.createElement(iconMap.selected[iconKey], {
+            className: 'text-primary h-8 w-8',
+          }),
+        )
+      }
+    })
+
+    // 해제된 마커 → 기본 아이콘으로
+    removed.forEach((code) => {
+      const entry = markerMapRef.current[code]
+      if (entry) {
+        const { root, iconKey } = entry
+        root.render(
+          React.createElement(iconMap.default[iconKey], {
+            className: 'text-primary h-8 w-8',
+          }),
+        )
+      }
+    })
+
+    // 현재 상태 저장
+    prevSelectedNodesRef.current = curr
+  }, [selectedNodes])
+
   // 마커 및 간선 그리기
   useEffect(() => {
     const map = mapRef.current
@@ -210,35 +313,52 @@ const MapBoxMap = ({
         // 기존 마커 제거
         markerRefList.current.forEach((m) => m.remove())
         markerRefList.current = []
-
-        // 더미 데이터 때문에 크기 조정
-        // const xScale = imageWidth / 600
-        // const yScale = imageHeight / 400
-
-        // beacon_code → [lng, lat] 매핑용 객체
         const beaconMap = {}
 
         beaconList.forEach((beacon) => {
           const { coord_x, coord_y, is_exit, is_cctv, name, beacon_code } = beacon
-
-          // const scaledX = (coord_x + 100) * xScale
-          // const scaledY = coord_y * yScale
-          // const [lng, lat] = convertPixelToLngLat(coord_x, coord_y, imageWidth, imageHeight)
           const [lng, lat] = [coord_x, coord_y]
 
           // 위치 저장
           beaconMap[beacon_code] = [lng, lat]
 
-          let IconComponent = Beacon
-          if (is_exit) IconComponent = Exit
-          else if (is_cctv) IconComponent = CCTV
+          // [성준]
+          let iconKey = 'beacon'
+          if (is_exit) iconKey = 'exit'
+          else if (is_cctv) iconKey = 'cctv'
+
+          const isSelected =
+            selectedMarkerId === beacon_code ||
+            (modeRef.current === 'route' &&
+              selectedNodes.some((node) => node.beacon_code === beacon_code)) // [성준] 선택된 노드에 포함된 경우
+
+          const iconMap = {
+            default: { beacon: Beacon, cctv: CCTV, exit: Exit },
+            selected: { beacon: BeaconSelected, cctv: CCTVSelected, exit: ExitSelected },
+          }
+
+          const IconComponent = isSelected ? iconMap.selected[iconKey] : iconMap.default[iconKey]
 
           const container = document.createElement('div')
-          ReactDOM.createRoot(container).render(<IconComponent className="text-primary h-8 w-8" />)
+          const root = ReactDOM.createRoot(container) // [성준] 최초 1회만 createRoot
+          root.render(<IconComponent className="text-primary h-8 w-8" />)
+
+          // ReactDOM.createRoot(container).render(<IconComponent className="text-primary h-8 w-8" />)
 
           // 이벤트 여기다 넣어!!
-          container.addEventListener('click', () => {
-            if (modeRef.current === 'route' || modeRef.current === 'map') {
+          // [성준]
+          container.addEventListener('click', (e) => {
+            e.stopPropagation()
+            if (modeRef.current === 'map') {
+              if (selectedMarkerId === beacon_code) {
+                setSelectedMarkerId(null)
+                onMarkerClickRef.current?.(null) // 선택 해제 시 null 전달
+              } else {
+                setSelectedMarkerId(beacon_code)
+                onMarkerClickRef.current?.(beacon) // 선택 시 비콘 정보 전달
+              }
+            }
+            if (modeRef.current === 'route') {
               onMarkerClickRef.current?.(beacon)
             }
           })
@@ -246,6 +366,14 @@ const MapBoxMap = ({
           const marker = new mapboxgl.Marker({ element: container })
             .setLngLat([lng, lat])
             .addTo(map)
+
+          markerMapRef.current[beacon_code] = {
+            marker,
+            iconKey,
+            beacon,
+            container, // DOM 요소도 함께 저장
+            root,
+          }
 
           markerRefList.current.push(marker)
         })
@@ -327,13 +455,7 @@ const MapBoxMap = ({
         mapRef.current &&
         (() => {
           const projected = mapRef.current.project([tempMarker.coord_x, tempMarker.coord_y])
-
-          const iconMap = {
-            cctv: CCTV,
-            beacon: Beacon,
-            exit: Exit,
-          }
-
+          const iconMap = { cctv: CCTV, beacon: Beacon, exit: Exit }
           const Icon = iconMap[tempMarker.iconId]
 
           return (
