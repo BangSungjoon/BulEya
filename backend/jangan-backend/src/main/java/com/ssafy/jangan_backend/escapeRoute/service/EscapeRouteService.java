@@ -85,7 +85,7 @@ public class EscapeRouteService {
         // 각 비콘과 연결된 모든 간선 리스트
         List<Edge> edgeList = edgeRepository.findByBeaconAIdIn(beaconList.stream().map(Beacon::getId).toList());
         // 모든 출구 비콘 리스트
-        List<Beacon> exitList = beaconList.stream().filter(Beacon::getIsExit).toList();
+        List<Beacon> exitList = beaconList.stream().filter(beacon -> beacon.getIsExit() && !dangerBeacons.contains(beacon.getBeaconCode())).toList();
 
         HashMap<Integer, List<Edge>> graph = new HashMap<>();
         HashMap<Integer, Integer> dist = new HashMap<>();
