@@ -20,7 +20,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -32,15 +34,81 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.ssafy.jangan_mobile.R
 import com.ssafy.jangan_mobile.store.FireNotificationStore
 import com.ssafy.jangan_mobile.ui.theme.Headline
 import com.ssafy.jangan_mobile.ui.theme.Subtitle2
-import com.ssafy.jangan_mobile.ui.theme.system_red
+import com.ssafy.jangan_mobile.ui.theme.system_red//
 
 
+//@Composable
+//fun FireNotificationCard(
+//    stationName: String,
+//    beaconName: String,
+//    imageUrl: String,
+//    isVisible: Boolean,
+//    onDismiss: () -> Unit,
+//    onGuideClick: () -> Unit
+//) {
+//    Column(
+//        modifier = Modifier
+//            .fillMaxWidth()
+//            .background(Color.Black, shape = RoundedCornerShape(16.dp))
+//            .padding(16.dp),
+//        horizontalAlignment = Alignment.CenterHorizontally
+//    ) {
+//        // 🚉 역 정보 표시
+//        StationInfo(stationName = stationName)
+//
+//        Spacer(modifier = Modifier.height(20.dp))
+//        Box(
+//            modifier = Modifier
+//                .fillMaxWidth(0.8f)
+//                .background(Color(0xFF90EE90), shape = CircleShape)
+//                .padding(vertical = 8.dp),
+//            contentAlignment = Alignment.Center
+//        ) {
+//            Text(
+//                text = stationName,
+//                fontSize = 18.sp,
+//                fontWeight = FontWeight.Bold,
+//                color = Color.Black
+//            )
+//        }
+//
+//        Spacer(modifier = Modifier.height(12.dp))
+//
+//        // 🔥 상태 + 개찰구 정보
+//        Row(
+//            modifier = Modifier
+//                .fillMaxWidth(0.9f)
+//                .background(Color.Red, shape = RoundedCornerShape(16.dp))
+//                .padding(12.dp),
+//            verticalAlignment = Alignment.CenterVertically,
+//            horizontalArrangement = Arrangement.SpaceBetween
+//        ) {
+//            Text(
+//                text = "화재 발생",
+//                fontSize = 16.sp,
+//                fontWeight = FontWeight.Bold,
+//                color = Color.Black
+//            )
+//
+//            Text(
+//                text = beaconName,
+//                fontSize = 16.sp,
+//                fontWeight = FontWeight.Bold,
+//                color = Color.White
+//            )
+//        }
+//    }
+//}
+
+// 엊그제 만든거
 @Composable
 fun FireNotificationCard(
     beaconName: String,
@@ -54,93 +122,175 @@ fun FireNotificationCard(
     Column(
         modifier = Modifier
             .width(380.dp)
-            .height(334.dp)
+            .height(280.dp)
             .background(Color.Black, shape = RoundedCornerShape(40.dp))
             .padding(vertical = 12.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         // 🔥 상태 + 개찰구 정보
-        Box(
+        Row(
             modifier = Modifier
                 .width(360.dp)
                 .height(76.dp)
-                .background(color = Color.Transparent)
+                .background(color = system_red, shape = RoundedCornerShape(60.dp))
+                .padding(start = 32.dp, top = 22.dp, end = 32.dp, bottom = 22.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            // 빨간 박스 전체
-            Row(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(color = system_red, shape = RoundedCornerShape(60.dp))
-                    .padding(horizontal = 24.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Image(
-                        painter = painterResource(id = R.drawable.fireicon),
-                        contentDescription = "Fire Icon",
-                        modifier = Modifier
-                            .height(32.dp)
-                            .padding(1.dp)
-                    )
-                    Text(
-                        text = " 화재 발생",
-                        style = Headline,
-                        color = Color.White
-                    )
-                }
-
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Image(
+                    painter = painterResource(id = R.drawable.fireicon),
+                    contentDescription = "Fire Icon",
+                    modifier = Modifier
+                        .height(32.dp)
+                        .padding(1.dp)
+                )
                 Text(
-                    text = beaconName,
-                    style = Subtitle2,
-                    color = Color.White
+                    text = " 화재 발생",
+                    style = Headline
                 )
             }
+
+            Text(
+                text = beaconName,
+                style = Subtitle2,
+                color = Color.White
+            )
         }
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
-        // 📸 화재 이미지 표시 (둥근 흰색 테두리 포함 박스)
-        Box(
-            modifier = Modifier
-                .width(364.dp)
-                .height(214.dp)
-                .border(
-                    width = 5.dp,
-                    color = Color(0xFFFFFFFF),
-                    shape = RoundedCornerShape(size = 30.dp)
-                )
-                .clip(RoundedCornerShape(size = 30.dp)) // 이미지도 같이 둥글게 클리핑
-        ) {
-            if (imageUrl.isNotEmpty()) {
-                AsyncImage(
-                    model = imageUrl,
-                    contentDescription = "Fire Image",
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clip(RoundedCornerShape(30.dp)),
-                    contentScale = ContentScale.Crop,
-                    onSuccess = {
-                        Log.d("FireNotificationCard", "✅ 이미지 로딩 성공")
-                    },
-                    onError = {
-                        Log.e("FireNotificationCard", "❌ 이미지 로딩 실패", it.result.throwable)
-                    }
-                )
-            } else {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "이미지를 불러올 수 없습니다",
-                        color = Color.White
-                    )
+        // 🔥 화재 이미지
+        if (imageUrl.isNotEmpty()) {
+            AsyncImage(
+                model = imageUrl,
+                contentDescription = "Fire Image",
+                modifier = Modifier
+                    .width(320.dp)
+                    .height(180.dp)
+                    .clip(RoundedCornerShape(16.dp)),
+                contentScale = ContentScale.Crop,
+                onSuccess = {
+                    Log.d("FireNotificationCard", "✅ 이미지 로딩 성공")
+                },
+                onError = {
+                    Log.e("FireNotificationCard", "❌ 이미지 로딩 실패", it.result.throwable)
                 }
-            }
+            )
+        } else {
+            Text(
+                text = "이미지를 불러올 수 없습니다",
+                color = Color.White,
+                modifier = Modifier.padding(top = 12.dp)
+            )
         }
     }
 }
+
+
+
+
+//@Composable
+//fun FireNotificationCard(
+//    beaconName: String,
+//    imageUrl: String,
+//    isVisible: Boolean,
+//    onDismiss: () -> Unit,
+//    onGuideClick: () -> Unit
+//) {
+//    Log.d("FireNotificationCard", "🧩 파라미터 gateName=$beaconName, imageUrl=$imageUrl")
+//
+//    Column(
+//        modifier = Modifier
+//            .width(380.dp)
+//            .height(334.dp)
+//            .background(Color.Black, shape = RoundedCornerShape(40.dp))
+//            .padding(vertical = 12.dp),
+//        horizontalAlignment = Alignment.CenterHorizontally,
+//    ) {
+//        // 🔥 상태 + 개찰구 정보
+//        Box(
+//            modifier = Modifier
+//                .width(360.dp)
+//                .height(76.dp)
+//                .background(color = Color.Transparent)
+//        ) {
+//            // 빨간 박스 전체
+//            Row(
+//                modifier = Modifier
+//                    .fillMaxSize()
+//                    .background(color = system_red, shape = RoundedCornerShape(60.dp))
+//                    .padding(horizontal = 24.dp),
+//                verticalAlignment = Alignment.CenterVertically,
+//                horizontalArrangement = Arrangement.SpaceBetween
+//            ) {
+//                Row(verticalAlignment = Alignment.CenterVertically) {
+//                    Image(
+//                        painter = painterResource(id = R.drawable.fireicon),
+//                        contentDescription = "Fire Icon",
+//                        modifier = Modifier
+//                            .height(32.dp)
+//                            .padding(1.dp)
+//                    )
+//                    Text(
+//                        text = " 화재 발생",
+//                        style = Headline,
+//                        color = Color.White
+//                    )
+//                }
+//
+//                Text(
+//                    text = beaconName,
+//                    style = Subtitle2,
+//                    color = Color.White
+//                )
+//            }
+//        }
+//
+//        Spacer(modifier = Modifier.height(20.dp))
+//
+//        // 📸 화재 이미지 표시 (둥근 흰색 테두리 포함 박스)
+//        Box(
+//            modifier = Modifier
+//                .width(364.dp)
+//                .height(214.dp)
+//                .border(
+//                    width = 5.dp,
+//                    color = Color(0xFFFFFFFF),
+//                    shape = RoundedCornerShape(size = 30.dp)
+//                )
+//                .clip(RoundedCornerShape(size = 30.dp)) // 이미지도 같이 둥글게 클리핑
+//        ) {
+//            if (imageUrl.isNotEmpty()) {
+//                AsyncImage(
+//                    model = imageUrl,
+//                    contentDescription = "Fire Image",
+//                    modifier = Modifier
+//                        .fillMaxSize()
+//                        .clip(RoundedCornerShape(30.dp)),
+//                    contentScale = ContentScale.Crop,
+//                    onSuccess = {
+//                        Log.d("FireNotificationCard", "✅ 이미지 로딩 성공")
+//                    },
+//                    onError = {
+//                        Log.e("FireNotificationCard", "❌ 이미지 로딩 실패", it.result.throwable)
+//                    }
+//                )
+//            } else {
+//                Box(
+//                    modifier = Modifier.fillMaxSize(),
+//                    contentAlignment = Alignment.Center
+//                ) {
+//                    Text(
+//                        text = "이미지를 불러올 수 없습니다",
+//                        color = Color.White
+//                    )
+//                }
+//            }
+//        }
+//    }
+//}
+
 
 
 @Composable

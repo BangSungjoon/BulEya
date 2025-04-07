@@ -18,50 +18,50 @@ import androidx.compose.material3.Text
 import com.ssafy.jangan_mobile.ui.theme.Subtitle2
 import com.ssafy.jangan_mobile.ui.theme.primaryColor
 
-@Composable
-fun StationInfo(
-    stationName: String // ✅ 역 이름을 동적으로 입력
-) {
-    Row(
-        modifier = Modifier
-            .width(380.dp)
-            .height(45.dp),
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        // 왼쪽 연장된 초록색 선
-        Box(
-            modifier = Modifier
-                .width(94.5.dp)
-                .height(8.dp)
-                .background(primaryColor)
-        )
-
-        // 중앙 역 이름 표시 (둥근 직사각형)
-        Box(
-            modifier = Modifier
-                .width(182.dp)
-                .height(61.dp) // 피그마대로 하면 좁은 것 같아서 볼더값만큼 더해줌
-                .background(color = Color.White, shape = RoundedCornerShape(100.dp))
-                .border(width = 8.dp, color = primaryColor, shape = RoundedCornerShape(100.dp)),
-            contentAlignment = Alignment.Center
-        ) {
-                Text(
-                    text = stationName,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-                    style = Subtitle2
-                )
-        }
-
-        // 오른쪽 연장된 초록색 선
-        Box(
-            modifier = Modifier
-                .width(94.5.dp)
-                .height(8.dp)
-                .background(primaryColor)
-        )
-    }
-}
+//@Composable
+//fun StationInfo(
+//    stationName: String // ✅ 역 이름을 동적으로 입력
+//) {
+//    Row(
+//        modifier = Modifier
+//            .width(380.dp)
+//            .height(45.dp),
+//        horizontalArrangement = Arrangement.Center,
+//        verticalAlignment = Alignment.CenterVertically,
+//    ) {
+//        // 왼쪽 연장된 초록색 선
+//        Box(
+//            modifier = Modifier
+//                .width(94.5.dp)
+//                .height(8.dp)
+//                .background(primaryColor)
+//        )
+//
+//        // 중앙 역 이름 표시 (둥근 직사각형)
+//        Box(
+//            modifier = Modifier
+//                .width(182.dp)
+//                .height(61.dp) // 피그마대로 하면 좁은 것 같아서 볼더값만큼 더해줌
+//                .background(color = Color.White, shape = RoundedCornerShape(100.dp))
+//                .border(width = 8.dp, color = primaryColor, shape = RoundedCornerShape(100.dp)),
+//            contentAlignment = Alignment.Center
+//        ) {
+//                Text(
+//                    text = stationName,
+//                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+//                    style = Subtitle2
+//                )
+//        }
+//
+//        // 오른쪽 연장된 초록색 선
+//        Box(
+//            modifier = Modifier
+//                .width(94.5.dp)
+//                .height(8.dp)
+//                .background(primaryColor)
+//        )
+//    }
+//}
 
 //@Preview(
 //    showBackground = true,

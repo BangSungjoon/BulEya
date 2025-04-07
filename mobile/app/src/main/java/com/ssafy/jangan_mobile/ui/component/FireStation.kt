@@ -34,47 +34,38 @@ import com.ssafy.jangan_mobile.ui.theme.system_red
 
 @Composable
 fun FireStation(
-    stationName: String, // ✅ 역 이름
-    status: String,      // ✅ 상태 (예: "화재 발생")
-    gateName: String,     // ✅ 개찰구 정보 (예: "B3 개찰구")
+    stationName: String,
+    beaconName: String,
+    imageUrl: String,
+    isVisible: Boolean,
     onDismiss: () -> Unit,
-    modifier: Modifier = Modifier
+    onGuideClick: () -> Unit
 ) {
     Column(
         modifier = Modifier
-            .width(300.dp)
-            .background(Color(0xFF1B1B1D), shape = RoundedCornerShape(40.dp))
-            .padding(16.dp),
+            .width(380.dp)
+            .height(213.dp)
+            .background(color = Color(0xFF1B1B1D), shape = RoundedCornerShape(size = 40.dp))
+            .padding(top = 12.dp, bottom = 12.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // ✅ 상단 라벨 (역 이름)
-        Box(
-            modifier = Modifier
-                .background(Color.White, shape = RoundedCornerShape(50.dp))
-                .border(
-                    width = 4.dp,
-                    color = Color(0xFF8AEA52),
-                    shape = RoundedCornerShape(50.dp)
-                )
-                .padding(horizontal = 24.dp, vertical = 8.dp)
-        ) {
-            Text(
-                text = stationName,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.Black
-            )
-        }
 
+        Spacer(modifier = Modifier.height(24.dp))
+        // 🚉 역 정보 표시
+        StationInfo(stationName = stationName)
+
+        Spacer(modifier = Modifier.height(24.dp))
         Spacer(modifier = Modifier.height(20.dp))
+
+
 
         // 🔥 화재 발생 상태 카드
         Row(
             modifier = Modifier
-                .fillMaxWidth()
+                .width(360.dp)
                 .height(76.dp)
                 .background(color = Color(0xFFEE5B5B), shape = RoundedCornerShape(60.dp))
-                .padding(horizontal = 24.dp),
+                .padding(start = 32.dp, top = 22.dp, end = 32.dp, bottom = 22.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -88,18 +79,16 @@ fun FireStation(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = status,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
+                    text = "화재 발생",
+                    style = Headline,
                     color = Color.Black
                 )
             }
 
             // 🚪 개찰구
             Text(
-                text = gateName,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
+                text = beaconName,
+                style = Subtitle2,
                 color = Color.White
             )
         }
