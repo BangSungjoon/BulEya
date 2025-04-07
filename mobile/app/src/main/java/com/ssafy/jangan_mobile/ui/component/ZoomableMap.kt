@@ -1,25 +1,18 @@
 package com.ssafy.jangan_mobile.ui.component
 
-import android.widget.ImageView
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.ssafy.jangan_mobile.R
-import androidx.compose.ui.platform.LocalInspectionMode
-import androidx.compose.ui.viewinterop.AndroidView
-import com.bumptech.glide.Glide
-import com.bumptech.glide.load.engine.DiskCacheStrategy
 
 @Composable
 fun ZoomableHighResMap(imageRes: Int) { // ✅ Int 타입으로 변경
@@ -148,6 +141,6 @@ fun ZoomableHighResMap(imageRes: Int) { // ✅ Int 타입으로 변경
 @Composable
 fun PreviewZoomableMap() {
     Surface {
-        ZoomableHighResMap(imageRes = R.drawable.b1)
+        ZoomableHighResMap(imageRes = R.drawable.b1_2)
     }
 }

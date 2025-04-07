@@ -1,6 +1,7 @@
 package com.ssafy.jangan_mobile.viewmodel
 
 import android.util.Log
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
@@ -44,6 +45,9 @@ class EscapeRouteViewModel : ViewModel() {
     private val routeTrigger = MediatorLiveData<Pair<Int, Int>>()
 
 
+    // cctv 사진 불러오기
+    val cctvImageUrl = mutableStateOf<String?>(null)
+
     init {
         Log.d("EscapeRoute", "✅ EscapeRouteViewModel 생성됨")
 
@@ -73,7 +77,7 @@ class EscapeRouteViewModel : ViewModel() {
 
 
 
-    fun fetchEscapeRoute(stationId: Int, beaconCode: Int) {
+    fun fetchEscapeRoute(stationId: Int, beaconCode: Int, ) {
         Log.d("EscapeRoute", "✅ fetchEscapeRoute 호출됨: stationId=$stationId, beaconCode=$beaconCode")
         CoroutineScope(Dispatchers.IO).launch {
             try {
@@ -114,6 +118,26 @@ class EscapeRouteViewModel : ViewModel() {
                 }
             } catch (e: Exception) {
                 Log.e("EscapeRoute", "❌ 위치 요청 실패: ${e.message}")
+            }
+        }
+    }
+
+    fun fetchCctvImage(stationId: Int, beaconCode: Int, callback: (String) -> Unit) {
+        viewModelScope.launch {
+            try {
+                val response = RetrofitInstance.api.getCctvImage(stationId, beaconCode)
+                if (response.isSuccessful) {
+                    val imageUrl = response.body()?.result?.image_url
+                    if (!imageUrl.isNullOrEmpty()) {
+                        cctvImageUrl.value = imageUrl  // 상태로도 저장
+                        callback(imageUrl)             // 콜백에도 전달
+                        Log.d("CCTV", "✅ CCTV 이미지 URL: $imageUrl")
+                    }
+                } else {
+                    Log.w("CCTV", "❌ 응답 실패: ${response.code()}")
+                }
+            } catch (e: Exception) {
+                Log.e("CCTV", "❗ 예외 발생", e)
             }
         }
     }
