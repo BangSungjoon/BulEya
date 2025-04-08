@@ -117,7 +117,7 @@ fun FireNotificationCard(
     onDismiss: () -> Unit,
     onGuideClick: () -> Unit
 ) {
-    Log.d("FireNotificationCard", "🧩 파라미터 gateName=$beaconName, imageUrl=$imageUrl")
+    Log.d("FireNotificationCard", "🧩 파라미터 imageUrl=$imageUrl")
 
     Column(
         modifier = Modifier
@@ -178,6 +178,7 @@ fun FireNotificationCard(
                 }
             )
         } else {
+            Log.w("FireNotificationCard", "⚠️ imageUrl이 비어 있음. 이미지 미표시")
             Text(
                 text = "이미지를 불러올 수 없습니다",
                 color = Color.White,

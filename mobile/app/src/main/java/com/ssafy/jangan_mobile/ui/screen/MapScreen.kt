@@ -80,6 +80,7 @@ import com.ssafy.jangan_mobile.ui.component.FloorSelector
 import com.ssafy.jangan_mobile.ui.viewmodel.MapViewModel
 import com.ssafy.jangan_mobile.viewmodel.EscapeRouteViewModel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun EscapeRouteMapScreen(
@@ -89,6 +90,8 @@ fun EscapeRouteMapScreen(
 ) {
     val context = LocalContext.current
     val mapView = remember { MapView(context) }
+
+    val zoomLevel = 6.5
 
     val fireNotificationDto: FireNotificationDto? by FireNotificationStore.fireNotificationDto.observeAsState()
     val currentLocationCode by FireNotificationStore.currentLocationBeaconCode.observeAsState()
@@ -139,6 +142,9 @@ fun EscapeRouteMapScreen(
     val selectedFireBeaconDto = remember { mutableStateOf<BeaconNotificationDto?>(null) }
     val lastShownFireId = remember { mutableStateOf<String?>(null) }
     val previousFireCodes = remember { mutableStateListOf<Int>() }
+    val selectedImageUrl = remember { mutableStateOf("") }
+    val mapConfigTrigger = remember { mutableStateOf(0) }
+
 
     // 마커들
     val myLocationAnnotation = remember { mutableStateOf<PointAnnotation?>(null) }
@@ -232,7 +238,7 @@ fun EscapeRouteMapScreen(
                 mapView.mapboxMap.setCamera(
                     CameraOptions.Builder()
                         .center(Point.fromLngLat(center[0], center[1]))
-                        .zoom(5.0)
+                        .zoom(zoomLevel)
                         .build()
                 )
                 mapView.mapboxMap.setBounds(
@@ -253,6 +259,7 @@ fun EscapeRouteMapScreen(
         }
         mapView.compass.enabled = false; //나침반 비활성화
         mapView.scalebar.enabled = false; //스케일바 비활성화
+        mapConfigTrigger.value = mapConfigTrigger.value + 1
     }
 
     // 🔁 내 위치 마커만 따로 관리
@@ -276,7 +283,7 @@ fun EscapeRouteMapScreen(
             mapView.mapboxMap.flyTo(
                 CameraOptions.Builder()
                     .center(Point.fromLngLat(myLocation!!.coordX, myLocation!!.coordY))
-                    .zoom(5.0)
+                    .zoom(zoomLevel)
                     .build(),
                 mapAnimationOptions {
                     duration(1500L)
@@ -286,19 +293,28 @@ fun EscapeRouteMapScreen(
     }
 
     // 화재 위치만 따로 관리
-    LaunchedEffect(fireNotificationDto, selectedFloor.value, showArrivalCard.value) {
+    LaunchedEffect(fireNotificationDto?.beaconNotificationDtos, selectedFloor.value, showArrivalCard.value, mapConfigTrigger.value) {
+
+        // 화재좌표 먼저 나오게끔 null값 확인
+        if (fireNotificationDto == null) {
+            Log.w("FireMarker", "🔥 아직 fireNotificationDto가 도착하지 않았음")
+            return@LaunchedEffect
+        }
 
         Log.d("🔥fireCheck", "불이야불이야 fireNotificationDto: $fireNotificationDto")
         val selectedFloorCode = floorStringToCode(selectedFloor.value)
         Log.d("FireMarker", "🔥 LaunchedEffect 호출됨. 현재 층: $selectedFloorCode")
+        if(pointAnnotationManager.value == null){
+            Log.d("FireMarker", "pointAnnotationManager가 null")
+        }
 
         pointAnnotationManager.value?.let { manager ->
             val fireBeacons = fireNotificationDto?.beaconNotificationDtos
-                ?.filter { it.floor == selectedFloorCode } ?: run {
+                ?: run {
                 Log.w("FireMarker", "⚠️ fireNotificationDto가 null이거나 해당 층의 화재 없음")
                 return@let
             }
-
+            Log.d("Firewhere", "불이야불불")
             fireBeacons.forEachIndexed { index, beacon ->
                 Log.d(
                     "FireMarker",
@@ -310,7 +326,6 @@ fun EscapeRouteMapScreen(
                     .withIconSize(0.25)
                 val fireMarker = manager.create(marker)
 
-
                 // ✅ 마커 클릭 이벤트 등록
                 manager.addClickListener { clicked ->
                     if (clicked == fireMarker) {
@@ -320,9 +335,16 @@ fun EscapeRouteMapScreen(
                         val stationId = fireNotification?.stationId ?: 0
                         val beaconCode = beacon.beaconCode
 
+                        Log.d("FireMarker", "➡️ 요청할 stationId=$stationId, beaconCode=$beaconCode")
+
                         viewModel.fetchCctvImage(stationId, beaconCode) { url ->
-                            selectedFireBeaconDto.value = beacon.copy(imageUrl = url)
+                            Log.d("FireMarker", "📸 fetchCctvImage → 받아온 imageUrl=$url")
+                            selectedImageUrl.value = url
+                            selectedFireBeaconDto.value = null
+                            selectedFireBeaconDto.value = beacon.copy()
+                            isFireNotificationCardVisible.value = false
                             isFireNotificationCardVisible.value = true
+//                            isCardVisible.value = true
                         }
                         true
                     } else false
@@ -485,11 +507,11 @@ fun EscapeRouteMapScreen(
                     Log.d("EscapeRouteMap", "🎉 목적지 도착 (좌표 동일) → 안내 카드 표시")
                     showArrivalCard.value = true
 
-//                    // 목적지 마커만 제거
-//                    destinationMarker.value?.let {
-//                        pointAnnotationManager.value?.delete(it)
-//                        destinationMarker.value = null
-//                    }
+                    // 목적지 마커만 제거
+                    destinationMarker.value?.let {
+                        pointAnnotationManager.value?.delete(it)
+                        destinationMarker.value = null
+                    }
                 }
             } else {
                     Log.w(
@@ -531,37 +553,47 @@ fun EscapeRouteMapScreen(
 
     LaunchedEffect(fireNotificationDto) {
         val isFireActive = fireNotificationDto?.beaconNotificationDtos?.any { it.isNewFire == 1 } == true
+
         if (isFireActive && !redLighting.value) {
-            redLighting.value = true
-            Log.d("Debug", "Red lighting started")
-            delay(5000) // 5초 대기
-            redLighting.value = false
-            Log.d("Debug", "Red lighting stopped after 5 seconds")
+            launch {
+                redLighting.value = true
+                Log.d("Debug", "Red lighting started")
+                delay(5000) // 5초 대기
+                redLighting.value = false
+                Log.d("Debug", "Red lighting stopped after 5 seconds")
+            }
         }
 
-//
-//        // 새로운 화재 나타날 떄 실시간 모달 자동 표시
-//        val currentFires = fireNotificationDto?.beaconNotificationDtos
-//            ?.filter { it.isNewFire == 1 }
-//            ?.map { it.beaconCode } ?: emptyList()
-//
-//
-//        // 🔍 이전에 없던 새 화재 탐색
-//        val newFireCode = currentFires.firstOrNull { it !in previousFireCodes }
-//
-//        if (newFireCode != null) {
-//            val newFire = fireNotificationDto?.beaconNotificationDtos?.firstOrNull { it.beaconCode == newFireCode }
-//
-//            if (newFire != null) {
-//                Log.d("🔥 Fire", "🚨 새롭게 추가된 화재 감지 → 모달 표시")
-//                selectedFireBeaconDto.value = newFire
-//                isFireNotificationCardVisible.value = true
-//            }
-//        }
-//
-//        // 🔄 현재 화재 상태 저장 (다음 변경 대비)
-//        previousFireCodes.clear()
-//        previousFireCodes.addAll(currentFires)
+
+        // 새로운 화재 나타날 떄 실시간 모달 자동 표시
+        val currentFires = fireNotificationDto?.beaconNotificationDtos
+            ?.filter { it.isNewFire == 1 }
+            ?.map { it.beaconCode } ?: emptyList()
+
+
+        // 🔍 이전에 없던 새 화재 탐색
+        val newFireCode = currentFires.firstOrNull { it !in previousFireCodes }
+
+        if (newFireCode != null) {
+            val newFire = fireNotificationDto?.beaconNotificationDtos?.firstOrNull { it.beaconCode == newFireCode }
+
+            if (newFire != null) {
+                Log.d("🔥 Fire", "🚨 새롭게 추가된 화재 감지 → 모달 표시")
+                selectedFireBeaconDto.value = newFire
+//                isCardVisible.value = true
+                isFireStationShown.value = true
+                mapView.mapboxMap.flyTo(
+                    CameraOptions.Builder()
+                        .zoom(zoomLevel)
+                        .center(Point.fromLngLat(newFire.coordX, newFire.coordY))
+                        .build()
+                )
+            }
+        }
+
+        // 🔄 현재 화재 상태 저장 (다음 변경 대비)
+        previousFireCodes.clear()
+        previousFireCodes.addAll(currentFires)
     }
 
     //🔥빨간색 깜빡임 애니메이션
@@ -601,6 +633,10 @@ Box(
 ) {
     // 1. 지도 배경
     AndroidView(factory = { mapView })
+
+//    val annotationApi = mapView.annotations
+//    pointAnnotationManager.value = annotationApi.createPointAnnotationManager()
+//    polylineManager.value = annotationApi.createPolylineAnnotationManager()
 
     // 화재 역정보 모달
     if (targetBeaconDto?.imageUrl?.isNotEmpty() == true && fireNotification != null) {
@@ -798,13 +834,23 @@ Box(
                 }
         }
     }
+
+    Log.d(
+        "FireModal",
+        "🔥 FireNotificationCard 조건 확인: visible=${isFireNotificationCardVisible.value}, beaconDto=${selectedFireBeaconDto.value}"
+    )
     // ✅ 🔥 화재 실시간 사진
         if (isFireNotificationCardVisible.value && selectedFireBeaconDto.value != null) {
+
+            Log.d(
+                "FireModal",
+                "📦 AnimatedVisibility 조건: isVisible=${isFireNotificationCardVisible.value}, beacon=${selectedFireBeaconDto.value}"
+            )
             // ✅ 🔥 상세 모달 (FireNotificationCard → FireDetailBottomSheet 교체)
             AnimatedVisibility(
                 visible = isFireNotificationCardVisible.value,
-                enter = slideInVertically(initialOffsetY = { -300 }) + fadeIn(),
-                exit = slideOutVertically(targetOffsetY = { -300 }) + fadeOut()
+                enter = slideInVertically(initialOffsetY = { -100 }) + fadeIn(),
+                exit = slideOutVertically(targetOffsetY = { -100 }) + fadeOut()
             ) {
                 Box(
                     modifier = Modifier
@@ -836,8 +882,8 @@ Box(
                     ) {
                         FireNotificationCard(
                             beaconName = selectedFireBeaconDto.value?.beaconName ?: "알 수 없음",
-                            imageUrl = selectedFireBeaconDto.value?.imageUrl ?: "",
-                            isVisible = true,
+                            imageUrl = selectedImageUrl.value,
+                            isVisible = isFireNotificationCardVisible.value,
                             onDismiss = {
                                 Log.d("FireModal", "🛑 모달 닫기 버튼 클릭")
                                 isFireNotificationCardVisible.value = false

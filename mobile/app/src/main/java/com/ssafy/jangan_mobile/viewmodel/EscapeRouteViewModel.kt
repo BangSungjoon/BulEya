@@ -125,9 +125,12 @@ class EscapeRouteViewModel : ViewModel() {
     fun fetchCctvImage(stationId: Int, beaconCode: Int, callback: (String) -> Unit) {
         viewModelScope.launch {
             try {
+                Log.d("CCTV", "🌐 API 요청 → stationId=$stationId, beaconCode=$beaconCode")
                 val response = RetrofitInstance.api.getCctvImage(stationId, beaconCode)
                 if (response.isSuccessful) {
                     val imageUrl = response.body()?.result?.image_url
+                    Log.d("CCTV", "✅ 응답 성공 → imageUrl=$imageUrl")
+
                     if (!imageUrl.isNullOrEmpty()) {
                         cctvImageUrl.value = imageUrl  // 상태로도 저장
                         callback(imageUrl)             // 콜백에도 전달
