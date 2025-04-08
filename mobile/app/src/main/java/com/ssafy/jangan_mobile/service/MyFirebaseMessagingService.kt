@@ -86,6 +86,7 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
                 if(nearestBeaconCode != -1) {
                     sendAlertNotification(fireNotificationDto, jsonString, nearestBeaconCode) //알림표시
                     FireNotificationStore.setNotification(fireNotificationDto, this) // 여기선 setValue() 가능
+                    FireNotificationStore.setCurrentNotificationBeaconCode(nearestBeaconCode, this)
                 }
                 stopSelf()
             }, 2_000)

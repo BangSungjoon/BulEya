@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -116,7 +117,7 @@ fun EscapeRouteMapScreen(
     val left = -coordinateWidth / 2
     val right = coordinateWidth / 2
 
-    val colors = listOf(android.graphics.Color.rgb(138, 234, 82), android.graphics.Color.rgb(244, 12, 12)) // 초록 ↔ 투명
+    val colors = listOf(android.graphics.Color.rgb(138, 234, 82), android.graphics.Color.argb(128, 138, 234, 82)) // 초록 ↔ 투명
     var colorIndex = 0
 
     val handler = Handler(Looper.getMainLooper())
@@ -140,6 +141,7 @@ fun EscapeRouteMapScreen(
     val isFireStationShown = remember { mutableStateOf(false) } // 최초 알림용
     val cctvImageUrl = remember { mutableStateOf<String?>(null) }
     val selectedFireBeaconDto = remember { mutableStateOf<BeaconNotificationDto?>(null) }
+    val lineState = remember { mutableStateOf(0) }
     val lastShownFireId = remember { mutableStateOf<String?>(null) }
     val previousFireCodes = remember { mutableStateListOf<Int>() }
     val selectedImageUrl = remember { mutableStateOf("") }
@@ -314,6 +316,7 @@ fun EscapeRouteMapScreen(
                 Log.w("FireMarker", "⚠️ fireNotificationDto가 null이거나 해당 층의 화재 없음")
                 return@let
             }
+            manager.delete(fireMarkers)
             Log.d("Firewhere", "불이야불불")
             fireBeacons.forEachIndexed { index, beacon ->
                 Log.d(
@@ -325,6 +328,7 @@ fun EscapeRouteMapScreen(
                     .withIconImage("fire-icon")
                     .withIconSize(0.25)
                 val fireMarker = manager.create(marker)
+                fireMarkers.add(fireMarker)
 
                 // ✅ 마커 클릭 이벤트 등록
                 manager.addClickListener { clicked ->
@@ -424,6 +428,10 @@ fun EscapeRouteMapScreen(
         }
 
 
+        polylineManager.value?.deleteAll()
+        routeMarkers.clear()
+        polylineList.clear()
+
         if (showRoute.value && routePoints.size >= 2) {
             Log.d("EscapeRouteMap", "🟩 전체 경로 좌표:")
             routePoints.forEachIndexed { index, point ->
@@ -453,23 +461,6 @@ fun EscapeRouteMapScreen(
                 val line = polylineManager.value?.create(polyline)
                 polylineList.add(line!!)
             }
-            if(blinkRunnable != null) {
-                handler.removeCallbacks(blinkRunnable!!)
-            }
-
-            blinkRunnable = object : Runnable {
-                override fun run() {
-                    polylineList.forEach { polyline ->
-                        polyline.lineColorInt = colors[colorIndex]
-                        polylineManager.value?.update(polyline)
-                    }
-
-                    colorIndex = (colorIndex + 1) % colors.size
-                    handler.postDelayed(this, 500) // 0.5초마다 깜빡
-                }
-            }
-            handler.post(blinkRunnable!!)
-
 
             // 기존 목적지 지우기
             destinationMarker.value?.let { existingMarker ->
@@ -521,6 +512,18 @@ fun EscapeRouteMapScreen(
                     )
                 }
 
+        }
+        lineState.value = lineState.value + 1
+    }
+    LaunchedEffect(lineState, showRoute.value) {
+        while (showRoute.value) {
+            Log.d("polyline", "size: ${polylineList.size}")
+            polylineList.forEach { polyline ->
+                polyline.lineColorInt = colors[colorIndex]
+                polylineManager.value?.update(polyline)
+            }
+            colorIndex = (colorIndex + 1) % colors.size
+            delay(500)
         }
     }
 
