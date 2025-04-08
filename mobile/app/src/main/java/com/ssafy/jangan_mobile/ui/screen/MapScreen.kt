@@ -300,7 +300,7 @@ fun EscapeRouteMapScreen(
                 Log.w("FireMarker", "⚠️ fireNotificationDto가 null이거나 해당 층의 화재 없음")
                 return@let
             }
-
+            manager.delete(fireMarkers)
             fireBeacons.forEachIndexed { index, beacon ->
                 Log.d(
                     "FireMarker",
@@ -311,6 +311,7 @@ fun EscapeRouteMapScreen(
                     .withIconImage("fire-icon")
                     .withIconSize(0.25)
                 val fireMarker = manager.create(marker)
+                fireMarkers.add(fireMarker)
 
 
                 // ✅ 마커 클릭 이벤트 등록
@@ -404,6 +405,10 @@ fun EscapeRouteMapScreen(
         }
 
 
+        polylineManager.value?.deleteAll()
+        routeMarkers.clear()
+        polylineList.clear()
+
         if (showRoute.value && routePoints.size >= 2) {
             Log.d("EscapeRouteMap", "🟩 전체 경로 좌표:")
             routePoints.forEachIndexed { index, point ->
@@ -487,8 +492,9 @@ fun EscapeRouteMapScreen(
         }
         lineState.value = lineState.value + 1
     }
-    LaunchedEffect(lineState) {
-        while (true) {
+    LaunchedEffect(lineState, showRoute) {
+        while (showRoute.value) {
+            Log.d("polyline", "size: ${polylineList.size}")
             polylineList.forEach { polyline ->
                 polyline.lineColorInt = colors[colorIndex]
                 polylineManager.value?.update(polyline)
