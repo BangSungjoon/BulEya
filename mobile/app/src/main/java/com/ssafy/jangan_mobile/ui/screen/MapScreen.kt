@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -69,6 +70,7 @@ import com.ssafy.jangan_mobile.ui.component.FireStation
 import com.ssafy.jangan_mobile.ui.component.FloorSelector
 import com.ssafy.jangan_mobile.ui.viewmodel.MapViewModel
 import com.ssafy.jangan_mobile.viewmodel.EscapeRouteViewModel
+import kotlinx.coroutines.delay
 
 @Composable
 fun EscapeRouteMapScreen(
@@ -102,7 +104,7 @@ fun EscapeRouteMapScreen(
     val left = -coordinateWidth / 2
     val right = coordinateWidth / 2
 
-    val colors = listOf(android.graphics.Color.rgb(138, 234, 82), android.graphics.Color.rgb(244, 12, 12)) // 초록 ↔ 투명
+    val colors = listOf(android.graphics.Color.rgb(138, 234, 82), android.graphics.Color.argb(128, 138, 234, 82)) // 초록 ↔ 투명
     var colorIndex = 0
 
     val handler = Handler(Looper.getMainLooper())
@@ -125,6 +127,7 @@ fun EscapeRouteMapScreen(
     val isFireStationShown = remember { mutableStateOf(false) } // 최초 알림용
     val cctvImageUrl = remember { mutableStateOf<String?>(null) }
     val selectedFireBeaconDto = remember { mutableStateOf<BeaconNotificationDto?>(null) }
+    val lineState = remember { mutableStateOf(0) }
 
     // 마커들
     val myLocationAnnotation = remember { mutableStateOf<PointAnnotation?>(null) }
@@ -403,23 +406,6 @@ fun EscapeRouteMapScreen(
                 val line = polylineManager.value?.create(polyline)
                 polylineList.add(line!!)
             }
-            if(blinkRunnable != null) {
-                handler.removeCallbacks(blinkRunnable!!)
-            }
-
-            blinkRunnable = object : Runnable {
-                override fun run() {
-                    polylineList.forEach { polyline ->
-                        polyline.lineColorInt = colors[colorIndex]
-                        polylineManager.value?.update(polyline)
-                    }
-
-                    colorIndex = (colorIndex + 1) % colors.size
-                    handler.postDelayed(this, 500) // 0.5초마다 깜빡
-                }
-            }
-            handler.post(blinkRunnable!!)
-
 
             // ✅ 무조건 routePoints[0]에 목적지 마커 표시
             val destination = routePoints.first()
@@ -460,6 +446,17 @@ fun EscapeRouteMapScreen(
                     )
                 }
 
+        }
+        lineState.value = lineState.value + 1
+    }
+    LaunchedEffect(lineState) {
+        while (true) {
+            polylineList.forEach { polyline ->
+                polyline.lineColorInt = colors[colorIndex]
+                polylineManager.value?.update(polyline)
+            }
+            colorIndex = (colorIndex + 1) % colors.size
+            delay(500)
         }
     }
 
