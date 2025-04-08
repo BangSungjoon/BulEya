@@ -492,7 +492,7 @@ fun EscapeRouteMapScreen(
         }
         lineState.value = lineState.value + 1
     }
-    LaunchedEffect(lineState, showRoute) {
+    LaunchedEffect(lineState, showRoute.value) {
         while (showRoute.value) {
             Log.d("polyline", "size: ${polylineList.size}")
             polylineList.forEach { polyline ->
