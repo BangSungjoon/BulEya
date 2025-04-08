@@ -2,6 +2,7 @@ import React from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import LogOut from '@/assets/icons/LogOut.svg?react'
+import Logo from '@/assets/icons/Logo.svg?react'
 import { logOut } from '@/api/axios'
 
 // NavBar
@@ -32,7 +33,7 @@ export default function NavBar({ items, activeItem, onSelect }) {
           className="flex h-20 w-full items-center justify-center text-gray-100"
           onClick={() => onSelect('map')}
         >
-          로고
+          <Logo className="h-10 w-10 text-gray-100" />
         </div>
 
         {/* 메뉴 리스트 */}

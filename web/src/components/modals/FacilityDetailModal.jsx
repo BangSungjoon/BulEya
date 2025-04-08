@@ -62,7 +62,7 @@ export default function FacilityDetailModal({ data, onClose, onDelete }) {
 
     try {
       await deleteBeacon(data.beacon_id)
-      alert('삭제가 완료되었습니다.')
+      // alert('삭제가 완료되었습니다.')
       onClose()
       onDelete && onDelete(data.beacon_id) // 부모에게 삭제 알림!
     } catch (error) {
@@ -103,7 +103,8 @@ export default function FacilityDetailModal({ data, onClose, onDelete }) {
           <p className="text-caption mb-1 text-gray-400">출구</p>
           <div className="flex items-center justify-between gap-2">
             <p className="text-overline max-w-[80%] text-sm leading-snug text-gray-300">
-              공사 등 출구로 사용할 수 없는 곳이라면, 선택을 해제해주세요.
+              {/* 공사 등 출구로 사용할 수 없는 곳이라면, 선택을 해제해주세요. */}
+              현재 층에서 다른 층으로 이동하는 통로입니다.
             </p>
             <input
               type="checkbox"
@@ -119,7 +120,7 @@ export default function FacilityDetailModal({ data, onClose, onDelete }) {
           <p className="text-caption mb-1 text-gray-400">CCTV</p>
           <div className="flex items-center justify-between gap-2">
             <p className="text-overline max-w-[80%] text-sm leading-snug text-gray-300">
-              현재 비콘에 CCTV가 위치해있을 경우 선택해주세요
+              현재 비콘에 CCTV가 위치해있습니다.
             </p>
             <input
               type="checkbox"
@@ -132,10 +133,10 @@ export default function FacilityDetailModal({ data, onClose, onDelete }) {
       </div>
 
       {/* 버튼 영역 */}
-      <div className="flex gap-2 p-4">
-        <button className="bg-primary hover:bg-primary/80 text-h3 h-10 flex-1 rounded-lg text-gray-600 transition-all duration-200 hover:-translate-y-0.5">
+      <div className="flex p-4">
+        {/* <button className="bg-primary hover:bg-primary/80 text-h3 h-10 flex-1 rounded-lg text-gray-600 transition-all duration-200 hover:-translate-y-0.5">
           수정
-        </button>
+        </button> */}
         <button
           onClick={handleDelete}
           className="text-h3 h-10 flex-1 rounded-lg bg-red-500 text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-red-400"

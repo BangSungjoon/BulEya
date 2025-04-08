@@ -211,6 +211,44 @@ export default function MapPage() {
     }
   }
 
+  const reloadEdgeOnly = async () => {
+    try {
+      const response = await fetchMapImage(stationId)
+      const result = response.data.result
+      const updatedEdges = result.find((d) => d.floor === selectedFloor)?.edge_list || []
+
+      setFloorDataList((prevList) =>
+        prevList.map((floor) =>
+          floor.floor === selectedFloor ? { ...floor, edge_list: updatedEdges } : floor,
+        ),
+      )
+    } catch (err) {
+      console.error('간선만 재로딩 실패:', err)
+    }
+  }
+
+  const handleRegisterSuccess = async () => {
+    await reloadBeaconOnly()
+    setTempMarker(null) // ✅ 임시 마커 제거!
+    setIsModalVisible(false) // ✅ 모달도 닫기
+  }
+
+  const reloadBeaconOnly = async () => {
+    try {
+      const response = await fetchMapImage(stationId)
+      const result = response.data.result
+      const updatedBeacons = result.find((d) => d.floor === selectedFloor)?.beacon_list || []
+
+      setFloorDataList((prevList) =>
+        prevList.map((floor) =>
+          floor.floor === selectedFloor ? { ...floor, beacon_list: updatedBeacons } : floor,
+        ),
+      )
+    } catch (err) {
+      console.error('비콘만 재로딩 실패:', err)
+    }
+  }
+
   // ==================
   // 간선 등록 관련
   // ==================
@@ -314,7 +352,8 @@ export default function MapPage() {
       console.log('서버 응답:', response)
 
       setSelectedNodes([])
-      await reloadFloorData()
+      // await reloadFloorData()
+      await reloadEdgeOnly()
     } catch (err) {
       console.error('❌ 간선 등록 실패:', err)
       alert('간선 등록에 실패했습니다.')
@@ -329,7 +368,8 @@ export default function MapPage() {
     try {
       await deleteEdge({ edge_id: edgeId })
       alert('✅ 간선 삭제 완료')
-      await reloadFloorData()
+      // await reloadFloorData()
+      await reloadEdgeOnly()
     } catch (err) {
       console.error('삭제 실패:', err)
       alert('❌ 간선 삭제 실패')
@@ -383,7 +423,7 @@ export default function MapPage() {
         <MapBoxMap
           mode={mode}
           mapImageUrl={selectedData.image_url}
-          beaconList={selectedData.beacon_list}
+          beaconList={selectedData.beacon_list} // [성준] 얕은 복사로 강제로 새로운 참조
           edgeList={selectedData.edge_list}
           selectedIcon={selectedIcon}
           onMapClick={mode === 'add' ? handleMapClick : undefined}
@@ -455,15 +495,18 @@ export default function MapPage() {
                 is_exit: is_exit,
               }}
               onClose={handleCloseModal}
-              onSuccess={reloadFloorData}
+              // onSuccess={reloadBeaconOnly}
+              onSuccess={handleRegisterSuccess}
             />
           </div>
         </div>
       )}
 
       {/* 장비 상세 모달 */}
-      {/* {displayedFacility && (
-        <div className="pointer-events-none absolute inset-0 z-20 mx-5 mt-15 mb-5 grid grid-cols-12">
+      {/* {(isDetailVisible || displayedFacility) && (
+        <div
+          className={`pointer-events-none absolute inset-0 z-20 mx-5 mt-15 mb-5 grid grid-cols-12`}
+        >
           <div
             className={`pointer-events-auto col-span-5 transform transition-all duration-300 md:col-span-3 ${
               isDetailVisible ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0'
@@ -476,12 +519,12 @@ export default function MapPage() {
             />
           </div>
         </div>
-      )} */}
-      {(isDetailVisible || displayedFacility) && (
-        <div
-          className={`pointer-events-none absolute inset-0 z-20 mx-5 mt-15 mb-5 grid grid-cols-12`}
-        >
+      )}
+       */}
+      {displayedFacility && (
+        <div className="pointer-events-none absolute inset-0 z-20 mx-5 mt-15 mb-5 grid grid-cols-12">
           <div
+            key={displayedFacility.beacon_code} // key로 강제 리렌더링
             className={`pointer-events-auto col-span-5 transform transition-all duration-300 md:col-span-3 ${
               isDetailVisible ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0'
             }`}

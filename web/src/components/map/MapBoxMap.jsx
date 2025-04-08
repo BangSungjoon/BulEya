@@ -443,7 +443,113 @@ const MapBoxMap = ({
     } else {
       map.once('styledata', drawAll)
     }
-  }, [beaconList, edgeList, mapImageUrl, mode])
+  }, [mapImageUrl, mode])
+
+  // edgeList만 변경될 때 간선만 업데이트
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map || !map.isStyleLoaded()) return
+
+    // beaconMap은 이전에 생성한 걸 재사용하거나 다시 생성해야 함
+    const beaconMap = {}
+    beaconList.forEach((beacon) => {
+      beaconMap[beacon.beacon_code] = [beacon.coord_x, beacon.coord_y]
+    })
+
+    const lineFeatures = edgeList
+      .map((edge) => {
+        const a = beaconMap[edge.beacon_a_code]
+        const b = beaconMap[edge.beacon_b_code]
+        if (!a || !b) return null
+        return {
+          type: 'Feature',
+          geometry: {
+            type: 'LineString',
+            coordinates: [a, b],
+          },
+          properties: {
+            edge_id: edge.edge_id,
+          },
+        }
+      })
+      .filter(Boolean)
+
+    const source = map.getSource(lineLayerId)
+    if (source) {
+      source.setData({
+        type: 'FeatureCollection',
+        features: lineFeatures,
+      })
+    }
+  }, [edgeList])
+
+  const drawMarkersOnly = () => {
+    const map = mapRef.current
+    if (!map) return
+
+    // 기존 마커 제거
+    markerRefList.current.forEach((m) => m.remove())
+    markerRefList.current = []
+
+    const beaconMap = {}
+    beaconList.forEach((beacon) => {
+      const { coord_x, coord_y, is_exit, is_cctv, beacon_code } = beacon
+      const [lng, lat] = [coord_x, coord_y]
+
+      beaconMap[beacon_code] = [lng, lat]
+
+      let iconKey = 'beacon'
+      if (is_exit) iconKey = 'exit'
+      else if (is_cctv) iconKey = 'cctv'
+
+      const isSelected =
+        selectedMarkerId === beacon_code ||
+        (modeRef.current === 'route' &&
+          selectedNodes.some((node) => node.beacon_code === beacon_code))
+
+      const iconMap = {
+        default: { beacon: Beacon, cctv: CCTV, exit: Exit },
+        selected: { beacon: BeaconSelected, cctv: CCTVSelected, exit: ExitSelected },
+      }
+
+      const IconComponent = isSelected ? iconMap.selected[iconKey] : iconMap.default[iconKey]
+
+      const container = document.createElement('div')
+      const root = ReactDOM.createRoot(container)
+      root.render(<IconComponent className="text-primary h-8 w-8" />)
+
+      container.addEventListener('click', (e) => {
+        e.stopPropagation()
+        if (modeRef.current === 'map') {
+          if (selectedMarkerId === beacon_code) {
+            setSelectedMarkerId(null)
+            onMarkerClickRef.current?.(null)
+          } else {
+            setSelectedMarkerId(beacon_code)
+            onMarkerClickRef.current?.(beacon)
+          }
+        } else if (modeRef.current === 'route') {
+          onMarkerClickRef.current?.(beacon)
+        }
+      })
+
+      const marker = new mapboxgl.Marker({ element: container }).setLngLat([lng, lat]).addTo(map)
+
+      markerMapRef.current[beacon_code] = {
+        marker,
+        iconKey,
+        beacon,
+        container,
+        root,
+      }
+
+      markerRefList.current.push(marker)
+    })
+  }
+
+  useEffect(() => {
+    drawMarkersOnly()
+  }, [beaconList])
 
   return (
     <div className="relative h-full w-full">
