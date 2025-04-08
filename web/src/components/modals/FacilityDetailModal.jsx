@@ -38,7 +38,7 @@ export default function FacilityDetailModal({ data, onClose, onDelete }) {
         playerRef.current = player
       } catch (error) {
         console.error('CCTV WebSocket 연결 실패:', error)
-        alert('CCTV 스트리밍을 가져오는 데 실패했습니다.')
+        // alert('CCTV 스트리밍을 가져오는 데 실패했습니다.')
       }
     }
     cctvStream()
