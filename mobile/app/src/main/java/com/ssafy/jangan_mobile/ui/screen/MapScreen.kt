@@ -16,6 +16,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -27,6 +28,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -39,8 +42,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.PointerIcon.Companion.Text
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.KeyboardType.Companion.Text
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -82,6 +87,8 @@ import com.ssafy.jangan_mobile.ui.viewmodel.MapViewModel
 import com.ssafy.jangan_mobile.viewmodel.EscapeRouteViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import androidx.compose.material3.Text
+import androidx.compose.runtime.mutableStateMapOf
 
 @Composable
 fun EscapeRouteMapScreen(
@@ -117,11 +124,14 @@ fun EscapeRouteMapScreen(
     val left = -coordinateWidth / 2
     val right = coordinateWidth / 2
 
-    val colors = listOf(android.graphics.Color.rgb(138, 234, 82), android.graphics.Color.argb(128, 138, 234, 82)) // 초록 ↔ 투명
+    val colors = listOf(
+        android.graphics.Color.rgb(138, 234, 82),
+        android.graphics.Color.argb(128, 138, 234, 82)
+    ) // 초록 ↔ 투명
     var colorIndex = 0
 
     val handler = Handler(Looper.getMainLooper())
-    var blinkRunnable : Runnable? = null
+    var blinkRunnable: Runnable? = null
 
     fun convertPixelToLngLat(x: Int, y: Int): List<Double> {
         val lng = left + (x.toDouble() / imageWidth) * (right - left)
@@ -131,7 +141,7 @@ fun EscapeRouteMapScreen(
 
 
     // 상태 변수
-    val redLighting = remember{ mutableStateOf(false) }
+    val redLighting = remember { mutableStateOf(false) }
     val hasArrived = remember { mutableStateOf(false) }
     val showArrivalCard = remember { mutableStateOf(false) }
     val isCardVisible = remember { mutableStateOf(true) } // 도착카드
@@ -146,6 +156,8 @@ fun EscapeRouteMapScreen(
     val previousFireCodes = remember { mutableStateListOf<Int>() }
     val selectedImageUrl = remember { mutableStateOf("") }
     val mapConfigTrigger = remember { mutableStateOf(0) }
+    val isFireIconClicked = remember { mutableStateOf(false) }
+    val firebeaconSave = remember { mutableMapOf<PointAnnotation, BeaconNotificationDto>() }
 
 
     // 마커들
@@ -230,9 +242,9 @@ fun EscapeRouteMapScreen(
             ) {
                 var center = convertPixelToLngLat(imageWidth / 2, imageHeight / 2)
                 // 화재알람 존재 시 지도 처음 위치를 화재 위치로
-                if( !(fireNotificationDto?.beaconNotificationDtos?.isEmpty() ?: true)){
+                if (!(fireNotificationDto?.beaconNotificationDtos?.isEmpty() ?: true)) {
                     fireNotificationDto!!.beaconNotificationDtos.forEach { dto ->
-                        if(dto.isNewFire == 1){
+                        if (dto.isNewFire == 1) {
                             center = listOf(dto.coordX, dto.coordY)
                         }
                     }
@@ -281,7 +293,7 @@ fun EscapeRouteMapScreen(
             }
         }
         // 현재 위치 카메라 추적
-        if(isTracking?: false && myLocation != null){
+        if (isTracking ?: false && myLocation != null) {
             mapView.mapboxMap.flyTo(
                 CameraOptions.Builder()
                     .center(Point.fromLngLat(myLocation!!.coordX, myLocation!!.coordY))
@@ -294,8 +306,18 @@ fun EscapeRouteMapScreen(
         }
     }
 
+    LaunchedEffect(selectedImageUrl.value) {
+        Log.d("🔥 ImageURL", "🔄 이미지 URL 변경됨: ${selectedImageUrl.value}")
+    }
+
     // 화재 위치만 따로 관리
-    LaunchedEffect(fireNotificationDto?.beaconNotificationDtos, selectedFloor.value, showArrivalCard.value, mapConfigTrigger.value) {
+    LaunchedEffect(
+        fireNotificationDto?.beaconNotificationDtos,
+        selectedFloor.value,
+        showArrivalCard.value,
+        mapConfigTrigger.value,
+        selectedImageUrl.value
+    ) {
 
         // 화재좌표 먼저 나오게끔 null값 확인
         if (fireNotificationDto == null) {
@@ -306,16 +328,16 @@ fun EscapeRouteMapScreen(
         Log.d("🔥fireCheck", "불이야불이야 fireNotificationDto: $fireNotificationDto")
         val selectedFloorCode = floorStringToCode(selectedFloor.value)
         Log.d("FireMarker", "🔥 LaunchedEffect 호출됨. 현재 층: $selectedFloorCode")
-        if(pointAnnotationManager.value == null){
+        if (pointAnnotationManager.value == null) {
             Log.d("FireMarker", "pointAnnotationManager가 null")
         }
 
         pointAnnotationManager.value?.let { manager ->
             val fireBeacons = fireNotificationDto?.beaconNotificationDtos
                 ?: run {
-                Log.w("FireMarker", "⚠️ fireNotificationDto가 null이거나 해당 층의 화재 없음")
-                return@let
-            }
+                    Log.w("FireMarker", "⚠️ fireNotificationDto가 null이거나 해당 층의 화재 없음")
+                    return@let
+                }
             manager.delete(fireMarkers)
             Log.d("Firewhere", "불이야불불")
             fireBeacons.forEachIndexed { index, beacon ->
@@ -330,22 +352,33 @@ fun EscapeRouteMapScreen(
                 val fireMarker = manager.create(marker)
                 fireMarkers.add(fireMarker)
 
+                // 화재 아이콘에 비콘 코드 저장
+                firebeaconSave[fireMarker] = beacon
+
                 // ✅ 마커 클릭 이벤트 등록
                 manager.addClickListener { clicked ->
-                    if (clicked == fireMarker) {
+                    val clickedBeacon = firebeaconSave[clicked]
+                    if (clickedBeacon != null) {
                         Log.d("FireMarker", "🔥 화재 마커 클릭됨! → 모달 다시 열기")
 
                         // beacon.beaconCode와 fireNotification.stationId를 함께 사용
-                        val stationId = fireNotification?.stationId ?: 0
-                        val beaconCode = beacon.beaconCode
+                        val stationId = fireNotification?.stationId ?: return@addClickListener false
+                        val beaconCode = clickedBeacon.beaconCode
 
-                        Log.d("FireMarker", "➡️ 요청할 stationId=$stationId, beaconCode=$beaconCode")
+                        Log.d("FireMarker", "➡️ 마커 클릭됨 요청할 stationId=$stationId, beaconCode=$beaconCode")
+                        Log.d("🔥 마커 클릭", "➡️ 선택된 마커의 beaconCode=$beaconCode, stationId=$stationId")
+                        Log.d("🔥 마커 클릭", "➡️ 좌표=(${clickedBeacon.coordX}, ${clickedBeacon.coordY}), 층=${clickedBeacon.floor}")
 
                         viewModel.fetchCctvImage(stationId, beaconCode) { url ->
                             Log.d("FireMarker", "📸 fetchCctvImage → 받아온 imageUrl=$url")
-                            selectedImageUrl.value = url
+
+//                            cctv 이미지로 받아올 예정
+//                            selectedImageUrl.value = "$url?ts=${System.currentTimeMillis()}"
+                            selectedImageUrl.value =
+                                "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Example.jpg/320px-Example.jpg"
                             selectedFireBeaconDto.value = null
-                            selectedFireBeaconDto.value = beacon.copy()
+                            selectedFireBeaconDto.value = clickedBeacon.copy()
+                            isFireIconClicked.value = true
                             isFireNotificationCardVisible.value = false
                             isFireNotificationCardVisible.value = true
 //                            isCardVisible.value = true
@@ -355,6 +388,10 @@ fun EscapeRouteMapScreen(
                 }
             }
         }
+    }
+
+    LaunchedEffect(imageUrl) {
+        Log.d("🔥 AsyncImage Trigger", "🖼️ imageUrl 변경 감지됨 → $imageUrl")
     }
 
     // 🔁 경로 표시도 분리해서 관리
@@ -408,9 +445,7 @@ fun EscapeRouteMapScreen(
             if (destination.floor == currentPosition.floor &&
                 destination.x == currentPosition.x &&
                 destination.y == currentPosition.y
-            )
-
-            {
+            ) {
                 Log.d("EscapeRouteMap", "📍 도착")
                 if (!showArrivalCard.value) {
                     Log.d("EscapeRouteMap", "🎉 목적지 도착 (좌표 동일) → 안내 카드 표시")
@@ -505,12 +540,12 @@ fun EscapeRouteMapScreen(
                     }
                 }
             } else {
-                    Log.w(
-                        "EscapeRouteMap",
-                        "❌ 도착 아님 → destination=(${destination.x}, ${destination.y}, floor=${destination.floor}) | " +
-                                "current=(${currentPosition.x}, ${currentPosition.y}, floor=${currentPosition.floor})"
-                    )
-                }
+                Log.w(
+                    "EscapeRouteMap",
+                    "❌ 도착 아님 → destination=(${destination.x}, ${destination.y}, floor=${destination.floor}) | " +
+                            "current=(${currentPosition.x}, ${currentPosition.y}, floor=${currentPosition.floor})"
+                )
+            }
 
         }
         lineState.value = lineState.value + 1
@@ -555,7 +590,8 @@ fun EscapeRouteMapScreen(
 //============================ 화재 났을 때 화면 붉게 하기
 
     LaunchedEffect(fireNotificationDto) {
-        val isFireActive = fireNotificationDto?.beaconNotificationDtos?.any { it.isNewFire == 1 } == true
+        val isFireActive =
+            fireNotificationDto?.beaconNotificationDtos?.any { it.isNewFire == 1 } == true
 
         if (isFireActive && !redLighting.value) {
             launch {
@@ -578,11 +614,12 @@ fun EscapeRouteMapScreen(
         val newFireCode = currentFires.firstOrNull { it !in previousFireCodes }
 
         if (newFireCode != null) {
-            val newFire = fireNotificationDto?.beaconNotificationDtos?.firstOrNull { it.beaconCode == newFireCode }
+            val newFire =
+                fireNotificationDto?.beaconNotificationDtos?.firstOrNull { it.beaconCode == newFireCode }
 
             if (newFire != null) {
                 Log.d("🔥 Fire", "🚨 새롭게 추가된 화재 감지 → 모달 표시")
-                selectedFireBeaconDto.value = newFire
+//                selectedFireBeaconDto.value = newFire
 //                isCardVisible.value = true
                 isFireStationShown.value = true
                 mapView.mapboxMap.flyTo(
@@ -613,7 +650,7 @@ fun EscapeRouteMapScreen(
     Box(modifier = Modifier.fillMaxSize()) {
 //        AndroidView(factory = { mapView })
 
-        if(redLighting.value) {
+        if (redLighting.value) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -623,281 +660,176 @@ fun EscapeRouteMapScreen(
     }
 //=========================================
 
+
 // UI 구성
-Box(
-    modifier = Modifier
-        .fillMaxSize()
-        .clickable {
-            if (isCardVisible.value) {
-                Log.d("EscapeRouteUI", "🛑 화면 클릭 → 화재 모달 닫기")
-                isCardVisible.value = false
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .clickable {
+                if (isCardVisible.value) {
+                    Log.d("EscapeRouteUI", "🛑 화면 클릭 → 화재 모달 닫기")
+                    isCardVisible.value = false
+                }
             }
-        }
-) {
-    // 1. 지도 배경
-    AndroidView(factory = { mapView })
+    ) {
+        // 1. 지도 배경
+        AndroidView(factory = { mapView })
 
 //    val annotationApi = mapView.annotations
 //    pointAnnotationManager.value = annotationApi.createPointAnnotationManager()
 //    polylineManager.value = annotationApi.createPolylineAnnotationManager()
 
-    // 화재 역정보 모달
-    if (targetBeaconDto?.imageUrl?.isNotEmpty() == true && fireNotification != null) {
+        // 화재 역정보 모달
+        if (targetBeaconDto?.imageUrl?.isNotEmpty() == true && fireNotification != null) {
 
-        // 🚀 최초 진입 시 fadeIn 트리거
-        LaunchedEffect(isCardVisible.value) {
-            if (isCardVisible.value) {
-                isFireStationShown.value = true
+            // 🚀 최초 진입 시 fadeIn 트리거
+            LaunchedEffect(isCardVisible.value) {
+                if (isCardVisible.value) {
+                    isFireStationShown.value = true
+                }
             }
-        }
 
-        Box(
-            modifier = Modifier.fillMaxSize()
-        ) {
-            // 🔹 배경 클릭 감지를 위한 반응 없는 투명 레이어
-            if (isFireStationShown.value) {
+            Box(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                // 🔹 배경 클릭 감지를 위한 반응 없는 투명 레이어
+                if (isFireStationShown.value) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clickable(
+                                indication = null,
+                                interactionSource = remember { MutableInteractionSource() }
+                            ) {
+                                Log.d("FireModal", "📴 배경 클릭 → 모달 닫기")
+                                isFireStationShown.value = false
+                            }
+                    )
+                }
+
+                // 🔸 FireStation 모달 (화면 상단에 고정)
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .clickable(
-                            indication = null,
-                            interactionSource = remember { MutableInteractionSource() }
-                        ) {
-                            Log.d("FireModal", "📴 배경 클릭 → 모달 닫기")
-                            isFireStationShown.value = false
-                        }
-                )
+                        .padding(top = 60.dp),
+                    contentAlignment = Alignment.TopCenter
+                ) {
+                    AnimatedVisibility(
+                        visible = isFireStationShown.value,
+                        enter = slideInVertically(initialOffsetY = { -100 }) + fadeIn(),
+                        exit = slideOutVertically(targetOffsetY = { -100 }) + fadeOut()
+                    ) {
+                        FireStation(
+                            stationName = fireNotification?.stationName ?: "",
+                            beaconName = targetBeaconDto?.beaconName ?: "알 수 없음",
+                            imageUrl = targetBeaconDto?.imageUrl ?: "",
+                            isVisible = isCardVisible.value,
+                            onDismiss = { isFireStationShown.value = false },
+                            onGuideClick = { Log.d("FireModal", "➡️ 대피 경로 클릭") }
+                        )
+                    }
+                }
             }
+        }
 
-            // 🔸 FireStation 모달 (화면 상단에 고정)
+
+        // 빨간색 화면 생성
+        if (redLighting.value) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(top = 60.dp),
-                contentAlignment = Alignment.TopCenter
+                    .background(Color.Red.copy(alpha = alpha)) // 투명도가 변하는 빨간색 배경
+            )
+        }
+
+        // ✅ 도착 알림 카드
+        if (showArrivalCard.value) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
             ) {
-                AnimatedVisibility(
-                    visible = isFireStationShown.value,
-                    enter = slideInVertically(initialOffsetY = { -100 }) + fadeIn(),
-                    exit = slideOutVertically(targetOffsetY = { -100 }) + fadeOut()
-                ) {
-                    FireStation(
-                        stationName = fireNotification?.stationName ?: "",
-                        beaconName = targetBeaconDto?.beaconName ?: "알 수 없음",
-                        imageUrl = targetBeaconDto?.imageUrl ?: "",
-                        isVisible = isCardVisible.value,
-                        onDismiss = { isFireStationShown.value = false },
-                        onGuideClick = { Log.d("FireModal", "➡️ 대피 경로 클릭") }
-                    )
-                }
+                ArrivalCard(
+                    onDismiss = {
+                        showArrivalCard.value = false
+                        isGuiding.value = false
+//                    pointAnnotationManager.value?.deleteAll()
+                    },
+                    // 경로 재안내 눌렀을 때
+                    onRetry = {
+                        Log.d("ArrivalCard", "🔁 경로 재안내 요청")
+                        hasArrived.value = false
+                        showArrivalCard.value = false
+                        isGuiding.value = true
+                        showRoute.value = true
+
+                        currentLocationCode?.let {
+                            viewModel.fetchEscapeRoute(it, it)
+                        }
+                    },
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .padding(top = 24.dp)
+                )
             }
         }
-    }
 
-
-//    // 화재 역정보 모달
-//    if (isCardVisible.value && targetBeaconDto?.imageUrl?.isNotEmpty() == true && fireNotification != null) {
-//
-//        LaunchedEffect(Unit) {
-//            // 최초 진입 시 FireStation 한 번만 보여줌
-//            isFireStationShown.value = true
-//        }
-//
-//    Box(
-//        modifier = Modifier
-//            .fillMaxSize()
-//            .pointerInput(Unit) {
-//                awaitPointerEventScope {
-//                    while (true) {
-//                        val event = awaitPointerEvent()
-//                        if (event.changes.size == 1 && event.changes[0].changedToUp()) {
-//                            Log.d("FireModal", "📴 단일 터치 → 모달 닫기")
-//                            isFireStationShown.value = false
-//                        }
-//                    }
-//                }
-//            }
-//            .padding(top = 60.dp),
-//        contentAlignment = Alignment.TopCenter // ✅ 여기에서 위치 고정!
-//    ) {
-//        AnimatedVisibility(
-//            visible = isFireStationShown.value,
-//            enter = slideInVertically(initialOffsetY = { -100 }) + fadeIn(),
-//            exit = slideOutVertically(targetOffsetY = { -100 }) + fadeOut()
-//        ) {
-//            FireStation(
-//                stationName = fireNotification.stationName,
-//                beaconName = targetBeaconDto?.beaconName ?: "알 수 없음",
-//                imageUrl = targetBeaconDto?.imageUrl ?: "",
-//                isVisible = isCardVisible.value,
-//                onDismiss = {
-//                    Log.d("FireModal", "🛑 모달 닫기 버튼 클릭")
-//                    isFireStationShown.value = false
-//                },
-//                onGuideClick = {
-//                    Log.d("FireModal", "➡️ 대피 경로 찾기 클릭됨")
-//                    // 여기에 대피 경로 탐색 관련 동작 추가
-//                }
-//            )
-//        }
-//    }
-//    }
-
-    // 빨간색 화면 생성
-    if(redLighting.value) {
-        Box(
+        // 2. 오버레이 전체 (층 버튼, 안내 버튼 등)
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.Red.copy(alpha = alpha)) // 투명도가 변하는 빨간색 배경
-        )
-    }
-
-    // ✅ 도착 알림 카드
-    if (showArrivalCard.value) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.SpaceBetween
         ) {
-            ArrivalCard(
-                onDismiss = {
-                    showArrivalCard.value = false
-                    isGuiding.value = false
-//                    pointAnnotationManager.value?.deleteAll()
-                },
-                // 경로 재안내 눌렀을 때
-                onRetry = {
-                    Log.d("ArrivalCard", "🔁 경로 재안내 요청")
-                    hasArrived.value = false
-                    showArrivalCard.value = false
-                    isGuiding.value = true
-                    showRoute.value = true
+            Spacer(modifier = Modifier.height(12.dp)) // 상단 공간
 
-                    currentLocationCode?.let {
-                        viewModel.fetchEscapeRoute(it, it)
-                    }
-                },
-                modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .padding(top = 24.dp)
-            )
-        }
-    }
-
-    // 2. 오버레이 전체 (층 버튼, 안내 버튼 등)
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.SpaceBetween
-    ) {
-        Spacer(modifier = Modifier.height(12.dp)) // 상단 공간
-
-        // ✅ 버튼 영역
-        Box(modifier = Modifier.fillMaxWidth()) {
-            Column(
-                modifier = Modifier
-                    .align(Alignment.BottomStart)
-                    .padding(start = 16.dp,
-                        bottom = 50.dp),
-                horizontalAlignment = Alignment.Start
-            ) {
-                FloorSelector(
-                    selectedFloor = selectedFloor.value,
-                    onFloorSelected = { selectedFloor.value = it }
-                )
-                if (!showArrivalCard.value) {
-                    Spacer(modifier = Modifier.height(16.dp))
-                    EvacuationButton(
-                        isGuiding = isGuiding.value,
-                        onClick = {
-                            if (isGuiding.value) {
-                                // ✅ 안내 종료 처리
-                                isGuiding.value = false
-                                showRoute.value = false
-                                polylineManager.value?.deleteAll()
-                                goalMarker.value?.let { pointAnnotationManager.value?.delete(it) }
-                                destinationMarker.value?.let { pointAnnotationManager.value?.delete(it) }
-                                routeMarkers.forEach { pointAnnotationManager.value?.delete(it) }
-                                routeMarkers.clear()
-                                myLocationAnnotation.value?.let { pointAnnotationManager.value?.delete(it) }
-                                viewModel.setIsTracking(false)
-                            } else {
-                                // ✅ 안내 시작
-                                hasArrived.value = false
-                                currentLocationCode?.let { code ->
-                                    viewModel.fetchEscapeRoute(222, code)
-                                    showRoute.value = true
-                                    isGuiding.value = true
-                                    viewModel.setIsTracking(true)
-                                }
-                            }
-                        }
-                    )
-                }
-                }
-        }
-    }
-
-    Log.d(
-        "FireModal",
-        "🔥 FireNotificationCard 조건 확인: visible=${isFireNotificationCardVisible.value}, beaconDto=${selectedFireBeaconDto.value}"
-    )
-    // ✅ 🔥 화재 실시간 사진
-        if (isFireNotificationCardVisible.value && selectedFireBeaconDto.value != null) {
-
-            Log.d(
-                "FireModal",
-                "📦 AnimatedVisibility 조건: isVisible=${isFireNotificationCardVisible.value}, beacon=${selectedFireBeaconDto.value}"
-            )
-            // ✅ 🔥 상세 모달 (FireNotificationCard → FireDetailBottomSheet 교체)
-            AnimatedVisibility(
-                visible = isFireNotificationCardVisible.value,
-                enter = slideInVertically(initialOffsetY = { -100 }) + fadeIn(),
-                exit = slideOutVertically(targetOffsetY = { -100 }) + fadeOut()
-            ) {
-                Box(
+            // ✅ 버튼 영역
+            Box(modifier = Modifier.fillMaxWidth()) {
+                Column(
                     modifier = Modifier
-                        .fillMaxSize()
-//                        .clickable(
-//                            indication = null,
-//                            interactionSource = remember { MutableInteractionSource() }
-//                        ) {
-//                            Log.d("FireModal", "🛑 배경 클릭 → 모달 닫기")
-//                            isFireNotificationCardVisible.value = false
-//                        }
-                        .pointerInput(Unit) {
-                            detectTapGestures(
-                                onTap = {
-                                    Log.d("FireModal", "🛑 배경 클릭 → 모달 닫기")
-                                    isFireNotificationCardVisible.value = false
-                                }
-                            )
-                        }
+                        .align(Alignment.BottomStart)
+                        .padding(
+                            start = 16.dp,
+                            bottom = 50.dp
+                        ),
+                    horizontalAlignment = Alignment.Start
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.TopCenter)
-                            .padding(top = 60.dp)
-                            .clickable(
-                                interactionSource = remember { MutableInteractionSource() },
-                                indication = null
-                            ) { /* 내부 탭 무시 */ }
-                    ) {
-                        FireNotificationCard(
-                            beaconName = selectedFireBeaconDto.value?.beaconName ?: "알 수 없음",
-                            imageUrl = selectedImageUrl.value,
-                            isVisible = isFireNotificationCardVisible.value,
-                            onDismiss = {
-                                Log.d("FireModal", "🛑 모달 닫기 버튼 클릭")
-                                isFireNotificationCardVisible.value = false
-                            },
-                            onGuideClick = {
-                                Log.d("FireModal", "➡️ 대피 경로 찾기 클릭됨")
-                                isFireNotificationCardVisible.value = false
-                                currentLocationCode?.let { code ->
-                                    viewModel.fetchEscapeRoute(222, code)
-                                    showRoute.value = true
-                                    isGuiding.value = true
+                    FloorSelector(
+                        selectedFloor = selectedFloor.value,
+                        onFloorSelected = { selectedFloor.value = it }
+                    )
+                    if (!showArrivalCard.value) {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        EvacuationButton(
+                            isGuiding = isGuiding.value,
+                            onClick = {
+                                if (isGuiding.value) {
+                                    // ✅ 안내 종료 처리
+                                    isGuiding.value = false
+                                    showRoute.value = false
+                                    polylineManager.value?.deleteAll()
+                                    goalMarker.value?.let { pointAnnotationManager.value?.delete(it) }
+                                    destinationMarker.value?.let {
+                                        pointAnnotationManager.value?.delete(
+                                            it
+                                        )
+                                    }
+                                    routeMarkers.forEach { pointAnnotationManager.value?.delete(it) }
+                                    routeMarkers.clear()
+                                    myLocationAnnotation.value?.let {
+                                        pointAnnotationManager.value?.delete(
+                                            it
+                                        )
+                                    }
+                                    viewModel.setIsTracking(false)
+                                } else {
+                                    // ✅ 안내 시작
+                                    hasArrived.value = false
+                                    currentLocationCode?.let { code ->
+                                        viewModel.fetchEscapeRoute(222, code)
+                                        showRoute.value = true
+                                        isGuiding.value = true
+                                        viewModel.setIsTracking(true)
+                                    }
                                 }
                             }
                         )
@@ -905,6 +837,93 @@ Box(
                 }
             }
         }
+
+        Log.d(
+            "FireModal",
+            "🔥 FireNotificationCard 조건 확인: visible=${isFireNotificationCardVisible.value}, beaconDto=${selectedFireBeaconDto.value}"
+        )
+
+        // ✅ 🔥 화재 실시간 사진
+//        if (isFireNotificationCardVisible.value == true && selectedFireBeaconDto.value != null &&
+//            isFireIconClicked.value == true
+//        ) {
+//            val shouldAnimate = remember { mutableStateOf(false) }
+//
+//            if (selectedFireBeaconDto.value != null && isFireIconClicked.value == true) {
+//                LaunchedEffect(Unit) {
+//                    delay(100) // 🔥 약간의 지연 후 애니메이션 시작
+//                    shouldAnimate.value = true
+//                }
+//              LaunchedEffect(isCardVisible.value) {
+//                    if (isCardVisible.value) {
+//                        isFireNotificationCardVisible.value = true
+//                    }
+//                }
+//
+//            Log.d(
+//                "FireModal",
+//                "📦 AnimatedVisibility 조건: isVisible=${isFireNotificationCardVisible.value}, beacon=${selectedFireBeaconDto.value}"
+//            )
+
+        // 조건 체크만 따로
+        val shouldShowFireNotificationCard =
+            isFireNotificationCardVisible.value &&
+                    selectedFireBeaconDto.value != null &&
+                    isFireIconClicked.value == true
+
+            // ✅ 🔥 상세 모달
+        AnimatedVisibility(
+            visible = shouldShowFireNotificationCard,
+            enter = slideInVertically(initialOffsetY = { -1000 }) + fadeIn(),
+            exit = slideOutVertically(targetOffsetY = { -1000 }) + fadeOut()
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .align(Alignment.TopCenter)
+                    .padding(top = 60.dp, start = 16.dp)
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null
+                    ) { /* 내부 탭 무시 */ }
+                    .pointerInput(Unit) {
+                        detectTapGestures(
+                            onTap = {
+                                Log.d("FireModal", "🛑 배경 클릭 → 모달 닫기")
+                                isFireNotificationCardVisible.value = false
+                            }
+                        )
+                    }
+            ) {
+//                AnimatedVisibility(
+//                    visible = isFireNotificationCardVisible.value,
+//                    enter = slideInVertically(initialOffsetY = { -300 }) + fadeIn(),
+//                    exit = slideOutVertically(targetOffsetY = { -300 }) + fadeOut()
+//                ) {
+                FireNotificationCard(
+                    beaconName = selectedFireBeaconDto.value?.beaconName ?: "알 수 없음",
+                    imageUrl = selectedImageUrl.value,
+                    isVisible = isFireNotificationCardVisible.value,
+                    onDismiss = {
+                        Log.d("FireModal", "🛑 모달 닫기 버튼 클릭")
+                        isFireNotificationCardVisible.value = false
+                        isFireIconClicked.value = false
+                    },
+                    onGuideClick = {
+                        Log.d("FireModal", "➡️ 대피 경로 찾기 클릭됨")
+                        isFireNotificationCardVisible.value = false
+                        currentLocationCode?.let { code ->
+                            viewModel.fetchEscapeRoute(222, code)
+                            showRoute.value = true
+                            isGuiding.value = true
+                        }
+                    }
+                )
+//                }
+            }
+        }
+
     }
 }
+
 
