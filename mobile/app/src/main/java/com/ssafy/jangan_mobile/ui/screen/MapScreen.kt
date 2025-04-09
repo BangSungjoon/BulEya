@@ -95,6 +95,7 @@ import com.ssafy.jangan_mobile.store.CompassSensorManager
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.windowInsetsPadding
+import com.mapbox.maps.plugin.gestures.getGesturesManager
 
 @Composable
 fun EscapeRouteMapScreen(
@@ -271,7 +272,8 @@ fun EscapeRouteMapScreen(
                         )
                         .build()
                 )
-
+                mapView.mapboxMap.getGesturesManager()!!.rotateGestureDetector.isEnabled = false
+                mapView.mapboxMap.getGesturesManager()!!.shoveGestureDetector.isEnabled = false
                 val annotationApi = mapView.annotations
                 pointAnnotationManager.value = annotationApi.createPointAnnotationManager()
                 polylineManager.value = annotationApi.createPolylineAnnotationManager()
@@ -283,10 +285,13 @@ fun EscapeRouteMapScreen(
     }
 
     //방향 센서 설정
-    val azimuthState = remember { mutableStateOf(0f) }
+    val azimuthState = remember { mutableStateOf(0) }
     val compassSensorManager = remember {
         CompassSensorManager(context) { azimuth ->
-            azimuthState.value = azimuth
+            val azimuthInt = azimuth.toInt() - (azimuth.toInt() % 5)
+            if(azimuthInt != azimuthState.value){
+                azimuthState.value = azimuthInt
+            }
         }
     }
     DisposableEffect(Unit) {
@@ -298,9 +303,11 @@ fun EscapeRouteMapScreen(
 
     // 마커 각도 수정
     LaunchedEffect(azimuthState.value) {
+        var beforePointAnnotation: PointAnnotation? = null
         myLocationAnnotation.value?.let {
-            pointAnnotationManager.value?.delete(it)
-            myLocationAnnotation.value = null
+//            pointAnnotationManager.value?.delete(it)
+//            myLocationAnnotation.value = null
+            beforePointAnnotation = it
         }
         val selectedFloorCode = floorStringToCode(selectedFloor.value)
         myLocation?.let { beacon ->
@@ -312,6 +319,9 @@ fun EscapeRouteMapScreen(
                     .withIconRotate(azimuthState.value.toDouble())
                 myLocationAnnotation.value = pointAnnotationManager.value?.create(marker)
             }
+        }
+        myLocationAnnotation.value?.let {
+            pointAnnotationManager.value?.delete(beforePointAnnotation!!)
         }
     }
 
