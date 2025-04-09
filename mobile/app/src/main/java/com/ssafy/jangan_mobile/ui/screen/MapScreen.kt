@@ -464,7 +464,7 @@ fun EscapeRouteMapScreen(
 
             polylineManager.value?.deleteAll()
 
-
+//
             // 기존 목적지 마커 지우기
             destinationMarker.value?.let { existingMarker ->
                 pointAnnotationManager.value?.delete(existingMarker)
@@ -498,11 +498,11 @@ fun EscapeRouteMapScreen(
                     showArrivalCard.value = true
                     hasArrived.value = true
 
-                    // 도착지 마커 제거
-                    destinationMarker.value?.let { existingMarker ->
-                        pointAnnotationManager.value?.delete(existingMarker)
-                        destinationMarker.value = null
-                    }
+//                    // 도착지 마커 제거
+//                    destinationMarker.value?.let { existingMarker ->
+//                        pointAnnotationManager.value?.delete(existingMarker)
+//                        destinationMarker.value = null
+//                    }
                 }
             } else {
                 Log.w(
@@ -768,7 +768,7 @@ fun EscapeRouteMapScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(top = 32.dp),
+                        .padding(top = 36.dp),
                     contentAlignment = Alignment.TopCenter
                 ) {
                     AnimatedVisibility(
@@ -804,6 +804,7 @@ fun EscapeRouteMapScreen(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .padding(top = 36.dp)
             ) {
                 ArrivalCard(
                     onDismiss = {
@@ -865,7 +866,7 @@ fun EscapeRouteMapScreen(
                 onFloorSelected = { selectedFloor.value = it }
             )
             if (!showArrivalCard.value) {
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(36.dp))
                 EvacuationButton(
                     isGuiding = isGuiding.value,
                     onClick = {
@@ -920,7 +921,7 @@ fun EscapeRouteMapScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .align(Alignment.TopCenter)
-                    .padding(top = 32.dp, start = 16.dp, end = 16.dp)
+                    .padding(top = 36.dp, start = 16.dp, end = 16.dp)
                     .windowInsetsPadding(WindowInsets.navigationBars)
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },

@@ -45,7 +45,7 @@ fun FireStation(
         modifier = Modifier
             .width(380.dp)
             .height(213.dp)
-            .background(color = Color(0xFF1B1B1D), shape = RoundedCornerShape(size = 40.dp))
+            .background(Color.Black, shape = RoundedCornerShape(size = 40.dp))
             .padding(top = 12.dp, bottom = 12.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -55,6 +55,7 @@ fun FireStation(
         StationInfo(stationName = stationName)
 
         Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(22.dp))
 
 
 
@@ -63,7 +64,7 @@ fun FireStation(
             modifier = Modifier
                 .width(360.dp)
                 .height(76.dp)
-                .background(color = Color(0xFFEE5B5B), shape = RoundedCornerShape(60.dp))
+                .background(color = Color(0xFFEA5252), shape = RoundedCornerShape(60.dp))
                 .padding(start = 32.dp, top = 22.dp, end = 32.dp, bottom = 22.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
