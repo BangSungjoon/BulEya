@@ -149,3 +149,4 @@ async def report_fire(
 
     except Exception as e:
         print("전송 중 오류:", e)
+

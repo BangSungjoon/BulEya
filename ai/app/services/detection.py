@@ -9,6 +9,13 @@ model_m = YOLO("models/m_best.pt")
 model_x = YOLO("models/x_best.pt")
 executor = ThreadPoolExecutor()
 
+import os
+from datetime import datetime
+
+SAVE_DIR = "outputs"  # 저장 폴더
+
+os.makedirs(f"{SAVE_DIR}/fire", exist_ok=True)
+os.makedirs(f"{SAVE_DIR}/normal", exist_ok=True)
 
 def detect_fire(results) -> bool:
     for result in results:
@@ -25,6 +32,10 @@ def detect_fire(results) -> bool:
 def run_detection(beacon_code, image_data, filename, content_type):
     image = Image.open(io.BytesIO(image_data)).convert("RGB")
 
+    # 저장용 타임스탬프
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    save_name = f"{beacon_code}_{timestamp}.jpg"
+
     # 1차 감지
     results_n = model_n.predict(image)
 
@@ -34,11 +45,19 @@ def run_detection(beacon_code, image_data, filename, content_type):
         results_x = model_x.predict(image)
         if detect_fire(results_x):
             print(f"{beacon_code}: 2차 감지 됨")
+
+            # 화재 이미지 저장
+            results_x[0].save(filename=f"{SAVE_DIR}/fire/{save_name}")
+
             return beacon_code, {
                 "filename": filename,
                 "content_type": content_type,
                 "data": image_data
             }
+        
+    # 정상 이미지 저장 (1차 결과라도)
+    results_n[0].save(filename=f"{SAVE_DIR}/normal/{save_name}")
+    
     return None
 
 
