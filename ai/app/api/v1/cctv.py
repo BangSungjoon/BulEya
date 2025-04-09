@@ -9,13 +9,13 @@ from app.core.redis import (
 )
 import json
 import torch
-from fastapi.responses import JSONResponse
+# from fastapi.responses import JSONResponse
 
 router = APIRouter()
 
-@router.options("/cctv-frame", tags=["cctv"])
-async def options_cctv():
-    return JSONResponse(status_code=200)
+# @router.options("/cctv-frame", tags=["cctv"])
+# async def options_cctv():
+#     return JSONResponse(status_code=200)
 
 @router.post("/cctv-frame", tags=["cctv"])
 async def receive_cctv_data(
