@@ -88,7 +88,7 @@ SPRING_ENDPOINT = os.getenv("SPRING_BOOT_ENDPOINT")
 async def report_fire(
     station_id: str,
     fire_images: Dict[str, dict],  # { beacon_code: {filename, content_type, data} }
-    cctv_list: List[dict]          # [{ beacon_code, rtsp_ip }]
+    beacon_list: List[dict]          # [{ beacon_code, rtsp_ip }]
 ):
     """
     화재 감지 결과를 Spring 서버로 전송하는 함수
@@ -102,28 +102,64 @@ async def report_fire(
     if not SPRING_ENDPOINT:
         raise RuntimeError("환경변수 SPRING_BOOT_ENDPOINT가 설정되어 있지 않습니다.")
 
-    files = []
-    beacon_list = []
-    fire_codes = set(fire_images.keys())  # Set으로 빠르게 확인
+    # files = []
+    # beacon_list = []
+    # fire_codes = set(fire_images.keys())  # Set으로 빠르게 확인
 
-    # 파일 추가
-    for beacon_code in fire_codes:
-        file_info = fire_images[beacon_code]
+    # # 파일 추가
+    # for beacon_code in fire_codes:
+    #     file_info = fire_images[beacon_code]
+    #     files.append((
+    #         "files",
+    #         (file_info["filename"], file_info["data"], file_info["content_type"])
+    #     ))
+
+    # # 비콘 리스트 구성
+    # for beacon in cctv_list:
+    #     beacon_code = beacon["beacon_code"]
+    #     is_fire = 1 if beacon_code in fire_codes else 0
+    #     beacon_list.append({
+    #         "beacon_code": int(beacon_code),
+    #         "is_active_fire": is_fire
+    #     })
+
+    # # JSON DTO 추가
+    # payload = {
+    #     "station_id": station_id,
+    #     "beacon_list": beacon_list
+    # }
+
+    # files.append((
+    #     "json",
+    #     ("json", json.dumps(payload), "application/json")
+    # ))
+
+    # try:
+    #     async with httpx.AsyncClient() as client:
+    #         response = await client.post(SPRING_ENDPOINT, files=files)
+
+    #     print("[전송 시각]", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    #     print("[전송 JSON]", json.dumps(payload, indent=2))
+    #     print("[전송 파일 목록]", [f[1][0] for f in files])
+    #     print(f"Spring 응답 코드: {response.status_code}")
+    #     print(f"Spring 응답: {response.text}")
+
+    #     if response.status_code != 200:
+    #         print("Spring 응답 오류:", response.text)
+
+    # except Exception as e:
+    #     print("전송 중 오류:", e)
+
+    files = []
+
+    # 이미지 파일은 fire_images에 존재하는 beacon만 전송 (is_active_fire == 1인 것들)
+    for beacon_code, file_info in fire_images.items():
         files.append((
             "files",
             (file_info["filename"], file_info["data"], file_info["content_type"])
         ))
 
-    # 비콘 리스트 구성
-    for beacon in cctv_list:
-        beacon_code = beacon["beacon_code"]
-        is_fire = 1 if beacon_code in fire_codes else 0
-        beacon_list.append({
-            "beacon_code": int(beacon_code),
-            "is_active_fire": is_fire
-        })
-
-    # JSON DTO 추가
+    # JSON DTO (beacon_list 전체 포함)
     payload = {
         "station_id": station_id,
         "beacon_list": beacon_list
@@ -138,10 +174,10 @@ async def report_fire(
         async with httpx.AsyncClient() as client:
             response = await client.post(SPRING_ENDPOINT, files=files)
 
-        print("[전송 시각]", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+        # 로그 출력
         print("[전송 JSON]", json.dumps(payload, indent=2))
         print("[전송 파일 목록]", [f[1][0] for f in files])
-        print(f"Spring 응답 코드: {response.status_code}")
+        print(f"Spring 전송 완료: {response.status_code}")
         print(f"Spring 응답: {response.text}")
 
         if response.status_code != 200:
@@ -149,4 +185,3 @@ async def report_fire(
 
     except Exception as e:
         print("전송 중 오류:", e)
-

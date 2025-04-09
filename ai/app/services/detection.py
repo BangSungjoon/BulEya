@@ -2,12 +2,12 @@ from ultralytics import YOLO
 from PIL import Image
 import io
 import asyncio
-from concurrent.futures import ThreadPoolExecutor
+# from concurrent.futures import ThreadPoolExecutor
 
 model_n = YOLO("models/n_best.pt")
 model_m = YOLO("models/m_best.pt")
 model_x = YOLO("models/x_best.pt")
-executor = ThreadPoolExecutor()
+# executor = ThreadPoolExecutor()
 
 # import os
 # from datetime import datetime
