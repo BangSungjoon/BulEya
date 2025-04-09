@@ -83,6 +83,7 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
                     beaconManager.stopRangingBeacons(region)
                     beaconManager.getRegionViewModel(region).rangedBeacons.removeObserver(observer)
                 }
+                Log.d("ContentValues", "Check Code : nearest:${nearestBeaconCode}")
                 if(nearestBeaconCode != -1) {
                     sendAlertNotification(fireNotificationDto, jsonString, nearestBeaconCode) //알림표시
                     FireNotificationStore.setNotification(fireNotificationDto, this) // 여기선 setValue() 가능

@@ -200,8 +200,8 @@ class MainActivity : ComponentActivity() {
 
         region = Region("current-location-scan", null, null, null)
         beaconManager = BeaconManager.getInstanceForApplication(this)
-        beaconManager?.foregroundScanPeriod = 5000L
-        beaconManager?.foregroundBetweenScanPeriod = 100L
+        beaconManager?.foregroundScanPeriod = 3000L
+        beaconManager?.foregroundBetweenScanPeriod = 2100L
         beaconManager?.updateScanPeriods()
         beaconManager?.beaconParsers?.clear()
         beaconManager?.beaconParsers?.add(
