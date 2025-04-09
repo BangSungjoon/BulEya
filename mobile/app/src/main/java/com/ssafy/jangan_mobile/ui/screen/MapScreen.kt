@@ -465,11 +465,11 @@ fun EscapeRouteMapScreen(
             polylineManager.value?.deleteAll()
 
 //
-            // 기존 목적지 마커 지우기
-            destinationMarker.value?.let { existingMarker ->
-                pointAnnotationManager.value?.delete(existingMarker)
-                destinationMarker.value = null
-            }
+//            // 기존 목적지 마커 지우기
+//            destinationMarker.value?.let { existingMarker ->
+//                pointAnnotationManager.value?.delete(existingMarker)
+//                destinationMarker.value = null
+//            }
 
             // ✅ 무조건 routePoints[0]에 목적지 마커 표시
             val destination = routePoints.first()
