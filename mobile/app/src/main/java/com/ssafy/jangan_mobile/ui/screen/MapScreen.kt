@@ -420,7 +420,7 @@ fun EscapeRouteMapScreen(
                             Log.d("FireMarker", "📸 fetchCctvImage → 받아온 imageUrl=$url")
 
 //                            cctv 이미지로 받아올 예정
-                            selectedImageUrl.value = "$url?ts=${System.currentTimeMillis()}"
+                            selectedImageUrl.value = "$url"
 //                            selectedImageUrl.value =
 //                                "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Example.jpg/320px-Example.jpg"
                             selectedFireBeaconDto.value = null
@@ -599,7 +599,6 @@ fun EscapeRouteMapScreen(
     }
     LaunchedEffect(lineState, showRoute.value) {
         while (showRoute.value) {
-            Log.d("polyline", "size: ${polylineList.size}")
             polylineList.forEach { polyline ->
                 polyline.lineColorInt = colors[colorIndex]
                 polylineManager.value?.update(polyline)
@@ -903,10 +902,6 @@ fun EscapeRouteMapScreen(
 
 
         }
-        Log.d(
-            "FireModal",
-            "🔥 FireNotificationCard 조건 확인: visible=${isFireNotificationCardVisible.value}, beaconDto=${selectedFireBeaconDto.value}"
-        )
 
 
         // 조건 체크만 따로

@@ -29,7 +29,6 @@ class CompassSensorManager(
 
     override fun onSensorChanged(event: SensorEvent?) {
         if (event?.sensor?.type == Sensor.TYPE_ORIENTATION) {
-            Log.d("DirectionSensor", "Value: " + event.values[0] + " degrees=====================");
             val azimuth = event.values[0]
             onAzimuthChanged(azimuth)
         }
