@@ -848,13 +848,13 @@ fun EscapeRouteMapScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-//                        .clickable(
-//                            indication = null,
-//                            interactionSource = remember { MutableInteractionSource() }
-//                        ) {
-//                            Log.d("FireModal", "🛑 배경 클릭 → 모달 닫기")
-//                            isFireNotificationCardVisible.value = false
-//                        }
+    //                        .clickable(
+    //                            indication = null,
+    //                            interactionSource = remember { MutableInteractionSource() }
+    //                        ) {
+    //                            Log.d("FireModal", "🛑 배경 클릭 → 모달 닫기")
+    //                            isFireNotificationCardVisible.value = false
+    //                        }
                         .pointerInput(Unit) {
                             detectTapGestures(
                                 onTap = {
@@ -955,26 +955,26 @@ fun EscapeRouteMapScreen(
         )
 
         // ✅ 🔥 화재 실시간 사진
-//        if (isFireNotificationCardVisible.value == true && selectedFireBeaconDto.value != null &&
-//            isFireIconClicked.value == true
-//        ) {
-//            val shouldAnimate = remember { mutableStateOf(false) }
-//
-//            if (selectedFireBeaconDto.value != null && isFireIconClicked.value == true) {
-//                LaunchedEffect(Unit) {
-//                    delay(100) // 🔥 약간의 지연 후 애니메이션 시작
-//                    shouldAnimate.value = true
-//                }
-//              LaunchedEffect(isCardVisible.value) {
-//                    if (isCardVisible.value) {
-//                        isFireNotificationCardVisible.value = true
-//                    }
-//                }
-//
-//            Log.d(
-//                "FireModal",
-//                "📦 AnimatedVisibility 조건: isVisible=${isFireNotificationCardVisible.value}, beacon=${selectedFireBeaconDto.value}"
-//            )
+    //        if (isFireNotificationCardVisible.value == true && selectedFireBeaconDto.value != null &&
+    //            isFireIconClicked.value == true
+    //        ) {
+    //            val shouldAnimate = remember { mutableStateOf(false) }
+    //
+    //            if (selectedFireBeaconDto.value != null && isFireIconClicked.value == true) {
+    //                LaunchedEffect(Unit) {
+    //                    delay(100) // 🔥 약간의 지연 후 애니메이션 시작
+    //                    shouldAnimate.value = true
+    //                }
+    //              LaunchedEffect(isCardVisible.value) {
+    //                    if (isCardVisible.value) {
+    //                        isFireNotificationCardVisible.value = true
+    //                    }
+    //                }
+    //
+    //            Log.d(
+    //                "FireModal",
+    //                "📦 AnimatedVisibility 조건: isVisible=${isFireNotificationCardVisible.value}, beacon=${selectedFireBeaconDto.value}"
+    //            )
 
         // 조건 체크만 따로
         val shouldShowFireNotificationCard =
@@ -987,7 +987,7 @@ fun EscapeRouteMapScreen(
             visible = shouldShowFireNotificationCard,
             enter = slideInVertically(initialOffsetY = { -1000 }) + fadeIn(),
             exit = slideOutVertically(targetOffsetY = { -1000 }) + fadeOut()
-        ) {
+        ){
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -1005,12 +1005,12 @@ fun EscapeRouteMapScreen(
                             }
                         )
                     }
-            ) {
-//                AnimatedVisibility(
-//                    visible = isFireNotificationCardVisible.value,
-//                    enter = slideInVertically(initialOffsetY = { -300 }) + fadeIn(),
-//                    exit = slideOutVertically(targetOffsetY = { -300 }) + fadeOut()
-//                ) {
+            )   {
+    //                AnimatedVisibility(
+    //                    visible = isFireNotificationCardVisible.value,
+    //                    enter = slideInVertically(initialOffsetY = { -300 }) + fadeIn(),
+    //                    exit = slideOutVertically(targetOffsetY = { -300 }) + fadeOut()
+    //                ) {
                 FireNotificationCard(
                     beaconName = selectedFireBeaconDto.value?.beaconName ?: "알 수 없음",
                     imageUrl = selectedImageUrl.value,
@@ -1030,10 +1030,9 @@ fun EscapeRouteMapScreen(
                         }
                     }
                 )
-//                }
+                }
             }
         }
-
     }
 }
 
