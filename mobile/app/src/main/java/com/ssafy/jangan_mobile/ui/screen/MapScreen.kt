@@ -391,9 +391,9 @@ fun EscapeRouteMapScreen(
                             Log.d("FireMarker", "📸 fetchCctvImage → 받아온 imageUrl=$url")
 
 //                            cctv 이미지로 받아올 예정
-//                            selectedImageUrl.value = "$url?ts=${System.currentTimeMillis()}"
-                            selectedImageUrl.value =
-                                "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Example.jpg/320px-Example.jpg"
+                            selectedImageUrl.value = "$url?ts=${System.currentTimeMillis()}"
+//                            selectedImageUrl.value =
+//                                "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Example.jpg/320px-Example.jpg"
                             selectedFireBeaconDto.value = null
                             selectedFireBeaconDto.value = clickedBeacon.copy()
                             isFireIconClicked.value = true
