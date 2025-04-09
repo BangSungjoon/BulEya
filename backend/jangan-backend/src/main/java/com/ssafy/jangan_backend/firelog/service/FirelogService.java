@@ -97,10 +97,12 @@ public class FirelogService {
 				// 진행중이던 화재 진압됨
 				// MultipartFile file = fileNameMap.get(beacon.getBeaconCode());
 				// String fileName = minioUtil.uploadFile(fileNameMap.get(beacon.getBeaconCode()), MinioUtil.BUCKET_IMAGELOGS);
+				MultipartFile file = fileNameMap.get(beacon.getBeaconCode());
+				String fileName = minioUtil.uploadFile(file, MinioUtil.BUCKET_IMAGELOGS);
 				FireLog fireLog = FireLog.builder()
 					.isActiveFire(false)
 					.beaconId(beacon.getId())
-					.imageName(null)
+					.imageName(fileName)
 					.build();
 				firelogRepository.save(fireLog);
 				isChanged = true;
