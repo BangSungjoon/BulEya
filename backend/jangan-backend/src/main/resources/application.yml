@@ -22,7 +22,7 @@ spring:
     password: ${MYSQL_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
-      max-lifetime: 600000
+      max-lifetime: 60000
 
   jpa:
     database: mysql
