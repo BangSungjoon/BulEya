@@ -81,6 +81,7 @@ import httpx
 import json
 from typing import Dict, List
 import os
+from datetime import datetime
 
 SPRING_ENDPOINT = os.getenv("SPRING_BOOT_ENDPOINT")
 
@@ -137,9 +138,10 @@ async def report_fire(
         async with httpx.AsyncClient() as client:
             response = await client.post(SPRING_ENDPOINT, files=files)
 
+        print("[전송 시각]", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
         print("[전송 JSON]", json.dumps(payload, indent=2))
         print("[전송 파일 목록]", [f[1][0] for f in files])
-        print(f"Spring 전송 완료: {response.status_code}")
+        print(f"Spring 응답 코드: {response.status_code}")
         print(f"Spring 응답: {response.text}")
 
         if response.status_code != 200:

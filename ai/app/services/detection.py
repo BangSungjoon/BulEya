@@ -63,13 +63,20 @@ async def analyze_images(file_dict: dict, cctv_list: list):
     ])
 
     # 2. YOLO 감지 병렬 처리
-    loop = asyncio.get_event_loop()
-    detect_tasks = [
-        loop.run_in_executor(executor, run_detection, b_code, img_data, filename, content_type)
-        for b_code, img_data, filename, content_type in read_results
-    ]
+    # loop = asyncio.get_event_loop()
+    # detect_tasks = [
+    #     loop.run_in_executor(executor, run_detection, b_code, img_data, filename, content_type)
+    #     for b_code, img_data, filename, content_type in read_results
+    # ]
 
-    detect_results = await asyncio.gather(*detect_tasks)
+    # detect_results = await asyncio.gather(*detect_tasks)
+
+    # 2. YOLO 감지 비동기 처리(병렬 처리는는 순서가 꼬일 가능성이 있다.)
+    detect_results = []
+    for beacon_code, img_data, filename, content_type in read_results:
+        result = run_detection(beacon_code, img_data, filename, content_type)
+        if result:
+            detect_results.append(result)
 
     for result in detect_results:
         if result:
