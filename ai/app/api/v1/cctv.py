@@ -2,20 +2,14 @@ from fastapi import APIRouter, UploadFile, File, Form
 from typing import List
 from app.services.detection import analyze_images
 from app.services.fire_report import report_fire
-# from app.core.redis import has_station, add_station, remove_station
 from app.core.redis import (
     get_beacon_fire_count, set_beacon_fire_count, delete_beacon, has_beacon,
     get_station_fire_count, set_station_fire_count, delete_station, has_station
 )
 import json
 import torch
-# from fastapi.responses import JSONResponse
 
 router = APIRouter()
-
-# @router.options("/cctv-frame", tags=["cctv"])
-# async def options_cctv():
-#     return JSONResponse(status_code=200)
 
 @router.post("/cctv-frame", tags=["cctv"])
 async def receive_cctv_data(
@@ -101,7 +95,6 @@ async def receive_cctv_data(
         # "cctv_list": cctv_list,
         "fire_beacons": fire_beacons,
         "gpu": torch.cuda.is_available(),
-        # "fire_images": fire_images,
     }
 
 @router.get("/test", tags=["test"])
