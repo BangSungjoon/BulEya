@@ -55,7 +55,6 @@ fun FireStation(
         StationInfo(stationName = stationName)
 
         Spacer(modifier = Modifier.height(24.dp))
-        Spacer(modifier = Modifier.height(20.dp))
 
 
 

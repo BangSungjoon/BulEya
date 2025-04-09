@@ -123,7 +123,7 @@ fun FireNotificationCard(
     Column(
         modifier = Modifier
             .width(380.dp)
-            .height(280.dp)
+            .height(334.dp)
             .background(Color.Black, shape = RoundedCornerShape(40.dp))
             .padding(vertical = 12.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -167,9 +167,8 @@ fun FireNotificationCard(
                 painter = rememberAsyncImagePainter(model = imageUrl),
                 contentDescription = "Fire Image",
                 modifier = Modifier
-                    .width(320.dp)
-                    .height(180.dp)
-                    .clip(RoundedCornerShape(16.dp)),
+                    .width(364.dp)
+                    .height(214.dp),
                 contentScale = ContentScale.Crop,
 //                onSuccess = {
 //                    Log.d("FireNotificationCard", "✅ 이미지 로딩 성공")
