@@ -89,6 +89,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.mutableStateMapOf
+import com.ssafy.jangan_mobile.store.CompassSensorManager
 
 @Composable
 fun EscapeRouteMapScreen(
@@ -214,7 +215,7 @@ fun EscapeRouteMapScreen(
                     }
                     +image(
                         "marker-icon",
-                        BitmapFactory.decodeResource(context.resources, R.drawable.ellipse)
+                        BitmapFactory.decodeResource(context.resources, R.drawable.maker_icon)
                     ) {}
                     +image(
                         "fire-icon",
@@ -276,8 +277,21 @@ fun EscapeRouteMapScreen(
         mapConfigTrigger.value = mapConfigTrigger.value + 1
     }
 
+    //방향 센서 설정
+    val azimuthState = remember { mutableStateOf(0f) }
+    val compassSensorManager = remember {
+        CompassSensorManager(context) { azimuth ->
+            azimuthState.value = azimuth
+        }
+    }
+    DisposableEffect(Unit) {
+        compassSensorManager.startListening()
+        onDispose {
+            compassSensorManager.stopListening()
+        }
+    }
     // 🔁 내 위치 마커만 따로 관리
-    LaunchedEffect(myLocation, selectedFloor.value, isTracking) {
+    LaunchedEffect(myLocation, selectedFloor.value, isTracking, azimuthState.value) {
         myLocationAnnotation.value?.let {
             pointAnnotationManager.value?.delete(it)
             myLocationAnnotation.value = null
@@ -289,6 +303,7 @@ fun EscapeRouteMapScreen(
                     .withPoint(Point.fromLngLat(beacon.coordX, beacon.coordY))
                     .withIconImage("marker-icon")
                     .withIconSize(0.15)
+                    .withIconRotate(azimuthState.value.toDouble())
                 myLocationAnnotation.value = pointAnnotationManager.value?.create(marker)
             }
         }
@@ -416,14 +431,13 @@ fun EscapeRouteMapScreen(
         if (!showRoute.value || routePoints.size == 1) {
 
             polylineManager.value?.deleteAll()
-//            // 마커 삭제하는 것
-//            routeMarkers.forEach { marker -> pointAnnotationManager.value?.delete(marker) }
-//            routeMarkers.clear()
 
-            destinationMarker.value?.let { existingMarker ->
-                pointAnnotationManager.value?.delete(existingMarker)
-                destinationMarker.value = null
-            }
+
+//            // 기존 목적지 마커 지우기
+//            destinationMarker.value?.let { existingMarker ->
+//                pointAnnotationManager.value?.delete(existingMarker)
+//                destinationMarker.value = null
+//            }
 
             // ✅ 무조건 routePoints[0]에 목적지 마커 표시
             val destination = routePoints.first()
@@ -451,6 +465,12 @@ fun EscapeRouteMapScreen(
                     Log.d("EscapeRouteMap", "🎉 목적지 도착 (좌표 동일) → 안내 카드 표시")
                     showArrivalCard.value = true
                     hasArrived.value = true
+
+//                    // 도착지 마커 제거
+//                    destinationMarker.value?.let { existingMarker ->
+//                        pointAnnotationManager.value?.delete(existingMarker)
+//                        destinationMarker.value = null
+//                    }
                 }
             } else {
                 Log.w(
@@ -497,11 +517,6 @@ fun EscapeRouteMapScreen(
                 polylineList.add(line!!)
             }
 
-            // 기존 목적지 지우기
-            destinationMarker.value?.let { existingMarker ->
-                pointAnnotationManager.value?.delete(existingMarker)
-                destinationMarker.value = null
-            }
 
             // ✅ 무조건 routePoints[0]에 목적지 마커 표시
             val destination = routePoints.first()
@@ -533,11 +548,11 @@ fun EscapeRouteMapScreen(
                     Log.d("EscapeRouteMap", "🎉 목적지 도착 (좌표 동일) → 안내 카드 표시")
                     showArrivalCard.value = true
 
-                    // 목적지 마커만 제거
-                    destinationMarker.value?.let {
-                        pointAnnotationManager.value?.delete(it)
-                        destinationMarker.value = null
-                    }
+//                    // 목적지 마커만 제거
+//                    destinationMarker.value?.let {
+//                        pointAnnotationManager.value?.delete(it)
+//                        destinationMarker.value = null
+//                    }
                 }
             } else {
                 Log.w(
@@ -569,11 +584,13 @@ fun EscapeRouteMapScreen(
             showArrivalCard.value = false
             isGuiding.value = false // ✅ 안내 종료 버튼도 함께 사라지게
 
-            // 도착지 마커 제거
-            destinationMarker.value?.let {
-                pointAnnotationManager.value?.delete(it)
-                destinationMarker.value = null
-            }
+//            Log.d("DEST_MARKER", "🧪 삭제 시도 전 상태: ${destinationMarker.value}")
+//            // 도착지 마커 제거
+//            destinationMarker.value?.let {
+//                pointAnnotationManager.value?.delete(it)
+//                destinationMarker.value = null
+//                Log.d("DEST_MARKER", "🗑️ 도착 마커 삭제 시도: $destinationMarker")
+//            }
 
             // 경로 마커 제거
             routeMarkers.forEach {
@@ -587,8 +604,7 @@ fun EscapeRouteMapScreen(
     }
 
 
-//============================ 화재 났을 때 화면 붉게 하기
-
+    //화재 났을 때 화면 붉게 하기
     LaunchedEffect(fireNotificationDto) {
         val isFireActive =
             fireNotificationDto?.beaconNotificationDtos?.any { it.isNewFire == 1 } == true
@@ -621,13 +637,26 @@ fun EscapeRouteMapScreen(
                 Log.d("🔥 Fire", "🚨 새롭게 추가된 화재 감지 → 모달 표시")
 //                selectedFireBeaconDto.value = newFire
 //                isCardVisible.value = true
+
                 isFireStationShown.value = true
+
                 mapView.mapboxMap.flyTo(
                     CameraOptions.Builder()
                         .zoom(zoomLevel)
                         .center(Point.fromLngLat(newFire.coordX, newFire.coordY))
                         .build()
                 )
+
+                // 🔥 3. 잠시 대기 후 경로 재요청 (시각적으로 순서를 보장)
+                delay(1000)
+
+                if (isGuiding.value) {
+                    Log.d("🔥 Fire", "📍 새 화재 후 경로 재탐색 실행")
+                    currentLocationCode?.let { code ->
+                        viewModel.fetchEscapeRoute(222, code)
+                    }
+                }
+
             }
         }
 
@@ -808,11 +837,11 @@ fun EscapeRouteMapScreen(
                                     showRoute.value = false
                                     polylineManager.value?.deleteAll()
                                     goalMarker.value?.let { pointAnnotationManager.value?.delete(it) }
-                                    destinationMarker.value?.let {
-                                        pointAnnotationManager.value?.delete(
-                                            it
-                                        )
-                                    }
+//                                    destinationMarker.value?.let {
+//                                        pointAnnotationManager.value?.delete(
+//                                            it
+//                                        )
+//                                    }
                                     routeMarkers.forEach { pointAnnotationManager.value?.delete(it) }
                                     routeMarkers.clear()
                                     myLocationAnnotation.value?.let {
