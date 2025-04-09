@@ -46,70 +46,6 @@ import com.ssafy.jangan_mobile.ui.theme.Subtitle2
 import com.ssafy.jangan_mobile.ui.theme.system_red//
 
 
-//@Composable
-//fun FireNotificationCard(
-//    stationName: String,
-//    beaconName: String,
-//    imageUrl: String,
-//    isVisible: Boolean,
-//    onDismiss: () -> Unit,
-//    onGuideClick: () -> Unit
-//) {
-//    Column(
-//        modifier = Modifier
-//            .fillMaxWidth()
-//            .background(Color.Black, shape = RoundedCornerShape(16.dp))
-//            .padding(16.dp),
-//        horizontalAlignment = Alignment.CenterHorizontally
-//    ) {
-//        // 🚉 역 정보 표시
-//        StationInfo(stationName = stationName)
-//
-//        Spacer(modifier = Modifier.height(20.dp))
-//        Box(
-//            modifier = Modifier
-//                .fillMaxWidth(0.8f)
-//                .background(Color(0xFF90EE90), shape = CircleShape)
-//                .padding(vertical = 8.dp),
-//            contentAlignment = Alignment.Center
-//        ) {
-//            Text(
-//                text = stationName,
-//                fontSize = 18.sp,
-//                fontWeight = FontWeight.Bold,
-//                color = Color.Black
-//            )
-//        }
-//
-//        Spacer(modifier = Modifier.height(12.dp))
-//
-//        // 🔥 상태 + 개찰구 정보
-//        Row(
-//            modifier = Modifier
-//                .fillMaxWidth(0.9f)
-//                .background(Color.Red, shape = RoundedCornerShape(16.dp))
-//                .padding(12.dp),
-//            verticalAlignment = Alignment.CenterVertically,
-//            horizontalArrangement = Arrangement.SpaceBetween
-//        ) {
-//            Text(
-//                text = "화재 발생",
-//                fontSize = 16.sp,
-//                fontWeight = FontWeight.Bold,
-//                color = Color.Black
-//            )
-//
-//            Text(
-//                text = beaconName,
-//                fontSize = 16.sp,
-//                fontWeight = FontWeight.Bold,
-//                color = Color.White
-//            )
-//        }
-//    }
-//}
-
-// 엊그제 만든거
 @Composable
 fun FireNotificationCard(
     beaconName: String,
@@ -167,6 +103,11 @@ fun FireNotificationCard(
                 painter = rememberAsyncImagePainter(model = imageUrl),
                 contentDescription = "Fire Image",
                 modifier = Modifier
+                    .border(
+                        width = 5.dp,
+                        color = Color.White,
+                        shape = RoundedCornerShape(30.dp)
+                    )
                     .width(364.dp)
                     .height(214.dp),
                 contentScale = ContentScale.Crop,
