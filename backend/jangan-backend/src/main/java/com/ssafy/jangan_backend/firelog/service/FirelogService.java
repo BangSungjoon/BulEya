@@ -98,7 +98,7 @@ public class FirelogService {
 				// MultipartFile file = fileNameMap.get(beacon.getBeaconCode());
 				// String fileName = minioUtil.uploadFile(fileNameMap.get(beacon.getBeaconCode()), MinioUtil.BUCKET_IMAGELOGS);
 				MultipartFile file = fileNameMap.get(beacon.getBeaconCode());
-				String fileName = minioUtil.uploadFile(file, MinioUtil.BUCKET_IMAGELOGS);
+				String fileName = file == null ?  null : minioUtil.uploadFile(file, MinioUtil.BUCKET_IMAGELOGS);
 				FireLog fireLog = FireLog.builder()
 					.isActiveFire(false)
 					.beaconId(beacon.getId())
