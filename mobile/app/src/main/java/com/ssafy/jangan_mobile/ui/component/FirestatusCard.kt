@@ -188,6 +188,66 @@ fun FireNotificationCard(
     }
 }
 
+@Composable
+fun StationStatusCard(
+    stationName: String, // ✅ 역 이름
+    status: String,      // ✅ 상태 (예: "화재 발생")
+    gateName: String     // ✅ 개찰구 정보 (예: "B3 개찰구")
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color.Black, shape = RoundedCornerShape(16.dp))
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        // 🚉 역 정보 표시
+        StationInfo(stationName = stationName)
+
+        Spacer(modifier = Modifier.height(20.dp))
+        Box(
+            modifier = Modifier
+                .fillMaxWidth(0.8f)
+                .background(Color(0xFF90EE90), shape = CircleShape)
+                .padding(vertical = 8.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = stationName,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black
+            )
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // 🔥 상태 + 개찰구 정보
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(0.9f)
+                .background(Color.Red, shape = RoundedCornerShape(16.dp))
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = "🔥 $status",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black
+            )
+
+            Text(
+                text = gateName,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.White
+            )
+        }
+    }
+}
+
 
 
 

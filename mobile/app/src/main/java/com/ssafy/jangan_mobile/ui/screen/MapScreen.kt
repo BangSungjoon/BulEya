@@ -769,7 +769,7 @@ fun EscapeRouteMapScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(top = 24.dp),
+                        .padding(top = 32.dp),
                     contentAlignment = Alignment.TopCenter
                 ) {
                     AnimatedVisibility(
@@ -925,7 +925,7 @@ fun EscapeRouteMapScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .align(Alignment.TopCenter)
-                    .padding(top = 16.dp, start = 16.dp, end = 16.dp)
+                    .padding(top = 32.dp, start = 16.dp, end = 16.dp)
                     .windowInsetsPadding(WindowInsets.navigationBars)
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
