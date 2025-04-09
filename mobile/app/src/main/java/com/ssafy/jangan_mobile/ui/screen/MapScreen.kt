@@ -433,11 +433,11 @@ fun EscapeRouteMapScreen(
             polylineManager.value?.deleteAll()
 
 
-//            // 기존 목적지 마커 지우기
-//            destinationMarker.value?.let { existingMarker ->
-//                pointAnnotationManager.value?.delete(existingMarker)
-//                destinationMarker.value = null
-//            }
+            // 기존 목적지 마커 지우기
+            destinationMarker.value?.let { existingMarker ->
+                pointAnnotationManager.value?.delete(existingMarker)
+                destinationMarker.value = null
+            }
 
             // ✅ 무조건 routePoints[0]에 목적지 마커 표시
             val destination = routePoints.first()
@@ -466,11 +466,11 @@ fun EscapeRouteMapScreen(
                     showArrivalCard.value = true
                     hasArrived.value = true
 
-//                    // 도착지 마커 제거
-//                    destinationMarker.value?.let { existingMarker ->
-//                        pointAnnotationManager.value?.delete(existingMarker)
-//                        destinationMarker.value = null
-//                    }
+                    // 도착지 마커 제거
+                    destinationMarker.value?.let { existingMarker ->
+                        pointAnnotationManager.value?.delete(existingMarker)
+                        destinationMarker.value = null
+                    }
                 }
             } else {
                 Log.w(
@@ -584,13 +584,14 @@ fun EscapeRouteMapScreen(
             showArrivalCard.value = false
             isGuiding.value = false // ✅ 안내 종료 버튼도 함께 사라지게
 
-//            Log.d("DEST_MARKER", "🧪 삭제 시도 전 상태: ${destinationMarker.value}")
-//            // 도착지 마커 제거
-//            destinationMarker.value?.let {
-//                pointAnnotationManager.value?.delete(it)
-//                destinationMarker.value = null
-//                Log.d("DEST_MARKER", "🗑️ 도착 마커 삭제 시도: $destinationMarker")
-//            }
+            Log.d("DEST_MARKER", "🧪 삭제 시도 전 상태: ${destinationMarker.value}")
+            // 도착지 마커 제거
+            destinationMarker.value?.let {
+                pointAnnotationManager.value?.delete(it)
+                Log.d("DEST_MARKER", "🗑️ 도착 마커 삭제 시도: $destinationMarker")
+            }
+            destinationMarker.value = null
+            Log.d("DEST_MARKER", "🗑️ 도착 마커 삭제 시도 (null 여부 상관없이 초기화)")
 
             // 경로 마커 제거
             routeMarkers.forEach {
