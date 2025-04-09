@@ -54,7 +54,7 @@ class EscapeRouteViewModel : ViewModel() {
         // stationId가 바뀔 때 동작
         routeTrigger.addSource(stationIdLiveData) { stationId ->
             val beaconCode = beaconCodeLiveData.value
-            if (stationId != null && beaconCode != null) {
+            if (stationId != null && beaconCode != null && routeTrigger.value?.first != stationId) {
                 Log.d("EscapeRoute", "🚀 Station ID 변화 감지")
                 routeTrigger.value = stationId to beaconCode
             }
@@ -63,7 +63,7 @@ class EscapeRouteViewModel : ViewModel() {
         // beaconCode가 바뀔 때도 동일한 로직
         routeTrigger.addSource(beaconCodeLiveData) { beaconCode ->
             val stationId = stationIdLiveData.value
-            if (stationId != null && beaconCode != null) {
+            if (stationId != null && beaconCode != null && routeTrigger.value?.second != beaconCode) {
                 Log.d("EscapeRoute", "🚀 Beacon Code 변화 감지")
                 routeTrigger.value = stationId to beaconCode
             }

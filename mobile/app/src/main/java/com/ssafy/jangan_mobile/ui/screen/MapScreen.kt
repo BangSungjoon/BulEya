@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -78,6 +79,7 @@ import com.ssafy.jangan_mobile.ui.component.EvacuationButton
 import com.ssafy.jangan_mobile.ui.component.FireNotificationCard
 import com.ssafy.jangan_mobile.ui.component.FireStation
 import com.ssafy.jangan_mobile.ui.component.FloorSelector
+import com.ssafy.jangan_mobile.ui.component.ToMyLocation
 import com.ssafy.jangan_mobile.ui.viewmodel.MapViewModel
 import com.ssafy.jangan_mobile.viewmodel.EscapeRouteViewModel
 import kotlinx.coroutines.delay
@@ -301,6 +303,7 @@ fun EscapeRouteMapScreen(
                 return@let
             }
             manager.delete(fireMarkers)
+            fireMarkers.clear()
             fireBeacons.forEachIndexed { index, beacon ->
                 Log.d(
                     "FireMarker",
@@ -764,6 +767,13 @@ Box(
                         bottom = 50.dp),
                 horizontalAlignment = Alignment.Start
             ) {
+                ToMyLocation(
+                    modifier = Modifier.align(Alignment.Start),
+                    mapView = mapView,
+                    myLocation = myLocation,
+                    onClick = {  }
+                )
+                Spacer(modifier = Modifier.height(15.dp))
                 FloorSelector(
                     selectedFloor = selectedFloor.value,
                     onFloorSelected = { selectedFloor.value = it }
@@ -797,7 +807,7 @@ Box(
                         }
                     )
                 }
-                }
+            }
         }
     }
     // ✅ 🔥 화재 실시간 사진
