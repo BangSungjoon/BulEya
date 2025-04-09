@@ -156,7 +156,8 @@ public class FirelogService {
 		if(imageName == null || imageName.isEmpty()) {
 			throw new CustomIllegalArgumentException(BaseResponseStatus.FIRE_LOG_NOT_FOUND_EXCEPTION);
 		}
-		return new FireImageDto(imageName);
+		String url = minioUtil.getPresignedUrl(MinioUtil.BUCKET_IMAGELOGS, imageName);
+		return new FireImageDto(url);
 	}
 
 	public Integer getFireCount() {
