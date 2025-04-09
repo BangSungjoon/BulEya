@@ -108,7 +108,7 @@ public class FirelogService {
 				//isOnFire = true;
 				dangerBeacons.add(fireInfo.getBeaconCode());
 				MultipartFile file = fileNameMap.get(beacon.getBeaconCode());
-				String fileName = minioUtil.uploadFile(fileNameMap.get(beacon.getBeaconCode()), MinioUtil.BUCKET_IMAGELOGS);
+				String fileName = minioUtil.uploadFile(file, MinioUtil.BUCKET_IMAGELOGS);
 				FireLog fireLog = FireLog.builder()
 					.isActiveFire(true)
 					.beaconId(beacon.getId())
@@ -116,12 +116,12 @@ public class FirelogService {
 					.build();
 				firelogRepository.save(fireLog);
 				// 신규 발생한 화재인 경우
+				String presignedUrl = minioUtil.getPresignedUrl(MinioUtil.BUCKET_IMAGELOGS, fileName);
 				if(firelogOptional.isEmpty() || !firelogOptional.get().getIsActiveFire()){
-					String presignedUrl = minioUtil.getPresignedUrl(MinioUtil.BUCKET_IMAGELOGS, fileName);
 					fireNotificationDto.getBeaconNotificationDtos().add(new BeaconNotificationDto(beacon.getName(), beacon.getBeaconCode(), beacon.getCoordX(), beacon.getCoordY(), beacon.getMap().getFloor(), presignedUrl, 1));
 					isChanged = true;
 				} else {
-					fireNotificationDto.getBeaconNotificationDtos().add(new BeaconNotificationDto(beacon.getName(), beacon.getBeaconCode(), beacon.getCoordX(), beacon.getCoordY(), beacon.getMap().getFloor(), null, 0));
+					fireNotificationDto.getBeaconNotificationDtos().add(new BeaconNotificationDto(beacon.getName(), beacon.getBeaconCode(), beacon.getCoordX(), beacon.getCoordY(), beacon.getMap().getFloor(), presignedUrl, 0));
 				}
 			}
 		}
