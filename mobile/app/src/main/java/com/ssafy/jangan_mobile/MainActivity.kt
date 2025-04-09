@@ -223,7 +223,9 @@ class MainActivity : ComponentActivity() {
 //            }
 //            checkBeaconsJob?.start()
 //        }
-
+        setContent {
+            AppNavigation()
+        }
         val jsonString = intent?.getStringExtra("jsonString")
         val fireNotificationDto = Gson().fromJson(jsonString, FireNotificationDto::class.java)
         val notificationBeaconCode = intent?.getIntExtra("notificationBeaconCode", -1)
@@ -231,9 +233,7 @@ class MainActivity : ComponentActivity() {
             FireNotificationStore.setNotification(fireNotificationDto, this)
         }
         FireNotificationStore.setCurrentNotificationBeaconCode(notificationBeaconCode, this)
-        setContent {
-            AppNavigation()
-        }
+
 
         // firebase topic 구독
         FirebaseApp.initializeApp(this);

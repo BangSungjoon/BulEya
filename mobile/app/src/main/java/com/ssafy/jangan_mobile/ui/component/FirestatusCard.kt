@@ -38,6 +38,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import coil.compose.rememberAsyncImagePainter
 import com.ssafy.jangan_mobile.R
 import com.ssafy.jangan_mobile.store.FireNotificationStore
 import com.ssafy.jangan_mobile.ui.theme.Headline
@@ -117,7 +118,7 @@ fun FireNotificationCard(
     onDismiss: () -> Unit,
     onGuideClick: () -> Unit
 ) {
-    Log.d("FireNotificationCard", "🧩 파라미터 gateName=$beaconName, imageUrl=$imageUrl")
+    Log.d("FireNotificationCard", "🧩 파라미터 imageUrl=$imageUrl")
 
     Column(
         modifier = Modifier
@@ -162,22 +163,23 @@ fun FireNotificationCard(
 
         // 🔥 화재 이미지
         if (imageUrl.isNotEmpty()) {
-            AsyncImage(
-                model = imageUrl,
+            Image(
+                painter = rememberAsyncImagePainter(model = imageUrl),
                 contentDescription = "Fire Image",
                 modifier = Modifier
                     .width(320.dp)
                     .height(180.dp)
                     .clip(RoundedCornerShape(16.dp)),
                 contentScale = ContentScale.Crop,
-                onSuccess = {
-                    Log.d("FireNotificationCard", "✅ 이미지 로딩 성공")
-                },
-                onError = {
-                    Log.e("FireNotificationCard", "❌ 이미지 로딩 실패", it.result.throwable)
-                }
+//                onSuccess = {
+//                    Log.d("FireNotificationCard", "✅ 이미지 로딩 성공")
+//                },
+//                onError = {
+//                    Log.e("FireNotificationCard", "❌ 이미지 로딩 실패", it.result.throwable)
+//                }
             )
         } else {
+            Log.w("FireNotificationCard", "⚠️ imageUrl이 비어 있음. 이미지 미표시")
             Text(
                 text = "이미지를 불러올 수 없습니다",
                 color = Color.White,
