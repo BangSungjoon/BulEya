@@ -138,7 +138,7 @@ public class FirelogService {
 
 			System.out.println("isChanged.");
 
-			List<String> tokenList = fcmTokenRepository.findAll().stream().map(FcmToken::getUuid).toList();
+			List<String> tokenList = fcmTokenRepository.findAll().stream().map(FcmToken::getToken).toList();
 			fcmUtil.sendMessage(fireNotificationDto, tokenList);
 			// fcmUtil.sendMessage(fireNotificationDto);
 		}

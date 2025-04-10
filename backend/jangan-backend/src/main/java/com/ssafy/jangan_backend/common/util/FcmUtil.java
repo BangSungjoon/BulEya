@@ -68,6 +68,7 @@ public class FcmUtil {
 	 */
 	public int sendMessage(Object dto, List<String> tokens) {
 		for(String token : tokens) {
+			System.out.println("FCM Send To : " + token);
 			try {
 				String jsonString = objectMapper.writeValueAsString(dto);
 
