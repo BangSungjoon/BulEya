@@ -15,4 +15,10 @@ object RetrofitInstance {
             .build()
             .create(MapService::class.java)
     }
+    val fcmApi: FcmService by lazy{
+        Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .build()
+            .create(FcmService::class.java)
+    }
 }

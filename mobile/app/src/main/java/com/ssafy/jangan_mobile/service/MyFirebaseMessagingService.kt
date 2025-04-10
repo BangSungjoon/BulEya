@@ -10,6 +10,7 @@ import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.os.Handler
 import android.os.Looper
+import android.provider.Settings
 import android.util.Log
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
@@ -22,11 +23,15 @@ import com.ssafy.jangan_mobile.MainActivity
 import com.ssafy.jangan_mobile.R
 import com.ssafy.jangan_mobile.service.dto.FireNotificationDto
 import com.ssafy.jangan_mobile.store.FireNotificationStore
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.altbeacon.beacon.Beacon
 import org.altbeacon.beacon.BeaconManager
 import org.altbeacon.beacon.BeaconParser
 import org.altbeacon.beacon.Identifier
 import org.altbeacon.beacon.Region
+import java.util.UUID
 
 
 class MyFirebaseMessagingService: FirebaseMessagingService() {
@@ -158,5 +163,10 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
 
     override fun onNewToken(token: String) {
         super.onNewToken(token)
+        val fcmService = RetrofitInstance.fcmApi
+        val uuid = UUID.nameUUIDFromBytes(Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID).toByteArray()).toString()
+        CoroutineScope(Dispatchers.IO).launch{
+            fcmService.registerFcmToken(uuid, token)
+        }
     }
 }
