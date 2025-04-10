@@ -368,7 +368,8 @@ fun EscapeRouteMapScreen(
         Log.d("🔥 ImageURL", "🔄 이미지 URL 변경됨: ${selectedImageUrl.value}")
     }
 
-    // 화재 위치만 따로 관리
+    // 화재 마커 고르기
+//     🔥 1. 마커 생성 및 클릭 이벤트 등록
     LaunchedEffect(
         fireNotificationDto?.beaconNotificationDtos,
         selectedFloor.value,
@@ -454,6 +455,33 @@ fun EscapeRouteMapScreen(
                     }
                 }
             }
+        }
+    }
+    LaunchedEffect(fireNotificationDto,mapConfigTrigger.value) {
+        while (true) {
+            // 🔥 fire 마커 이미지 교체
+            val nextIcon = fireMarkerIcons[fireIconIndex]
+            val manager = pointAnnotationManager.value ?: return@LaunchedEffect
+            val fireBeacons = fireNotificationDto?.beaconNotificationDtos ?: return@LaunchedEffect
+
+            fireMarkers.toList().forEachIndexed { index, marker ->
+                val point = marker.point
+                val beacon = fireBeacons[index]
+                // 새로운 마커 생성
+                val newMarkerOptions = PointAnnotationOptions()
+                    .withPoint(point)
+                    .withIconImage(nextIcon)
+                    .withIconSize(0.25)
+                val newMarker = manager.create(newMarkerOptions)
+
+                // 1. 먼저 새 마커를 fireMarkers 리스트에 넣고
+                fireMarkers[index] = newMarker
+                firebeaconSave[newMarker] = beacon
+                // 2. 기존 마커 삭제 (덮어씌운 뒤 제거)
+                manager.delete(marker)
+            }
+            fireIconIndex = (fireIconIndex + 1) % fireMarkerIcons.size
+            delay(500)
         }
     }
 
@@ -628,31 +656,6 @@ fun EscapeRouteMapScreen(
         }
     }
 
-    LaunchedEffect(fireNotificationDto) {
-        while (true) {
-            // 🔥 fire 마커 이미지 교체
-            val nextIcon = fireMarkerIcons[fireIconIndex]
-            val manager = pointAnnotationManager.value ?: return@LaunchedEffect
-
-            fireMarkers.toList().forEachIndexed { index, marker ->
-                val point = marker.point
-
-                // 새로운 마커 생성
-                val newMarkerOptions = PointAnnotationOptions()
-                    .withPoint(point)
-                    .withIconImage(nextIcon)
-                    .withIconSize(0.25)
-                val newMarker = manager.create(newMarkerOptions)
-
-                // 1. 먼저 새 마커를 fireMarkers 리스트에 넣고
-                fireMarkers[index] = newMarker
-                // 2. 기존 마커 삭제 (덮어씌운 뒤 제거)
-                manager.delete(marker)
-            }
-            fireIconIndex = (fireIconIndex + 1) % fireMarkerIcons.size
-            delay(500)
-        }
-    }
 
     // 안내 종료 모달
     LaunchedEffect(showArrivalCard.value) {
@@ -798,7 +801,7 @@ fun EscapeRouteMapScreen(
 
             Box(
                 modifier = Modifier.fillMaxSize()
-            ) {
+            ){
                 // 🔹 배경 클릭 감지를 위한 반응 없는 투명 레이어
                 if (isFireStationShown.value) {
                     Box(

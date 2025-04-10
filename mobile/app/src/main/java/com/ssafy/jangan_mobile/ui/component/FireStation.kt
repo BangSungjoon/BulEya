@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -44,7 +43,8 @@ fun FireStation(
 ) {
     Column(
         modifier = Modifier
-            .aspectRatio(380f / 213f)
+            .width(380.dp)
+            .height(213.dp)
             .background(Color.Black, shape = RoundedCornerShape(size = 40.dp))
             .padding(top = 12.dp, bottom = 12.dp),
         horizontalAlignment = Alignment.CenterHorizontally
