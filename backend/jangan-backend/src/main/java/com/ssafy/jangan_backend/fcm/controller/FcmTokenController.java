@@ -2,6 +2,7 @@ package com.ssafy.jangan_backend.fcm.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -10,7 +11,8 @@ import com.ssafy.jangan_backend.fcm.service.FcmTokenService;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-@RestController("/api")
+@RestController
+@RequestMapping("/api")
 public class FcmTokenController {
 	private final FcmTokenService fcmTokenService;
 
