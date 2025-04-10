@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -43,21 +44,23 @@ fun FireStation(
 ) {
     Column(
         modifier = Modifier
-            .width(380.dp)
-            .height(213.dp)
+            .aspectRatio(380f / 213f)
             .background(Color.Black, shape = RoundedCornerShape(size = 40.dp))
             .padding(top = 12.dp, bottom = 12.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
-        Spacer(modifier = Modifier.height(24.dp))
         // 🚉 역 정보 표시
-        StationInfo(stationName = stationName)
+        Box(
+            modifier = Modifier
+                .width(380.dp)
+                .height(93.dp)
+                .padding(top = 24.dp, bottom = 24.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            StationInfo(stationName = stationName)
+        }
 
-        Spacer(modifier = Modifier.height(24.dp))
-        Spacer(modifier = Modifier.height(22.dp))
-
-
+        Spacer(modifier = Modifier.height(20.dp))
 
         // 🔥 화재 발생 상태 카드
         Row(
