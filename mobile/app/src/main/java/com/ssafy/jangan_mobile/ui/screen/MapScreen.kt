@@ -18,7 +18,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -26,13 +25,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -45,10 +44,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.PointerIcon.Companion.Text
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.input.KeyboardType.Companion.Text
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -76,10 +73,12 @@ import com.mapbox.maps.plugin.annotation.generated.PolylineAnnotationOptions
 import com.mapbox.maps.plugin.annotation.generated.createPointAnnotationManager
 import com.mapbox.maps.plugin.annotation.generated.createPolylineAnnotationManager
 import com.mapbox.maps.plugin.compass.compass
+import com.mapbox.maps.plugin.gestures.getGesturesManager
 import com.mapbox.maps.plugin.scalebar.scalebar
 import com.ssafy.jangan_mobile.R
 import com.ssafy.jangan_mobile.service.dto.BeaconNotificationDto
 import com.ssafy.jangan_mobile.service.dto.FireNotificationDto
+import com.ssafy.jangan_mobile.store.CompassSensorManager
 import com.ssafy.jangan_mobile.store.FireNotificationStore
 import com.ssafy.jangan_mobile.ui.component.ArrivalCard
 import com.ssafy.jangan_mobile.ui.component.EvacuationButton
@@ -91,13 +90,6 @@ import com.ssafy.jangan_mobile.ui.viewmodel.MapViewModel
 import com.ssafy.jangan_mobile.viewmodel.EscapeRouteViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import androidx.compose.material3.Text
-import androidx.compose.runtime.mutableStateMapOf
-import com.ssafy.jangan_mobile.store.CompassSensorManager
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.windowInsetsPadding
-import com.mapbox.maps.plugin.gestures.getGesturesManager
 
 @Composable
 fun EscapeRouteMapScreen(
@@ -398,56 +390,58 @@ fun EscapeRouteMapScreen(
             fireMarkers.clear()
             Log.d("Firewhere", "불이야불불")
             fireBeacons.forEachIndexed { index, beacon ->
-                Log.d(
-                    "FireMarker",
-                    "🔥 [$index] 화재 마커 생성 → coord=(${beacon.coordX}, ${beacon.coordY}), floor=${beacon.floor}, beaconCode=${beacon.beaconCode}"
-                )
-                val marker = PointAnnotationOptions()
-                    .withPoint(Point.fromLngLat(beacon.coordX, beacon.coordY))
-                    .withIconImage("fire-icon")
-                    .withIconSize(0.25)
-                val fireMarker = manager.create(marker)
-                fireMarkers.add(fireMarker)
+                if(floorStringToCode(selectedFloor.value) == beacon.floor){
+                    Log.d(
+                        "FireMarker",
+                        "🔥 [$index] 화재 마커 생성 → coord=(${beacon.coordX}, ${beacon.coordY}), floor=${beacon.floor}, beaconCode=${beacon.beaconCode}"
+                    )
+                    val marker = PointAnnotationOptions()
+                        .withPoint(Point.fromLngLat(beacon.coordX, beacon.coordY))
+                        .withIconImage("fire-icon")
+                        .withIconSize(0.25)
+                    val fireMarker = manager.create(marker)
+                    fireMarkers.add(fireMarker)
 
-                // 화재 아이콘에 비콘 코드 저장
-                firebeaconSave[fireMarker] = beacon
+                    // 화재 아이콘에 비콘 코드 저장
+                    firebeaconSave[fireMarker] = beacon
 
-                // ✅ 마커 클릭 이벤트 등록
-                manager.addClickListener { clicked ->
-                    val clickedBeacon = firebeaconSave[clicked]
-                    if (clickedBeacon != null) {
-                        Log.d("FireMarker", "🔥 화재 마커 클릭됨! → 모달 다시 열기")
+                    // ✅ 마커 클릭 이벤트 등록
+                    manager.addClickListener { clicked ->
+                        val clickedBeacon = firebeaconSave[clicked]
+                        if (clickedBeacon != null) {
+                            Log.d("FireMarker", "🔥 화재 마커 클릭됨! → 모달 다시 열기")
 
-                        // beacon.beaconCode와 fireNotification.stationId를 함께 사용
-                        val stationId = fireNotification?.stationId ?: return@addClickListener false
-                        val beaconCode = clickedBeacon.beaconCode
+                            // beacon.beaconCode와 fireNotification.stationId를 함께 사용
+                            val stationId = fireNotification?.stationId ?: return@addClickListener false
+                            val beaconCode = clickedBeacon.beaconCode
 
-                        Log.d(
-                            "FireMarker",
-                            "➡️ 마커 클릭됨 요청할 stationId=$stationId, beaconCode=$beaconCode"
-                        )
-                        Log.d("🔥 마커 클릭", "➡️ 선택된 마커의 beaconCode=$beaconCode, stationId=$stationId")
-                        Log.d(
-                            "🔥 마커 클릭",
-                            "➡️ 좌표=(${clickedBeacon.coordX}, ${clickedBeacon.coordY}), 층=${clickedBeacon.floor}"
-                        )
+                            Log.d(
+                                "FireMarker",
+                                "➡️ 마커 클릭됨 요청할 stationId=$stationId, beaconCode=$beaconCode"
+                            )
+                            Log.d("🔥 마커 클릭", "➡️ 선택된 마커의 beaconCode=$beaconCode, stationId=$stationId")
+                            Log.d(
+                                "🔥 마커 클릭",
+                                "➡️ 좌표=(${clickedBeacon.coordX}, ${clickedBeacon.coordY}), 층=${clickedBeacon.floor}"
+                            )
 
-                        viewModel.fetchCctvImage(stationId, beaconCode) { url ->
-                            Log.d("FireMarker", "📸 fetchCctvImage → 받아온 imageUrl=$url")
+                            viewModel.fetchCctvImage(stationId, beaconCode) { url ->
+                                Log.d("FireMarker", "📸 fetchCctvImage → 받아온 imageUrl=$url")
 
-//                            cctv 이미지로 받아올 예정
-                            selectedImageUrl.value = "$url"
-//                            selectedImageUrl.value =
-//                                "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Example.jpg/320px-Example.jpg"
-                            selectedFireBeaconDto.value = null
-                            selectedFireBeaconDto.value = clickedBeacon.copy()
-                            isFireIconClicked.value = true
-                            isFireNotificationCardVisible.value = false
-                            isFireNotificationCardVisible.value = true
-//                            isCardVisible.value = true
-                        }
-                        true
-                    } else false
+    //                            cctv 이미지로 받아올 예정
+                                selectedImageUrl.value = "$url"
+    //                            selectedImageUrl.value =
+    //                                "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Example.jpg/320px-Example.jpg"
+                                selectedFireBeaconDto.value = null
+                                selectedFireBeaconDto.value = clickedBeacon.copy()
+                                isFireIconClicked.value = true
+                                isFireNotificationCardVisible.value = false
+                                isFireNotificationCardVisible.value = true
+    //                            isCardVisible.value = true
+                            }
+                            true
+                        } else false
+                    }
                 }
             }
         }
