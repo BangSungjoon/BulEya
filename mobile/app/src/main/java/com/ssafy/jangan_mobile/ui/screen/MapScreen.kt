@@ -328,7 +328,8 @@ fun EscapeRouteMapScreen(
             }
         }
         myLocationAnnotation.value?.let {
-            pointAnnotationManager.value?.delete(beforePointAnnotation!!)
+            if(beforePointAnnotation != null)
+                pointAnnotationManager.value?.delete(beforePointAnnotation!!)
         }
     }
 
