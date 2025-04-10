@@ -384,56 +384,58 @@ fun EscapeRouteMapScreen(
             fireMarkers.clear()
             Log.d("Firewhere", "불이야불불")
             fireBeacons.forEachIndexed { index, beacon ->
-                Log.d(
-                    "FireMarker",
-                    "🔥 [$index] 화재 마커 생성 → coord=(${beacon.coordX}, ${beacon.coordY}), floor=${beacon.floor}, beaconCode=${beacon.beaconCode}"
-                )
-                val marker = PointAnnotationOptions()
-                    .withPoint(Point.fromLngLat(beacon.coordX, beacon.coordY))
-                    .withIconImage("fire-icon")
-                    .withIconSize(0.25)
-                val fireMarker = manager.create(marker)
-                fireMarkers.add(fireMarker)
+                if(floorStringToCode(selectedFloor.value) == beacon.floor){
+                    Log.d(
+                        "FireMarker",
+                        "🔥 [$index] 화재 마커 생성 → coord=(${beacon.coordX}, ${beacon.coordY}), floor=${beacon.floor}, beaconCode=${beacon.beaconCode}"
+                    )
+                    val marker = PointAnnotationOptions()
+                        .withPoint(Point.fromLngLat(beacon.coordX, beacon.coordY))
+                        .withIconImage("fire-icon")
+                        .withIconSize(0.25)
+                    val fireMarker = manager.create(marker)
+                    fireMarkers.add(fireMarker)
 
-                // 화재 아이콘에 비콘 코드 저장
-                firebeaconSave[fireMarker] = beacon
+                    // 화재 아이콘에 비콘 코드 저장
+                    firebeaconSave[fireMarker] = beacon
 
-                // ✅ 마커 클릭 이벤트 등록
-                manager.addClickListener { clicked ->
-                    val clickedBeacon = firebeaconSave[clicked]
-                    if (clickedBeacon != null) {
-                        Log.d("FireMarker", "🔥 화재 마커 클릭됨! → 모달 다시 열기")
+                    // ✅ 마커 클릭 이벤트 등록
+                    manager.addClickListener { clicked ->
+                        val clickedBeacon = firebeaconSave[clicked]
+                        if (clickedBeacon != null) {
+                            Log.d("FireMarker", "🔥 화재 마커 클릭됨! → 모달 다시 열기")
 
-                        // beacon.beaconCode와 fireNotification.stationId를 함께 사용
-                        val stationId = fireNotification?.stationId ?: return@addClickListener false
-                        val beaconCode = clickedBeacon.beaconCode
+                            // beacon.beaconCode와 fireNotification.stationId를 함께 사용
+                            val stationId = fireNotification?.stationId ?: return@addClickListener false
+                            val beaconCode = clickedBeacon.beaconCode
 
-                        Log.d(
-                            "FireMarker",
-                            "➡️ 마커 클릭됨 요청할 stationId=$stationId, beaconCode=$beaconCode"
-                        )
-                        Log.d("🔥 마커 클릭", "➡️ 선택된 마커의 beaconCode=$beaconCode, stationId=$stationId")
-                        Log.d(
-                            "🔥 마커 클릭",
-                            "➡️ 좌표=(${clickedBeacon.coordX}, ${clickedBeacon.coordY}), 층=${clickedBeacon.floor}"
-                        )
+                            Log.d(
+                                "FireMarker",
+                                "➡️ 마커 클릭됨 요청할 stationId=$stationId, beaconCode=$beaconCode"
+                            )
+                            Log.d("🔥 마커 클릭", "➡️ 선택된 마커의 beaconCode=$beaconCode, stationId=$stationId")
+                            Log.d(
+                                "🔥 마커 클릭",
+                                "➡️ 좌표=(${clickedBeacon.coordX}, ${clickedBeacon.coordY}), 층=${clickedBeacon.floor}"
+                            )
 
-                        viewModel.fetchCctvImage(stationId, beaconCode) { url ->
-                            Log.d("FireMarker", "📸 fetchCctvImage → 받아온 imageUrl=$url")
+                            viewModel.fetchCctvImage(stationId, beaconCode) { url ->
+                                Log.d("FireMarker", "📸 fetchCctvImage → 받아온 imageUrl=$url")
 
-//                            cctv 이미지로 받아올 예정
-                            selectedImageUrl.value = "$url"
-//                            selectedImageUrl.value =
-//                                "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Example.jpg/320px-Example.jpg"
-                            selectedFireBeaconDto.value = null
-                            selectedFireBeaconDto.value = clickedBeacon.copy()
-                            isFireIconClicked.value = true
-                            isFireNotificationCardVisible.value = false
-                            isFireNotificationCardVisible.value = true
-//                            isCardVisible.value = true
-                        }
-                        true
-                    } else false
+    //                            cctv 이미지로 받아올 예정
+                                selectedImageUrl.value = "$url"
+    //                            selectedImageUrl.value =
+    //                                "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Example.jpg/320px-Example.jpg"
+                                selectedFireBeaconDto.value = null
+                                selectedFireBeaconDto.value = clickedBeacon.copy()
+                                isFireIconClicked.value = true
+                                isFireNotificationCardVisible.value = false
+                                isFireNotificationCardVisible.value = true
+    //                            isCardVisible.value = true
+                            }
+                            true
+                        } else false
+                    }
                 }
             }
         }
