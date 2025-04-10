@@ -79,18 +79,6 @@ async def receive_cctv_data(
         else:
             set_station_fire_count(station_id, current_count)
 
-    # if fire_beacons:
-    #     # 화재가 감지된 경우
-    #     await report_fire(station_id, fire_images, cctv_data)
-    #     if not has_station(station_id):
-    #         # Redis에 화재가 난 역 id 값이 없다면, 추가
-    #         add_station(station_id)
-    # else:
-    #     if has_station(station_id):
-    #         # Redis에 화재가 난 역 id 값이 있다면, 삭제
-    #         remove_station(station_id)
-    #         await report_fire(station_id, fire_images, cctv_data)
-
     return { 
         # "cctv_list": cctv_list,
         "fire_beacons": fire_beacons,

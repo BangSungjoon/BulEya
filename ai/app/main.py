@@ -8,7 +8,7 @@ app = FastAPI()
 
 app.include_router(cctv_router, prefix="/ai")
 
-# Redis 연결 테스트 용 (삭제해도 무방)
+# Redis 연결 테스트 용
 import redis
 import os
 

@@ -9,14 +9,6 @@ model_m = YOLO("models/m_best.pt")
 model_x = YOLO("models/x_best.pt")
 # executor = ThreadPoolExecutor()
 
-# import os
-# from datetime import datetime
-
-# SAVE_DIR = "outputs"  # 저장 폴더
-
-# os.makedirs(f"{SAVE_DIR}/fire", exist_ok=True)
-# os.makedirs(f"{SAVE_DIR}/normal", exist_ok=True)
-
 def detect_fire(results) -> bool:
     for result in results:
         names = result.names
@@ -32,10 +24,6 @@ def detect_fire(results) -> bool:
 def run_detection(beacon_code, image_data, filename, content_type):
     image = Image.open(io.BytesIO(image_data)).convert("RGB")
 
-    # 저장용 타임스탬프
-    # timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    # save_name = f"{beacon_code}_{timestamp}.jpg"
-
     # 1차 감지
     results_n = model_n.predict(image)
 
@@ -46,18 +34,11 @@ def run_detection(beacon_code, image_data, filename, content_type):
         if detect_fire(results_x):
             print(f"{beacon_code}: 2차 감지 됨")
 
-            # 화재 이미지 저장
-            # results_x[0].save(filename=f"{SAVE_DIR}/fire/{save_name}")
-
             return beacon_code, {
                 "filename": filename,
                 "content_type": content_type,
                 "data": image_data
             }
-        
-    # 정상 이미지 저장 (1차 결과라도)
-    # else:
-    #     results_n[0].save(filename=f"{SAVE_DIR}/normal/{save_name}")
 
     return None
 
@@ -91,7 +72,7 @@ async def analyze_images(file_dict: dict, cctv_list: list):
 
     # detect_results = await asyncio.gather(*detect_tasks)
 
-    # 2. YOLO 감지 비동기 처리(병렬 처리는는 순서가 꼬일 가능성이 있다.)
+    # 2. YOLO 감지 비동기 처리(병렬 처리는 순서가 꼬일 가능성이 있다.)
     detect_results = []
     for beacon_code, img_data, filename, content_type in read_results:
         result = run_detection(beacon_code, img_data, filename, content_type)
