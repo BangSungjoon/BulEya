@@ -1,5 +1,6 @@
 package com.ssafy.jangan_mobile.service
 
+import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
@@ -11,5 +12,5 @@ interface FcmService {
     suspend fun registerFcmToken(
         @Field("uuid") uuid: String,
         @Field("token") token: String
-        ): Response<String>
+        ): ResponseBody
 }

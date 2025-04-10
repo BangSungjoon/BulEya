@@ -163,10 +163,13 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
 
     override fun onNewToken(token: String) {
         super.onNewToken(token)
+        Log.d("onNewToken", "onNewToken() called. token ; ${token}")
         val fcmService = RetrofitInstance.fcmApi
         val uuid = UUID.nameUUIDFromBytes(Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID).toByteArray()).toString()
         CoroutineScope(Dispatchers.IO).launch{
-            fcmService.registerFcmToken(uuid, token)
+            Log.d("onNewToken", "Coroutine called.")
+            val response = fcmService.registerFcmToken(uuid, token)
+            Log.d("onNewToken", "response : ${response.string()}")
         }
     }
 }
