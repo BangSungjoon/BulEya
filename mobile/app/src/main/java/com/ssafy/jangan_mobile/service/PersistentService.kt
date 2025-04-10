@@ -42,7 +42,9 @@ class PersistentService : Service() {
         val channelId = "persistent_service_channel"
         val channelName = "Persistent Service"
 
-        val chan = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_LOW)
+        val chan = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_LOW).apply{
+            setShowBadge(false)
+        }
         val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         manager.createNotificationChannel(chan)
 
