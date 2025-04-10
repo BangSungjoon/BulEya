@@ -1,5 +1,6 @@
 package com.ssafy.jangan_backend.common.util;
 
+import java.util.List;
 import java.util.concurrent.Executors;
 
 import org.springframework.stereotype.Component;
@@ -55,6 +56,32 @@ public class FcmUtil {
 		} catch (Exception e) {
 			e.printStackTrace();
 			return -1;
+		}
+
+		return 0;
+	}
+
+	/**
+	 * 모든 사용자에게 푸시 데이터를 보낸다.
+	 * @param dto : 전송할 데이터
+	 * @return -1 : 전송 실패, 0 : 전송 성공
+	 */
+	public int sendMessage(Object dto, List<String> tokens) {
+		for(String token : tokens) {
+			try {
+				String jsonString = objectMapper.writeValueAsString(dto);
+
+				Message message = Message.builder()
+					.setToken(token)
+					.putData("payload", jsonString)
+					.build();
+
+				// 동기 전송으로 확인
+				String response = FirebaseMessaging.getInstance().send(message);
+
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 
 		return 0;

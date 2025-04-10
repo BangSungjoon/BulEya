@@ -3,6 +3,8 @@ package com.ssafy.jangan_backend.firelog.service;
 import java.util.*;
 
 import com.ssafy.jangan_backend.escapeRoute.service.EscapeRouteService;
+import com.ssafy.jangan_backend.fcm.entity.FcmToken;
+import com.ssafy.jangan_backend.fcm.repository.FcmTokenRepository;
 import com.ssafy.jangan_backend.firelog.dto.*;
 import com.ssafy.jangan_backend.station.service.StationService;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,6 +41,7 @@ public class FirelogService {
 	private final MinioUtil minioUtil;
 	private final EscapeRouteService escapeRouteService;
 	private final RedisTemplate<String, EscapeRoute> redisTemplate;
+	private final FcmTokenRepository fcmTokenRepository;
 
 	private final StationService stationService;
 	@Value("${minio.bucket.name}")
@@ -134,7 +137,10 @@ public class FirelogService {
 			redisTemplate.opsForValue().set("escapeRoute:" + stationId, escapeRoute);
 
 			System.out.println("isChanged.");
-			fcmUtil.sendMessage(fireNotificationDto);
+
+			List<String> tokenList = fcmTokenRepository.findAll().stream().map(FcmToken::getUuid).toList();
+			fcmUtil.sendMessage(fireNotificationDto, tokenList);
+			// fcmUtil.sendMessage(fireNotificationDto);
 		}
 	}
 
