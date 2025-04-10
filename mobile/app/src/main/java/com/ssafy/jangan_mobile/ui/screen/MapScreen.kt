@@ -763,7 +763,6 @@ fun EscapeRouteMapScreen(
     )
     //🔥 화재 상황일 때 빨간색 깜빡임 효과 추가
     Box(modifier = Modifier.fillMaxSize()) {
-//        AndroidView(factory = { mapView })
 
         if (redLighting.value) {
             Box(
@@ -773,7 +772,7 @@ fun EscapeRouteMapScreen(
             )
         }
     }
-//=========================================
+
 
 // UI 구성
     Box(
@@ -892,21 +891,7 @@ fun EscapeRouteMapScreen(
                 .windowInsetsPadding(WindowInsets.navigationBars),
             verticalArrangement = Arrangement.Bottom,
             horizontalAlignment = Alignment.Start
-//            verticalArrangement = Arrangement.SpaceBetween
         ) {
-//            Spacer(modifier = Modifier.height(12.dp)) // 상단 공간
-
-            // ✅ 버튼 영역
-//            Box(
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .padding(start = 16.dp, end = 16.dp, bottom = 24.dp),
-//                contentAlignment = Alignment.BottomStart
-//            )
-//                Column(
-//                    modifier = Modifier.align(Alignment.BottomStart),
-////                horizontalAlignment = Alignment.Start
-//                )
             ToMyLocation(
                 modifier = Modifier.align(Alignment.Start),
                 mapView = mapView,

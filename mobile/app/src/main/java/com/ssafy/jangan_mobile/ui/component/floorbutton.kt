@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,13 +49,14 @@ fun FloorSelector(
         )
     )
 
-    Box(
+    Surface(
         modifier = Modifier
             .width(72.dp)
             .height(192.dp)
+            .clip(RoundedCornerShape(16.dp))
             .shadow(elevation = 4.dp, spotColor = gray400, ambientColor = gray400)
             .border(width = 1.dp, color = gray300, shape = RoundedCornerShape(16.dp))
-            .clip(RoundedCornerShape(16.dp))
+//            .clip(RoundedCornerShape(16.dp))
             .background(color = gray100),
     ) {
         Column(

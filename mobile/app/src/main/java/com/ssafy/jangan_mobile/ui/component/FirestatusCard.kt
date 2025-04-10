@@ -109,7 +109,8 @@ fun FireNotificationCard(
                         shape = RoundedCornerShape(30.dp)
                     )
                     .width(364.dp)
-                    .height(214.dp),
+                    .height(214.dp)
+                    .clip(RoundedCornerShape(30.dp)),
                 contentScale = ContentScale.Crop,
 //                onSuccess = {
 //                    Log.d("FireNotificationCard", "✅ 이미지 로딩 성공")

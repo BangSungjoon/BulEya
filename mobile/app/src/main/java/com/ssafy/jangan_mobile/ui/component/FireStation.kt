@@ -49,7 +49,7 @@ fun FireStation(
             .padding(top = 12.dp, bottom = 12.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // 🚉 역 정보 표시
+        // 역정보 표가
         Box(
             modifier = Modifier
                 .width(380.dp)
