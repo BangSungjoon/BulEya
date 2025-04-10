@@ -106,6 +106,9 @@ fun EscapeRouteMapScreen(
     val imageUrl by mapViewModel.mapImageUrl.collectAsState()
     val myLocation by viewModel.myLocation.observeAsState()
     val isTracking by viewModel.isTracking.observeAsState()
+    val fireFloors by viewModel.fireFloors.collectAsState()
+
+
 
     val showRoute = remember { mutableStateOf(false) }
     val selectedFloor = remember { mutableStateOf("B1") }
@@ -157,6 +160,7 @@ fun EscapeRouteMapScreen(
     val mapConfigTrigger = remember { mutableStateOf(0) }
     val isFireIconClicked = remember { mutableStateOf(false) }
     val firebeaconSave = remember { mutableMapOf<PointAnnotation, BeaconNotificationDto>() }
+    val firefloor = remember { mutableStateListOf<String>() }
 
 
     // 마커들
@@ -584,11 +588,11 @@ fun EscapeRouteMapScreen(
                     Log.d("EscapeRouteMap", "🎉 목적지 도착 (좌표 동일) → 안내 카드 표시")
                     showArrivalCard.value = true
 
-//                    // 목적지 마커만 제거
-//                    destinationMarker.value?.let {
-//                        pointAnnotationManager.value?.delete(it)
-//                        destinationMarker.value = null
-//                    }
+                    // 목적지 마커만 제거
+                    destinationMarker.value?.let {
+                        pointAnnotationManager.value?.delete(it)
+                        destinationMarker.value = null
+                    }
                 }
             } else {
                 Log.w(
@@ -649,7 +653,7 @@ fun EscapeRouteMapScreen(
             launch {
                 redLighting.value = true
                 Log.d("Debug", "Red lighting started")
-                delay(5000) // 5초 대기
+                delay(10000) // 5초 대기
                 redLighting.value = false
                 Log.d("Debug", "Red lighting stopped after 5 seconds")
             }
@@ -699,6 +703,11 @@ fun EscapeRouteMapScreen(
         // 🔄 현재 화재 상태 저장 (다음 변경 대비)
         previousFireCodes.clear()
         previousFireCodes.addAll(currentFires)
+
+
+        // 층수 바뀌는 것 적용하기
+        viewModel.updateFireFloors(fireNotificationDto)
+
     }
 
     //🔥빨간색 깜빡임 애니메이션
@@ -867,7 +876,8 @@ fun EscapeRouteMapScreen(
             Spacer(modifier = Modifier.height(15.dp))
             FloorSelector(
                 selectedFloor = selectedFloor.value,
-                onFloorSelected = { selectedFloor.value = it }
+                onFloorSelected = { selectedFloor.value = it },
+                firefloor = fireFloors
             )
             if (!showArrivalCard.value) {
                 Spacer(modifier = Modifier.height(36.dp))
@@ -972,103 +982,5 @@ fun EscapeRouteMapScreen(
 
 
 
-//    // ✅ 🔥 화재 실시간 사진
-//        if (isFireNotificationCardVisible.value && selectedFireBeaconDto.value != null) {
-//            // ✅ 🔥 상세 모달 (FireNotificationCard → FireDetailBottomSheet 교체)
-//            AnimatedVisibility(
-//                visible = isFireNotificationCardVisible.value,
-//                enter = slideInVertically(initialOffsetY = { -300 }) + fadeIn(),
-//                exit = slideOutVertically(targetOffsetY = { -300 }) + fadeOut()
-//            ) {
-//                Box(
-//                    modifier = Modifier
-//                        .fillMaxSize()
-//                        .pointerInput(Unit) {
-//                            detectTapGestures(
-//                                onTap = {
-//                                    Log.d("FireModal", "🛑 배경 클릭 → 모달 닫기")
-//                                    isFireNotificationCardVisible.value = false
-//                                }
-//                            )
-//                        }
-//                ) {
-//                    Box(
-//                        modifier = Modifier
-//                            .align(Alignment.TopCenter)
-//                            .padding(top = 60.dp)
-//                            .clickable(
-//                                interactionSource = remember { MutableInteractionSource() },
-//                                indication = null
-//                            ) { /* 내부 탭 무시 */ }
-//                    ) {
-//                        FireNotificationCard(
-//                            beaconName = selectedFireBeaconDto.value?.beaconName ?: "알 수 없음",
-//                            imageUrl = selectedFireBeaconDto.value?.imageUrl ?: "",
-//                            isVisible = true,
-//                            onDismiss = {
-//                                Log.d("FireModal", "🛑 모달 닫기 버튼 클릭")
-//                                isFireNotificationCardVisible.value = false
-//                            },
-//                            onGuideClick = {
-//                                Log.d("FireModal", "➡️ 대피 경로 찾기 클릭됨")
-//                                isFireNotificationCardVisible.value = false
-//                                currentLocationCode?.let { code ->
-//                                    viewModel.fetchEscapeRoute(222, code)
-//                                    showRoute.value = true
-//                                    isGuiding.value = true
-//                                }
-//                            }
-//                        )
-//                    }
-//                }
-//            // ✅ 버튼 영역
-//            Box(modifier = Modifier.fillMaxWidth()) {
-//                Column(
-//                    modifier = Modifier
-//                        .align(Alignment.BottomStart)
-//                        .padding(
-//                            start = 16.dp,
-//                            bottom = 50.dp
-//                        ),
-//                    horizontalAlignment = Alignment.Start
-//                ) {
-//                    if (!showArrivalCard.value) {
-//                        Spacer(modifier = Modifier.height(16.dp))
-//                        EvacuationButton(
-//                            isGuiding = isGuiding.value,
-//                            onClick = {
-//                                if (isGuiding.value) {
-//                                    // ✅ 안내 종료 처리
-//                                    isGuiding.value = false
-//                                    showRoute.value = false
-//                                    polylineManager.value?.deleteAll()
-//                                    goalMarker.value?.let { pointAnnotationManager.value?.delete(it) }
-////                                    destinationMarker.value?.let {
-////                                        pointAnnotationManager.value?.delete(
-////                                            it
-////                                        )
-////                                    }
-//                                    routeMarkers.forEach { pointAnnotationManager.value?.delete(it) }
-//                                    routeMarkers.clear()
-//                                    myLocationAnnotation.value?.let {
-//                                        pointAnnotationManager.value?.delete(
-//                                            it
-//                                        )
-//                                    }
-//                                    viewModel.setIsTracking(false)
-//                                } else {
-//                                    // ✅ 안내 시작
-//                                    hasArrived.value = false
-//                                    currentLocationCode?.let { code ->
-//                                        viewModel.fetchEscapeRoute(222, code)
-//                                        showRoute.value = true
-//                                        isGuiding.value = true
-//                                        viewModel.setIsTracking(true)
-//                                    }
-//                                }
-//                            }
-//                        )
-//                    }
-//                }
-//            }
-//        }
+// 화재가 나면 그 층 수 가져오기
+// 그 층수를 인식하여 플로어 버튼의 초록색을 깜빡이게 하기

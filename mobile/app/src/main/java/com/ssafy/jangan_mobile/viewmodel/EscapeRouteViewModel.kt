@@ -12,9 +12,12 @@ import com.ssafy.jangan_mobile.model.PixelLatLng
 import com.ssafy.jangan_mobile.service.RetrofitInstance
 import com.ssafy.jangan_mobile.service.dto.CurrentLocationDto
 import com.ssafy.jangan_mobile.service.dto.CurrentLocationResponse
+import com.ssafy.jangan_mobile.service.dto.FireNotificationDto
 import com.ssafy.jangan_mobile.store.FireNotificationStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class EscapeRouteViewModel : ViewModel() {
@@ -47,6 +50,16 @@ class EscapeRouteViewModel : ViewModel() {
 
     // cctv 사진 불러오기
     val cctvImageUrl = mutableStateOf<String?>(null)
+
+
+    // floor상태 추가
+    private val _fireFloors = MutableStateFlow<List<String>>(emptyList())
+    val fireFloors: StateFlow<List<String>> = _fireFloors
+
+
+
+
+
 
     init {
         Log.d("EscapeRoute", "✅ EscapeRouteViewModel 생성됨")
@@ -144,4 +157,20 @@ class EscapeRouteViewModel : ViewModel() {
             }
         }
     }
+
+    fun updateFireFloors(fireNotificationDto: FireNotificationDto?) {
+        val currentFireFloors = fireNotificationDto?.beaconNotificationDtos
+            ?.mapNotNull { beacon ->
+                when (beacon.floor) {
+                    1001 -> "B1"
+                    1002 -> "B2"
+                    1003 -> "B3"
+                    else -> null
+                }
+            }?.distinct() ?: emptyList()
+
+        _fireFloors.value = currentFireFloors
+    }
+
+
 }
