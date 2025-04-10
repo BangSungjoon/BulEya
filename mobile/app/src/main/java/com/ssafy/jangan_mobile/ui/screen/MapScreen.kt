@@ -30,6 +30,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -132,6 +134,9 @@ fun EscapeRouteMapScreen(
     ) // 초록 ↔ 투명
     var colorIndex = 0
 
+    val fireMarkerIcons = listOf("fire-weak", "fire-strong")
+    var fireIconIndex = 0
+
     val handler = Handler(Looper.getMainLooper())
     var blinkRunnable: Runnable? = null
 
@@ -223,6 +228,10 @@ fun EscapeRouteMapScreen(
                         "fire-icon",
                         BitmapFactory.decodeResource(context.resources, R.drawable.fire)
                     ) {}
+
+                    +image("fire-weak", BitmapFactory.decodeResource(context.resources, R.drawable.fire_weak)) {}
+                    +image("fire-strong", BitmapFactory.decodeResource(context.resources, R.drawable.fire_strong)) {}
+
                     +image(
                         "destination-icon",
                         BitmapFactory.decodeResource(context.resources, R.drawable.goal)
@@ -616,6 +625,32 @@ fun EscapeRouteMapScreen(
         }
     }
 
+    LaunchedEffect(fireNotificationDto) {
+        while (true) {
+            // 🔥 fire 마커 이미지 교체
+            val nextIcon = fireMarkerIcons[fireIconIndex]
+            val manager = pointAnnotationManager.value ?: return@LaunchedEffect
+
+            fireMarkers.toList().forEachIndexed { index, marker ->
+                val point = marker.point
+
+                // 새로운 마커 생성
+                val newMarkerOptions = PointAnnotationOptions()
+                    .withPoint(point)
+                    .withIconImage(nextIcon)
+                    .withIconSize(0.25)
+                val newMarker = manager.create(newMarkerOptions)
+
+                // 1. 먼저 새 마커를 fireMarkers 리스트에 넣고
+                fireMarkers[index] = newMarker
+                // 2. 기존 마커 삭제 (덮어씌운 뒤 제거)
+                manager.delete(marker)
+            }
+            fireIconIndex = (fireIconIndex + 1) % fireMarkerIcons.size
+            delay(500)
+        }
+    }
+
     // 안내 종료 모달
     LaunchedEffect(showArrivalCard.value) {
         if (showArrivalCard.value) {
@@ -733,7 +768,6 @@ fun EscapeRouteMapScreen(
         }
     }
 //=========================================
-
 
 // UI 구성
     Box(
