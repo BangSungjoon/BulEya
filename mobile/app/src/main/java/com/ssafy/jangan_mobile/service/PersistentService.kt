@@ -46,7 +46,6 @@ class PersistentService : Service() {
             setShowBadge(false)
         }
         val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        manager.deleteNotificationChannel(channelId)
         manager.createNotificationChannel(chan)
 
         return Notification.Builder(this, channelId)
