@@ -1,9 +1,11 @@
 package com.ssafy.jangan_mobile.ui.screen
 
+import android.animation.ValueAnimator
 import android.graphics.BitmapFactory
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.view.animation.LinearInterpolator
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
@@ -987,6 +989,3 @@ fun EscapeRouteMapScreen(
     }
 
 
-
-// 화재가 나면 그 층 수 가져오기
-// 그 층수를 인식하여 플로어 버튼의 초록색을 깜빡이게 하기
