@@ -128,10 +128,14 @@ class MainActivity : ComponentActivity() {
             val channelName = "My Custom Notifications"
             val importance = NotificationManager.IMPORTANCE_HIGH
 
-            val channel = NotificationChannel(channelId, channelName, importance)
+            val channel = NotificationChannel(channelId, channelName, importance).apply{
+                enableVibration(true)
+                vibrationPattern = longArrayOf(0, 100, 100, 100, 100, 100, 100, 500, 500, 100, 100, 100, 100, 100, 100, 500, 500, 100, 100, 100, 100, 100, 100, 500)
+            }
             channel.description = "This is my custom notification channel"
 
             val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.deleteNotificationChannel("alert")
             notificationManager.createNotificationChannel(channel)
         }
     }

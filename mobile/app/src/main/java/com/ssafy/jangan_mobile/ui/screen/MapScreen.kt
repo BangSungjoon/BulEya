@@ -16,7 +16,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -24,13 +23,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -43,10 +42,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.PointerIcon.Companion.Text
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.input.KeyboardType.Companion.Text
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -74,10 +71,12 @@ import com.mapbox.maps.plugin.annotation.generated.PolylineAnnotationOptions
 import com.mapbox.maps.plugin.annotation.generated.createPointAnnotationManager
 import com.mapbox.maps.plugin.annotation.generated.createPolylineAnnotationManager
 import com.mapbox.maps.plugin.compass.compass
+import com.mapbox.maps.plugin.gestures.getGesturesManager
 import com.mapbox.maps.plugin.scalebar.scalebar
 import com.ssafy.jangan_mobile.R
 import com.ssafy.jangan_mobile.service.dto.BeaconNotificationDto
 import com.ssafy.jangan_mobile.service.dto.FireNotificationDto
+import com.ssafy.jangan_mobile.store.CompassSensorManager
 import com.ssafy.jangan_mobile.store.FireNotificationStore
 import com.ssafy.jangan_mobile.ui.component.ArrivalCard
 import com.ssafy.jangan_mobile.ui.component.EvacuationButton
@@ -89,13 +88,6 @@ import com.ssafy.jangan_mobile.ui.viewmodel.MapViewModel
 import com.ssafy.jangan_mobile.viewmodel.EscapeRouteViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import androidx.compose.material3.Text
-import androidx.compose.runtime.mutableStateMapOf
-import com.ssafy.jangan_mobile.store.CompassSensorManager
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.windowInsetsPadding
-import com.mapbox.maps.plugin.gestures.getGesturesManager
 
 @Composable
 fun EscapeRouteMapScreen(

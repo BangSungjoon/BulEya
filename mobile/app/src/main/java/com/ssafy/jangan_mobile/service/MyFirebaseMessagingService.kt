@@ -84,7 +84,9 @@ class MyFirebaseMessagingService: FirebaseMessagingService() {
                     beaconManager.getRegionViewModel(region).rangedBeacons.removeObserver(observer)
                 }
                 Log.d("ContentValues", "Check Code : nearest:${nearestBeaconCode}")
-                if(nearestBeaconCode != -1) {
+                if(nearestBeaconCode != -1 || FireNotificationStore.currentLocationBeaconCode.value != -1) {
+                    if(FireNotificationStore.currentLocationBeaconCode.value != -1)
+                        nearestBeaconCode = FireNotificationStore.currentLocationBeaconCode.value!!
                     sendAlertNotification(fireNotificationDto, jsonString, nearestBeaconCode) //알림표시
                     FireNotificationStore.setNotification(fireNotificationDto, this) // 여기선 setValue() 가능
                     FireNotificationStore.setCurrentNotificationBeaconCode(nearestBeaconCode, this)
