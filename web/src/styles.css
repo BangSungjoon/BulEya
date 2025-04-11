@@ -1,0 +1,110 @@
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+@import 'tailwindcss';
+
+@theme {
+  --font-family-default: Pretendard, sans-serif;
+
+  --font-size-h1: 1.5rem;
+  --line-height-h1: 1.2;
+  --font-weight-h1: 600;
+
+  --font-size-h2: 1.25rem;
+  --line-height-h2: 1.3;
+  --font-weight-h2: 600;
+
+  --font-size-h3: 1.125rem;
+  --line-height-h3: 1.4;
+  --font-weight-h3: 600;
+
+  --font-size-body-1: 1rem;
+  --line-height-body-1: 1.5;
+  --font-weight-body-1: 400;
+
+  --font-size-body-2: 0.875rem;
+  --line-height-body-2: 1.5;
+  --font-weight-body-2: 400;
+
+  --font-size-caption: 0.75rem;
+  --line-height-caption: 1.5;
+  --font-weight-caption: 400;
+
+  --font-size-overline: 0.625rem;
+  --line-height-overline: 1.5;
+  --font-weight-overline: 400;
+
+  --color-primary: #8aea52;
+  --color-system-red: #f83a3a;
+  --color-system-yellow: #fbe205;
+  --color-system-green: #34a853;
+  --color-system-blue: #4285f4;
+
+  --color-gray-600: #1b1b1d;
+  --color-gray-500: #424242;
+  --color-gray-400: #9ba0a5;
+  --color-gray-300: #e9eef6;
+  --color-gray-200: #f8fafd;
+  --color-gray-100: #ffffff;
+}
+
+@layer base {
+  body {
+    font-family: var(--font-family-default);
+  }
+}
+
+@layer utilities {
+  .text-h1 {
+    font-size: var(--font-size-h1);
+    line-height: var(--line-height-h1);
+    font-weight: var(--font-weight-h1);
+  }
+
+  .text-h2 {
+    font-size: var(--font-size-h2);
+    line-height: var(--line-height-h2);
+    font-weight: var(--font-weight-h2);
+  }
+
+  .text-h3 {
+    font-size: var(--font-size-h3);
+    line-height: var(--line-height-h3);
+    font-weight: var(--font-weight-h3);
+  }
+
+  .text-body-1 {
+    font-size: var(--font-size-body-1);
+    line-height: var(--line-height-body-1);
+    font-weight: var(--font-weight-body-1);
+  }
+
+  .text-body-bold {
+    font-size: var(--font-size-body-2);
+    line-height: var(--line-height-body-2);
+    font-weight: var(--font-weight-body-2);
+  }
+
+  .text-caption {
+    font-size: var(--font-size-caption);
+    line-height: var(--line-height-caption);
+    font-weight: var(--font-weight-caption);
+  }
+
+  .text-overline {
+    font-size: var(--font-size-overline);
+    line-height: var(--line-height-overline);
+    font-weight: var(--font-weight-overline);
+  }
+}
+
+@keyframes guide-bar {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+.animate-guide-bar {
+  animation: guide-bar 2s linear forwards;
+}
