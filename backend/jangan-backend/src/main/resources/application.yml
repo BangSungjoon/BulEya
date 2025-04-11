@@ -1,0 +1,51 @@
+spring:
+  config:
+    import: classpath:/env.yml
+  application:
+    name: jangan-backend
+  jackson:
+    property-naming-strategy: SNAKE_CASE # snake_case <-> camelCase 자동 변환
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: 6379
+      username: ${REDIS_USERNAME}
+      password: ${REDIS_PASSWORD}
+  servlet:
+    multipart:
+      maxFileSize: 50MB
+      maxRequestSize: 1000MB
+
+  datasource:
+    url: ${MYSQL_URL}
+    username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      max-lifetime: 60000
+
+  jpa:
+    database: mysql
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: false
+        show_sql: false
+    open-in-view: false
+
+minio:
+  url: ${MINIO_URL}
+  access-key: ${MINIO_ACCESS_KEY}
+  secret-key: ${MINIO_SECRET_KEY}
+  bucket:
+    name: jangan
+    imagelog: ${BUCKET_IMAGELOG}
+
+springdoc:
+  api-docs:
+    path: /api/api-docs
+  swagger-ui:
+    path: /api/swagger-ui.html
+    operations-sorter: alpha
+    tags-sorter: alpha
