@@ -1,0 +1,5 @@
+train: /home/j-j12a204/sample_data/Train
+val: /home/j-j12a204/sample_data/Valid
+
+nc: 4
+names: ['fl', 'sm', 'none', 'person']
