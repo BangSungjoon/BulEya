@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -25,109 +26,55 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.ssafy.jangan_mobile.ui.theme.Subtitle2
 import com.ssafy.jangan_mobile.ui.theme.primaryColor
 
-
 @Composable
 fun StationInfo(
-    stationName: String // ✅ 역 이름을 동적으로 입력
+    stationName: String
 ) {
-    Row(
-        modifier = Modifier
-            .width(380.dp)
-            .height(45.dp),
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        // 왼쪽 연장된 초록색 선
-        Box(
-            modifier = Modifier
-                .width(94.5.dp)
-                .height(8.dp)
-                .background(primaryColor)
-        )
+    BoxWithConstraints {
+        val totalWidth = maxWidth * 0.9f // 전체 너비의 90% 사용
+        val lineWidth = totalWidth * 0.25f
+        val labelWidth = totalWidth * 0.5f
+        val labelHeight = labelWidth * (70f / 182f) // 기존 비율 유지
 
-        // 중앙 역 이름 표시 (둥근 직사각형)
-        Box(
+        Row(
             modifier = Modifier
-                .width(182.dp)
-                .height(61.dp) // 피그마대로 하면 좁은 것 같아서 볼더값만큼 더해줌
-                .background(color = Color.White, shape = RoundedCornerShape(100.dp))
-                .border(width = 8.dp, color = primaryColor, shape = RoundedCornerShape(100.dp)),
-            contentAlignment = Alignment.Center
+                .fillMaxWidth()
+                .height(labelHeight),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(
-                text = stationName,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-                style = Subtitle2
+            // 왼쪽 선
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(8.dp)
+                    .background(primaryColor)
+            )
+
+            // 중앙 역 이름 박스
+            Box(
+                modifier = Modifier
+                    .width(labelWidth)
+                    .height(labelHeight)
+                    .background(color = Color.White, shape = RoundedCornerShape(100.dp))
+                    .border(width = 8.dp, color = primaryColor, shape = RoundedCornerShape(100.dp)),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = stationName,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                    style = Subtitle2
+                )
+            }
+
+            // 오른쪽 선
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(8.dp)
+                    .background(primaryColor)
             )
         }
-
-        // 오른쪽 연장된 초록색 선
-        Box(
-            modifier = Modifier
-                .width(94.5.dp)
-                .height(8.dp)
-                .background(primaryColor)
-        )
     }
 }
 
-
-//@Composable
-//fun StationStatusCard(
-//    stationName: String, // ✅ 역 이름
-//    status: String,      // ✅ 상태 (예: "화재 발생")
-//    gateName: String     // ✅ 개찰구 정보 (예: "B3 개찰구")
-//) {
-//    Column(
-//        modifier = Modifier
-//            .fillMaxWidth()
-//            .background(Color.Black, shape = RoundedCornerShape(16.dp))
-//            .padding(16.dp),
-//        horizontalAlignment = Alignment.CenterHorizontally
-//    ) {
-//        // 🚉 역 정보 표시
-//        StationInfo(stationName = stationName)
-//
-//        Spacer(modifier = Modifier.height(20.dp))
-//        Box(
-//            modifier = Modifier
-//                .fillMaxWidth(0.8f)
-//                .background(Color(0xFF90EE90), shape = CircleShape)
-//                .padding(vertical = 8.dp),
-//            contentAlignment = Alignment.Center
-//        ) {
-//            Text(
-//                text = stationName,
-//                fontSize = 18.sp,
-//                fontWeight = FontWeight.Bold,
-//                color = Color.Black
-//            )
-//        }
-//
-//        Spacer(modifier = Modifier.height(12.dp))
-//
-//        // 🔥 상태 + 개찰구 정보
-//        Row(
-//            modifier = Modifier
-//                .fillMaxWidth(0.9f)
-//                .background(Color.Red, shape = RoundedCornerShape(16.dp))
-//                .padding(12.dp),
-//            verticalAlignment = Alignment.CenterVertically,
-//            horizontalArrangement = Arrangement.SpaceBetween
-//        ) {
-//            Text(
-//                text = "🔥 $status",
-//                fontSize = 16.sp,
-//                fontWeight = FontWeight.Bold,
-//                color = Color.Black
-//            )
-//
-//            Text(
-//                text = gateName,
-//                fontSize = 16.sp,
-//                fontWeight = FontWeight.Bold,
-//                color = Color.White
-//            )
-//        }
-//    }
-//}

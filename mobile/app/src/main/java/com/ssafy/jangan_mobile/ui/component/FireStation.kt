@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -41,59 +42,88 @@ fun FireStation(
     onDismiss: () -> Unit,
     onGuideClick: () -> Unit
 ) {
-    Column(
-        modifier = Modifier
-            .width(380.dp)
-            .height(213.dp)
-            .background(Color.Black, shape = RoundedCornerShape(size = 40.dp))
-            .padding(top = 12.dp, bottom = 12.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        // 역정보 표가
-        Box(
-            modifier = Modifier
-                .width(380.dp)
-                .height(93.dp)
-                .padding(top = 24.dp, bottom = 24.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            StationInfo(stationName = stationName)
-        }
+    BoxWithConstraints {
+        val cardWidth = maxWidth * 0.9f
+        val cardHeight = cardWidth * (213f / 380f) // 기존 비율 유지
 
-        Spacer(modifier = Modifier.height(20.dp))
-
-        // 🔥 화재 발생 상태 카드
-        Row(
+        Column(
             modifier = Modifier
-                .width(360.dp)
-                .height(76.dp)
-                .background(color = Color(0xFFEA5252), shape = RoundedCornerShape(60.dp))
-                .padding(start = 32.dp, top = 22.dp, end = 32.dp, bottom = 22.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+                .width(cardWidth)
+                .height(cardHeight)
+                .background(Color.Black, shape = RoundedCornerShape(size = 40.dp))
+                .padding(top = 12.dp, bottom = 12.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // 🔥 아이콘 + 텍스트
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    painter = painterResource(id = R.drawable.fireicon),
-                    contentDescription = "Fire Icon",
-                    tint = Color.Black,
-                    modifier = Modifier.size(24.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = "화재 발생",
-                    style = Headline,
-                    color = Color.Black
-                )
+            // 역 정보
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(0.45f), // 전체 높이의 45%
+                contentAlignment = Alignment.Center
+            ) {
+                StationInfo(stationName = stationName)
             }
 
-            // 🚪 개찰구
-            Text(
-                text = beaconName,
-                style = Subtitle2,
-                color = Color.White
-            )
+            Spacer(modifier = Modifier.height(10.dp))
+
+
+//    Column(
+//        modifier = Modifier
+//            .width(380.dp)
+//            .height(213.dp)
+//            .background(Color.Black, shape = RoundedCornerShape(size = 40.dp))
+//            .padding(top = 12.dp, bottom = 12.dp),
+//        horizontalAlignment = Alignment.CenterHorizontally
+//        ) {
+//            // 역정보 표가
+//            Box(
+//                modifier = Modifier
+//                    .width(380.dp)
+//                    .height(93.dp)
+//                    .padding(top = 24.dp, bottom = 24.dp),
+//                contentAlignment = Alignment.Center
+//            ) {
+//                StationInfo(stationName = stationName)
+//            }
+//
+//            Spacer(modifier = Modifier.height(20.dp))
+
+            // 🔥 화재 발생 상태 카드
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(0.95f)
+                    .weight(0.45f)
+//                    .width(360.dp)
+//                    .height(76.dp)
+                    .background(color = Color(0xFFEA5252), shape = RoundedCornerShape(60.dp))
+                 .padding(horizontal = 24.dp),
+//                    .padding(start = 32.dp, top = 22.dp, end = 32.dp, bottom = 22.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                // 🔥 아이콘 + 텍스트
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.fireicon),
+                        contentDescription = "Fire Icon",
+                        tint = Color.Black,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "화재 발생",
+                        style = Headline,
+                        color = Color.Black
+                    )
+                }
+
+                // 🚪 개찰구
+                Text(
+                    text = beaconName,
+                    style = Subtitle2,
+                    color = Color.White
+                )
+            }
         }
     }
 }

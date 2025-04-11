@@ -13,6 +13,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -46,6 +47,7 @@ import com.ssafy.jangan_mobile.ui.theme.Subtitle2
 import com.ssafy.jangan_mobile.ui.theme.system_red//
 
 
+
 @Composable
 fun FireNotificationCard(
     beaconName: String,
@@ -54,78 +56,89 @@ fun FireNotificationCard(
     onDismiss: () -> Unit,
     onGuideClick: () -> Unit
 ) {
-    Log.d("FireNotificationCard", "🧩 파라미터 imageUrl=$imageUrl")
+    BoxWithConstraints {
+        val cardWidth = maxWidth * 0.9f
+        val cardHeight = cardWidth * (334f / 380f) // 기존 비율 유지
+        val imageHeight = cardWidth * (214f / 380f)
 
-    Column(
-        modifier = Modifier
-            .width(380.dp)
-            .height(334.dp)
-            .background(Color.Black, shape = RoundedCornerShape(40.dp))
-            .padding(vertical = 12.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        // 🔥 상태 + 개찰구 정보
-        Row(
+        Log.d("FireNotificationCard", "🧩 파라미터 imageUrl=$imageUrl")
+
+        Column(
             modifier = Modifier
-                .width(360.dp)
-                .height(76.dp)
-                .background(color = system_red, shape = RoundedCornerShape(60.dp))
-                .padding(start = 32.dp, top = 22.dp, end = 32.dp, bottom = 22.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+                .width(cardWidth)
+                .height(cardHeight)
+//                .width(380.dp)
+//                .height(334.dp)
+                .background(Color.Black, shape = RoundedCornerShape(40.dp))
+                .padding(vertical = 12.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Image(
-                    painter = painterResource(id = R.drawable.fireicon),
-                    contentDescription = "Fire Icon",
-                    modifier = Modifier
-                        .height(32.dp)
-                        .padding(1.dp)
-                )
+            // 🔥 상태 + 개찰구 정보
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(0.95f)
+//                    .width(360.dp)
+                    .height(76.dp)
+                    .background(color = system_red, shape = RoundedCornerShape(60.dp))
+                    .padding(horizontal = 32.dp, vertical = 22.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Image(
+                        painter = painterResource(id = R.drawable.fireicon),
+                        contentDescription = "Fire Icon",
+                        modifier = Modifier
+                            .height(32.dp)
+                            .padding(1.dp)
+                    )
+                    Text(
+                        text = " 화재 발생",
+                        style = Headline
+                    )
+                }
+
                 Text(
-                    text = " 화재 발생",
-                    style = Headline
+                    text = beaconName,
+                    style = Subtitle2,
+                    color = Color.White
                 )
             }
 
-            Text(
-                text = beaconName,
-                style = Subtitle2,
-                color = Color.White
-            )
-        }
+            Spacer(modifier = Modifier.height(12.dp))
 
-        Spacer(modifier = Modifier.height(12.dp))
-
-        // 🔥 화재 이미지
-        if (imageUrl.isNotEmpty()) {
-            Image(
-                painter = rememberAsyncImagePainter(model = imageUrl),
-                contentDescription = "Fire Image",
-                modifier = Modifier
-                    .border(
-                        width = 5.dp,
-                        color = Color.White,
-                        shape = RoundedCornerShape(30.dp)
-                    )
-                    .width(364.dp)
-                    .height(214.dp)
-                    .clip(RoundedCornerShape(30.dp)),
-                contentScale = ContentScale.Crop,
+            // 🔥 화재 이미지
+            if (imageUrl.isNotEmpty()) {
+                Image(
+                    painter = rememberAsyncImagePainter(model = imageUrl),
+                    contentDescription = "Fire Image",
+                    modifier = Modifier
+                        .border(
+                            width = 5.dp,
+                            color = Color.White,
+                            shape = RoundedCornerShape(30.dp)
+                        )
+                        .width(cardWidth * 0.95f)
+                        .height(imageHeight)
+//                        .width(364.dp)
+//                        .height(214.dp)
+                        .clip(RoundedCornerShape(30.dp)),
+                    contentScale = ContentScale.Crop,
 //                onSuccess = {
 //                    Log.d("FireNotificationCard", "✅ 이미지 로딩 성공")
 //                },
 //                onError = {
 //                    Log.e("FireNotificationCard", "❌ 이미지 로딩 실패", it.result.throwable)
 //                }
-            )
-        } else {
-            Log.w("FireNotificationCard", "⚠️ imageUrl이 비어 있음. 이미지 미표시")
-            Text(
-                text = "이미지를 불러올 수 없습니다",
-                color = Color.White,
-                modifier = Modifier.padding(top = 12.dp)
-            )
+                )
+            } else {
+                Log.w("FireNotificationCard", "⚠️ imageUrl이 비어 있음. 이미지 미표시")
+                Text(
+                    text = "이미지를 불러올 수 없습니다",
+                    color = Color.White,
+                    modifier = Modifier.padding(top = 12.dp)
+                )
+            }
         }
     }
 }
@@ -273,69 +286,3 @@ fun FireDetailBottomSheet(
     }
 }
 
-
-//
-//LaunchedEffect(fireNotificationDto) {
-//    while (true) {
-//        // 🔥 fire 마커 이미지 교체
-//        val nextIcon = fireMarkerIcons[fireIconIndex]
-//        val manager = pointAnnotationManager.value ?: return@LaunchedEffect
-//
-//        fireMarkers.toList().forEachIndexed { index, marker ->
-//            val point = marker.point
-//
-//            // 새로운 마커 생성
-//            val newMarkerOptions = PointAnnotationOptions()
-//                .withPoint(point)
-//                .withIconImage(nextIcon)
-//                .withIconSize(0.25)
-//            val newMarker = manager.create(newMarkerOptions)
-//
-//            // 1. 먼저 새 마커를 fireMarkers 리스트에 넣고
-//            fireMarkers[index] = newMarker
-//            firebeaconSave[newMarker] = beacon
-//
-//            // ✅ 마커 클릭 이벤트 등록
-//            manager.addClickListener { clicked ->
-//                val clickedBeacon = firebeaconSave[clicked]
-//                if (clickedBeacon != null) {
-//                    Log.d("FireMarker", "🔥 화재 마커 클릭됨! → 모달 다시 열기")
-//
-//                    // beacon.beaconCode와 fireNotification.stationId를 함께 사용
-//                    val stationId = fireNotification?.stationId ?: return@addClickListener false
-//                    val beaconCode = clickedBeacon.beaconCode
-//
-//                    Log.d(
-//                        "FireMarker",
-//                        "➡️ 마커 클릭됨 요청할 stationId=$stationId, beaconCode=$beaconCode"
-//                    )
-//                    Log.d("🔥 마커 클릭", "➡️ 선택된 마커의 beaconCode=$beaconCode, stationId=$stationId")
-//                    Log.d(
-//                        "🔥 마커 클릭",
-//                        "➡️ 좌표=(${clickedBeacon.coordX}, ${clickedBeacon.coordY}), 층=${clickedBeacon.floor}"
-//                    )
-//
-//                    viewModel.fetchCctvImage(stationId, beaconCode) { url ->
-//                        Log.d("FireMarker", "📸 fetchCctvImage → 받아온 imageUrl=$url")
-//
-//                        //cctv 이미지로 받아올 예정
-//                        selectedImageUrl.value = "$url"
-//                        selectedFireBeaconDto.value = null
-//                        selectedFireBeaconDto.value = clickedBeacon.copy()
-//                        isFireIconClicked.value = true
-//                        isFireNotificationCardVisible.value = false
-//                        isFireNotificationCardVisible.value = true
-//                        // isCardVisible.value = true
-//                    }
-//                    true
-//                } else false
-//            }
-//
-//            // 2. 기존 마커 삭제 (덮어씌운 뒤 제거)
-//            manager.delete(marker)
-//
-//        }
-//        fireIconIndex = (fireIconIndex + 1) % fireMarkerIcons.size
-//        delay(500)
-//    }
-//}

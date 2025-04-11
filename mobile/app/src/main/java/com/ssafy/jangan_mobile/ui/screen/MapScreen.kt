@@ -1,11 +1,9 @@
 package com.ssafy.jangan_mobile.ui.screen
 
-import android.animation.ValueAnimator
 import android.graphics.BitmapFactory
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import android.view.animation.LinearInterpolator
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
@@ -32,8 +30,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -312,8 +308,6 @@ fun EscapeRouteMapScreen(
     LaunchedEffect(azimuthState.value) {
         var beforePointAnnotation: PointAnnotation? = null
         myLocationAnnotation.value?.let {
-//            pointAnnotationManager.value?.delete(it)
-//            myLocationAnnotation.value = null
             beforePointAnnotation = it
         }
         val selectedFloorCode = floorStringToCode(selectedFloor.value)
@@ -448,7 +442,6 @@ fun EscapeRouteMapScreen(
                                 isFireIconClicked.value = true
                                 isFireNotificationCardVisible.value = false
                                 isFireNotificationCardVisible.value = true
-    //                            isCardVisible.value = true
                             }
                             true
                         } else false
@@ -512,12 +505,6 @@ fun EscapeRouteMapScreen(
 
             polylineManager.value?.deleteAll()
 
-//
-//            // 기존 목적지 마커 지우기
-//            destinationMarker.value?.let { existingMarker ->
-//                pointAnnotationManager.value?.delete(existingMarker)
-//                destinationMarker.value = null
-//            }
 
             // ✅ 무조건 routePoints[0]에 목적지 마커 표시
             val destination = routePoints.first()
@@ -546,11 +533,6 @@ fun EscapeRouteMapScreen(
                     showArrivalCard.value = true
                     hasArrived.value = true
 
-//                    // 도착지 마커 제거
-//                    destinationMarker.value?.let { existingMarker ->
-//                        pointAnnotationManager.value?.delete(existingMarker)
-//                        destinationMarker.value = null
-//                    }
                 }
             } else {
                 Log.w(
@@ -716,9 +698,6 @@ fun EscapeRouteMapScreen(
 
             if (newFire != null) {
                 Log.d("🔥 Fire", "🚨 새롭게 추가된 화재 감지 → 모달 표시")
-//                selectedFireBeaconDto.value = newFire
-//                isCardVisible.value = true
-
                 isFireStationShown.value = true
 
                 mapView.mapboxMap.flyTo(
@@ -862,7 +841,6 @@ fun EscapeRouteMapScreen(
                     onDismiss = {
                         showArrivalCard.value = false
                         isGuiding.value = false
-//                    pointAnnotationManager.value?.deleteAll()
                     },
                     // 경로 재안내 눌렀을 때
                     onRetry = {
@@ -915,7 +893,6 @@ fun EscapeRouteMapScreen(
                             showRoute.value = false
                             polylineManager.value?.deleteAll()
                             goalMarker.value?.let { pointAnnotationManager.value?.delete(it) }
-//                                destinationMarker.value?.let { pointAnnotationManager.value?.delete(it) }
                             routeMarkers.forEach { pointAnnotationManager.value?.delete(it) }
                             routeMarkers.clear()
                             myLocationAnnotation.value?.let {
@@ -960,7 +937,8 @@ fun EscapeRouteMapScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .align(Alignment.TopCenter)
-                    .padding(top = 36.dp, start = 16.dp, end = 16.dp)
+                    .padding(top = 36.dp)
+//                    .padding(horizontal = 32.dp, vertical = 22.dp)
                     .windowInsetsPadding(WindowInsets.navigationBars)
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
@@ -973,13 +951,9 @@ fun EscapeRouteMapScreen(
                                 isFireNotificationCardVisible.value = false
                             }
                         )
-                    }
+                    },
+                contentAlignment = Alignment.TopCenter
             )   {
-    //                AnimatedVisibility(
-    //                    visible = isFireNotificationCardVisible.value,
-    //                    enter = slideInVertically(initialOffsetY = { -300 }) + fadeIn(),
-    //                    exit = slideOutVertically(targetOffsetY = { -300 }) + fadeOut()
-    //                ) {
                 FireNotificationCard(
                     beaconName = selectedFireBeaconDto.value?.beaconName ?: "알 수 없음",
                     imageUrl = selectedImageUrl.value,
