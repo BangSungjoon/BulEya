@@ -973,10 +973,9 @@ fun EscapeRouteMapScreen(
                         }
                     }
                 )
-
-                }
             }
         }
     }
+}
 
 

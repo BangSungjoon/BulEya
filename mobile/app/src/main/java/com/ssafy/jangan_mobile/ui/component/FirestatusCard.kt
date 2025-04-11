@@ -67,8 +67,6 @@ fun FireNotificationCard(
             modifier = Modifier
                 .width(cardWidth)
                 .height(cardHeight)
-//                .width(380.dp)
-//                .height(334.dp)
                 .background(Color.Black, shape = RoundedCornerShape(40.dp))
                 .padding(vertical = 12.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -77,7 +75,6 @@ fun FireNotificationCard(
             Row(
                 modifier = Modifier
                     .fillMaxWidth(0.95f)
-//                    .width(360.dp)
                     .height(76.dp)
                     .background(color = system_red, shape = RoundedCornerShape(60.dp))
                     .padding(horizontal = 32.dp, vertical = 22.dp),
@@ -120,16 +117,8 @@ fun FireNotificationCard(
                         )
                         .width(cardWidth * 0.95f)
                         .height(imageHeight)
-//                        .width(364.dp)
-//                        .height(214.dp)
                         .clip(RoundedCornerShape(30.dp)),
                     contentScale = ContentScale.Crop,
-//                onSuccess = {
-//                    Log.d("FireNotificationCard", "✅ 이미지 로딩 성공")
-//                },
-//                onError = {
-//                    Log.e("FireNotificationCard", "❌ 이미지 로딩 실패", it.result.throwable)
-//                }
                 )
             } else {
                 Log.w("FireNotificationCard", "⚠️ imageUrl이 비어 있음. 이미지 미표시")

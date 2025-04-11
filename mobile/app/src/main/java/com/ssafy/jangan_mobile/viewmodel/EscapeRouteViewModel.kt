@@ -97,7 +97,6 @@ class EscapeRouteViewModel : ViewModel() {
                 //JSON 경로 데이터 받기
                 val response = RetrofitInstance.api.getEscapeRoute(stationId, beaconCode).body()
                 Log.d("EscapeRoute", "✅ API 응답 받음: ${stationId}")
-                Log.d("EscapeRoute", "✅ API 응답 받음: ${response}")
 
                 val routeList = response?.result ?: run {
                     Log.w("EscapeRoute", "⚠️ API 응답이 null: route가 없음")
@@ -107,7 +106,6 @@ class EscapeRouteViewModel : ViewModel() {
                 val convertedRoute = routeList.map { point ->
                     PixelLatLng(point.coordX, point.coordY, point.floor)
                 }
-                Log.d("EscapeRoute", "✅ 경로 변환 완료: ${convertedRoute.size}개 좌표")
                 Log.d("EscapeRoute", "✅ 경로 변환 완료: ${convertedRoute.size}개 좌표")
                 _route.postValue(convertedRoute)
 
